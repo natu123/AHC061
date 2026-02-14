@@ -1,0 +1,47 @@
+﻿# AHC generated outputs
+out.txt
+vis.html
+score.txt
+result.txt
+
+# Generated input directories (optional local experiments)
+in2/
+out/
+outputs/
+results/
+
+# Build artifacts
+build/
+dist/
+target/
+
+# C/C++ artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exp
+*.pdb
+*.ilk
+*.exe.stackdump
+
+# Executables from local solver builds (keep official tools by path if needed)
+a.out
+*.out
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+
+# IDE/OS
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
