@@ -673,3 +673,37 @@
 - 次アクション:
   - championを `x04` として運用します。
   - 次ループは `x03/x06` 系の新規アイデアを `x04` ベースに対してA/Bし、`mean` 上積みと `elapsed` 圧縮を同時に狙います。
+
+## 2026-02-16 [T-070] 改良18（x04 TLEリスク抑制の軽量化）
+- 背景:
+  - 提出結果で `AC x99 / TLE x1` が発生し、`x04` の最悪実行時間をさらに下げる必要がありました。
+- 対象:
+  - `solver/src/x04_macro_route.rs`
+- 変更:
+  - `phase_cutoff` 既定値を `0.75 -> 0.65` に変更しました。
+  - 候補上限を `8/6 -> 7/5` に削減しました。
+  - `phase > 0.50` では `plan_len=6, beam_width=4` の fast mode を適用し、前半のみ従来の `plan_len=7, beam_width=5` を維持しました。
+- 実験条件:
+  - build:
+    - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r --manifest-path solver/Cargo.toml`
+  - test:
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x06_expert_switch_hybrid.exe > NUL 2> tmp_err_x06_f100_posttle_<seed>.txt"`
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x04_macro_route.exe > NUL 2> tmp_err_x04_f100_posttle_<seed>.txt"`
+  - seed範囲:
+    - full `0..99`
+- 結果:
+  - `x06`: mean `155,863.2`, median `133,042.5`, min `51,023`, max `605,548`, elapsed `10,174ms`, mean_seed `99.9ms`, p95_seed `163ms`, max_seed `197ms`
+  - `x04`（軽量化後）: mean `158,923.8`, median `138,335.5`, min `52,543`, max `605,548`, elapsed `31,035ms`, mean_seed `309ms`, p95_seed `1,170ms`, max_seed `1,315ms`
+- A/B比較:
+  - 対 `x06`（seed `0..99`）:
+    - mean: `155,863.2 -> 158,923.8`（`+3,060.6`）
+    - median: `133,042.5 -> 138,335.5`（`+5,293.0`）
+    - min: `51,023 -> 52,543`（`+1,520`）
+    - max: `605,548 -> 605,548`（`±0`）
+  - 対 `T-069` の x04:
+    - mean: `158,549.1 -> 158,923.8`（`+374.7`）
+    - elapsed: `40,144ms -> 31,035ms`（`-9,109ms`）
+    - max_seed: `1,860ms -> 1,315ms`（`-545ms`）
+- 考察:
+  - オンラインで問題化した tail time を抑えつつ、スコアは維持以上を確認しました。
+  - 次回提出は本軽量版 `x04` を基準にします。

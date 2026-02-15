@@ -21,34 +21,33 @@
   - 先頭手ごとに `target` 別 beam 探索を実行し、`strategic_score` 差分 + 目標接近ボーナスで評価
   - 予測AI行動は `x06` の予測系（primary/secondary切替）を再利用
 - 主要パラメータ（最終）:
-  - `phase_cutoff = 0.75`（`AHC_X04_PHASE_CUTOFF` で上書き可）
-  - `plan_len = 7`, `beam_width = 5`, `branch_width = 2`
-  - `target cap = 5`, `candidate cap = 6..8`
+  - `phase_cutoff = 0.65`（`AHC_X04_PHASE_CUTOFF` で上書き可）
+  - `plan_len = 7 / 6(phase>0.50)`, `beam_width = 5 / 4(phase>0.50)`, `branch_width = 2`
+  - `target cap = 5`, `candidate cap = 5..7`
 
 ## 強み
 - `seed 0..99` で `x06` 比 `mean/median/min` を同時改善した。
 - 改善は主に `M=4` 帯で発生し、他帯は `x06` と同値を維持できる。
 
 ## 弱み
-- `x06` 比で計算時間が増える（約4.15倍）。
+- `x06` 比で計算時間が増える（約3.05倍）。
 - `M=4` 内では改善/悪化seedの分散が大きく、境界値運用を誤ると tail-risk が悪化しやすい。
 
 ## 評価結果（最終）
 - full（`seed 0..99`, 対 `x06`）:
-  - `x06`: mean `155,863.2`, median `133,042.5`, min `51,023`, max `605,548`, elapsed `9,667ms`
-  - `x04`（cutoff `0.75`）: mean `158,549.1`, median `138,335.5`, min `52,543`, max `605,548`, elapsed `40,144ms`
+  - `x06`: mean `155,863.2`, median `133,042.5`, min `51,023`, max `605,548`, elapsed `10,174ms`
+  - `x04`（cutoff `0.65`, 軽量化後）: mean `158,923.8`, median `138,335.5`, min `52,543`, max `605,548`, elapsed `31,035ms`
 - 差分（`x04 - x06`）:
-  - mean `+2,685.9`
+  - mean `+3,060.6`
   - median `+5,293.0`
   - min `+1,520`
   - max `±0`
-  - elapsed `+30,477ms`
-- 実行時間分布（`x04`, cutoff `0.75`, seed `0..99`）:
-  - overall: mean `401.3ms`, p95 `1,663ms`, max `1,860ms`
-  - `M=4`: mean `1,454.1ms`, p95 `1,855ms`, max `1,860ms`
+  - elapsed `+20,861ms`
+- 実行時間分布（`x04`, cutoff `0.65`, seed `0..99`）:
+  - overall: mean `309ms`, p95 `1,170ms`, max `1,315ms`
 
 ## 関連ログ
-- 採用: `docs/AHC061_Experiment_Log_2026-02.md` の `T-069`
+- 採用: `docs/AHC061_Experiment_Log_2026-02.md` の `T-069`, `T-070`
 - 不採用試行: `docs/AHC061_Experiment_Failures_2026-02.md` の `T-068`
 - 計画: `docs/solver_specs_planned/ARCHIVED_AHC061_Solver_X04_MacroRoute_Plan.md`
 
