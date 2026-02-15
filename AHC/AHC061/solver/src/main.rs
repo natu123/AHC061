@@ -358,14 +358,14 @@ fn uncertainty_risk(top2: &[((usize, usize), (usize, usize), f64)]) -> f64 {
 fn build_secondary_ai_moves(
     scores: &[i64],
     top2: &[((usize, usize), (usize, usize), f64)],
+    switch_cap: usize,
 ) -> Vec<(usize, usize)> {
     let mut moves: Vec<(usize, usize)> = top2.iter().map(|x| x.0).collect();
     if top2.is_empty() {
         return moves;
     }
     let s0 = scores.first().copied().unwrap_or(1).max(1) as f64;
-    let mut best_idx: Option<usize> = None;
-    let mut best_threat = 0.0_f64;
+    let mut ranked: Vec<(f64, usize)> = Vec::new();
     for (ai_idx, (p1, p2, conf)) in top2.iter().enumerate() {
         if p1 == p2 {
             continue;
@@ -373,12 +373,11 @@ fn build_secondary_ai_moves(
         let player = ai_idx + 1;
         let threat_ratio = (scores[player] as f64 / s0).clamp(0.2, 3.0);
         let threat = (1.0 - *conf) * threat_ratio;
-        if threat > best_threat {
-            best_threat = threat;
-            best_idx = Some(ai_idx);
-        }
+        ranked.push((threat, ai_idx));
     }
-    if let Some(i) = best_idx {
+    ranked.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+    let cap = switch_cap.max(1).min(ranked.len());
+    for (_, i) in ranked.into_iter().take(cap) {
         moves[i] = top2[i].1;
     }
     moves
@@ -483,8 +482,9 @@ fn best_one_step_score(game: &Game, state: &State, models: &[AiModel]) -> f64 {
     let scores = calc_scores(game, state);
     let ai_top2 = choose_predicted_ai_top2_moves(game, state, models);
     let predicted_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
-    let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2);
     let uncertainty = uncertainty_risk(&ai_top2);
+    let secondary_cap = if game.m >= 6 && uncertainty >= 0.28 { 2 } else { 1 };
+    let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2, secondary_cap);
     let risk_w = pessimism_weight(game, uncertainty);
 
     if candidates.len() == 1 {
@@ -561,8 +561,9 @@ fn choose_move(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize)
     let cur = state.pos[0];
     let ai_top2 = choose_predicted_ai_top2_moves(game, state, models);
     let predicted_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
-    let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2);
     let uncertainty = uncertainty_risk(&ai_top2);
+    let secondary_cap = if game.m >= 6 && uncertainty >= 0.28 { 2 } else { 1 };
+    let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2, secondary_cap);
     let risk_w = pessimism_weight(game, uncertainty);
 
     let mut is_leader = vec![false; game.m];
