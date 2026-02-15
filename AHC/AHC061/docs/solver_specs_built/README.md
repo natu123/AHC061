@@ -8,6 +8,7 @@
 - `x01`: `x01_beam_pessimistic`
 - `x02`: `x02_monte_carlo`
 - `x05`: `x05_adaptive_racing_mc`
+- `x06`: `x06_expert_switch_hybrid`
 
 ## 仕様
 - `xNN`は作成順の固定IDとして扱う。
@@ -18,6 +19,7 @@
 - `AHC061_Solver_X01_Beam_Pessimistic.md`
 - `AHC061_Solver_X02_MonteCarloExplore.md`
 - `AHC061_Solver_X05_AdaptiveRacingMC.md`
+- `AHC061_Solver_X06_ExpertSwitchHybrid.md`
 
 ## 注意点
 - 実装更新で戦略仕様が変わった場合、当日中に該当ファイルを更新する。

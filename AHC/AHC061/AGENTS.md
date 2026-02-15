@@ -66,6 +66,7 @@
 - `docs/solver_specs_built/AHC061_Solver_X01_Beam_Pessimistic.md` - x01戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X02_MonteCarloExplore.md` - x02戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X05_AdaptiveRacingMC.md` - x05戦略詳細
+- `docs/solver_specs_built/AHC061_Solver_X06_ExpertSwitchHybrid.md` - x06戦略詳細
 - `docs/solver_specs_planned/README.md` - 計画中ソルバ（xNN）の戦略詳細インデックス
 - `docs/solver_specs_planned/AHC061_Solver_X03_Particle_CVaR_Plan.md` - x03計画（Particle + CVaR）
 - `docs/solver_specs_planned/AHC061_Solver_X04_MacroRoute_Plan.md` - x04計画（マクロ経路最適化）

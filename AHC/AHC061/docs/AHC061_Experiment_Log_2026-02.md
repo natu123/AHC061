@@ -576,3 +576,49 @@
 - 次アクション:
   - `x03/x04` と非重複の新規案として `x05_adaptive_racing_mc` を `solver_specs_planned` へ追加し、次サイクルで実装着手します。
 
+## 2026-02-15 [T-066] 改良16（x06 Expert Switch Hybrid 初版）
+- 背景:
+  - `x03/x04` と別系統の探索として、既存expert（`x01`, `x02`）の強みを局面切替で合成する方針を検証しました。
+  - `x01` は高人数帯の安定性、`x02` は中人数帯（`M=3..5`）の期待値優位が確認済みでした。
+- 対象:
+  - `solver/src/lib.rs`
+  - `solver/src/strategy_mode.rs`
+  - `solver/src/x06_expert_switch_hybrid.rs`
+  - `solver/src/bin/x06_expert_switch_hybrid.rs`
+- 変更:
+  - `x06_expert_switch_hybrid` を新規実装しました。
+  - 切替条件は初版として単純化し、`M=3..5` で `x02`、それ以外は `x01` を採用しました。
+  - `StrategyMode::ExpertSwitchHybrid` を追加し、`x06` 専用binで実行可能にしました。
+- 実験条件:
+  - build:
+    - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r --manifest-path solver/Cargo.toml`
+  - test:
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x01_beam_pessimistic.exe > NUL 2> tmp_err_x01_f100_x06.txt"`
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x06_expert_switch_hybrid.exe > NUL 2> tmp_err_x06_f100.txt"`
+  - seed範囲:
+    - quick: `0..19`
+    - full: `0..99`
+- 結果:
+  - quick（`seed 0..19`）
+    - `x01`: mean `129,106.2`, median `114,450`, min `50,617`, max `388,857`, elapsed `2,694ms`
+    - `x06`: mean `146,623.6`, median `119,019.5`, min `70,744`, max `388,857`, elapsed `2,027ms`
+  - full（`seed 0..99`）
+    - `x01`: mean `151,174.2`, median `127,334`, min `50,617`, max `605,548`, elapsed `13,910ms`
+    - `x06`: mean `155,863.2`, median `133,042.5`, min `51,023`, max `605,548`, elapsed `10,158ms`
+  - `x06` の `M` 帯別（full）
+    - `M=3`: mean `145,563.6`
+    - `M=4`: mean `152,078.1`
+    - `M=5`: mean `110,948.3`
+- A/B比較:
+  - 対 `x01`（`seed 0..99`）
+    - mean: `151,174.2 -> 155,863.2`（`+4,689.0`）
+    - median: `127,334 -> 133,042.5`（`+5,708.5`）
+    - min: `50,617 -> 51,023`（`+406`）
+    - max: `605,548 -> 605,548`（`±0`）
+    - elapsed: `13,910ms -> 10,158ms`（`-3,752ms`）
+- 考察:
+  - `M=3..5` の改善を取り込みつつ高人数帯の安定を維持でき、`mean/median/min` を同時改善しました。
+  - 計算時間も短縮できたため、採用基準を満たす有力な代替候補と判断します。
+- 次アクション:
+  - championを `x06` として運用し、次ループは `x03` または `x04` の抜本系を継続探索します。
+
