@@ -130,6 +130,7 @@
 - 開発中は複数bin/複数ファイル構成を許容し、共通ロジックは重複させない方針を優先します。
 - 提出時は `champion` が指すソルバIDから単一ファイル成果物を生成します（例: `submission_x10.rs`）。
 - 実験ログには「採用ID（xNN）」と「提出成果物名（submission_xNN.rs）」を対応付けて記録します。
+- ソルバ詳細Docsは `docs/solver_specs_built`（作成済み）と `docs/solver_specs_planned`（作成予定）に分離し、将来コンテストでも同じ英語フォルダ名を使います。
 
 ## Docs統一ルール（retro）
 - 文字コードは UTF-8（BOMなし）に統一します。

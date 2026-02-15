@@ -106,6 +106,13 @@
 - `*_Game_Rules_Strict.md`: 実装準拠の厳密仕様（状態遷移・判定順序・例外）
 - `*_Initial_Study_YYYY-MM-DD.md`: 初期検討プロセスと比較結果
 - `*_Experiment_Log_YYYY-MM.md`: 継続検証ログ（月単位またはフェーズ単位）
+- `solver_specs_built/`: 作成済みソルバ（xNN）の戦略詳細
+- `solver_specs_planned/`: 計画中ソルバ（xNN）の戦略詳細
+
+### ソルバ詳細Docs運用（共通）
+- `docs/solver_specs_built` と `docs/solver_specs_planned` を標準フォルダ名として使用し、日本語ディレクトリ名は使用しない
+- 作成済み/計画中でファイルを分離し、`xNN`ごとに1ファイルで戦略詳細を管理する
+- 新規ソルバ作成時は、実装前に `solver_specs_planned`、実装後に `solver_specs_built` へ追記または移管する
 
 ### 命名規則（共通）
 - 形式: `<ContestID>_<DocType>[_YYYY-MM-DD].md`

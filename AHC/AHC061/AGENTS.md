@@ -62,6 +62,12 @@
 - `docs/AHC061_Experiment_Log_2026-02.md` - AHC061実験ログ（2026-02）
 - `docs/AHC061_Experiment_Failures_2026-02.md` - AHC061不採用実験ログ（2026-02）
 - `docs/AHC061_Status_2026-02-15-2113.md` - AHC061状況スナップショット（移行用）
+- `docs/solver_specs_built/README.md` - 作成済みソルバ（xNN）の戦略詳細インデックス
+- `docs/solver_specs_built/AHC061_Solver_X01_Beam_Pessimistic.md` - x01戦略詳細
+- `docs/solver_specs_built/AHC061_Solver_X02_MonteCarloExplore.md` - x02戦略詳細
+- `docs/solver_specs_planned/README.md` - 計画中ソルバ（xNN）の戦略詳細インデックス
+- `docs/solver_specs_planned/AHC061_Solver_X03_Particle_CVaR_Plan.md` - x03計画（Particle + CVaR）
+- `docs/solver_specs_planned/AHC061_Solver_X04_MacroRoute_Plan.md` - x04計画（マクロ経路最適化）
 - `N52XwIfp_windows/tools_x86_64-pc-windows-gnu/README.md` - 公式ツール説明
 - 必要になった時点で、提出コードや実験メモの該当ファイルを追加参照する
 
@@ -72,6 +78,8 @@
   - `docs/AHC061_Codex_Guide.md`: 実行手順・開発運用・Codex利用指針
   - `docs/AHC061_Game_Rules_Strict.md`: tester実装準拠の厳密ルール
   - `docs/AHC061_Initial_Study_2026-02-15.md`: 初期検討結果（固定ログ）
+  - `docs/solver_specs_built/`: 作成済みソルバ（xNN）の戦略詳細
+  - `docs/solver_specs_planned/`: 計画中ソルバ（xNN）の戦略詳細
 - 新しい検証フェーズを始める場合は `docs/AHC061_Experiment_Log_YYYY-MM.md` を新規作成する
 - 検証結果を会話で報告した場合、採否判断まで含めて当日中にDocsへ反映する
 - 仕様根拠が `README` と実装で食い違う場合、先に `docs/AHC061_Game_Rules_Strict.md` を更新してから他Docsへ反映する
