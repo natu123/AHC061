@@ -1027,6 +1027,66 @@
 - タグ:
   - `mc-sample-over`, `mid-group-regression`, `tail-risk-regression`, `restore`
 
+## 2026-02-15 [T-064] F-47（x05初版: Adaptive Racing MC）
+- 背景:
+  - `x03/x04` と別系統で、固定サンプルMCのノイズを抑えるため、候補淘汰つき逐次サンプリングを導入しました。
+- 変更:
+  - `solver/src/x05_adaptive_racing_mc.rs` を新規実装しました。
+  - `solver/src/lib.rs` に `x05` モジュールを追加しました。
+  - `solver/src/strategy_mode.rs` に `AdaptiveRacingMc` モードを追加しました。
+  - `solver/src/bin/x05_adaptive_racing_mc.rs` を追加しました。
+- 結果（seed 0..19）:
+  - mean `138,876.4`
+  - median `123,701.5`
+  - min `48,982`
+  - max `388,857`
+  - elapsed `2,259ms`
+- 結果（seed 0..99）:
+  - mean `147,673.9`
+  - median `125,326.5`
+  - min `46,395`
+  - max `605,548`
+  - elapsed `10,475ms`
+- 比較（対 現champion `x01`, seed 0..99）:
+  - mean: `151,174.2 -> 147,673.9`（`-3,500.3`）
+  - median: `127,334 -> 125,326.5`（`-2,007.5`）
+  - min: `50,617 -> 46,395`（`-4,222`）
+  - max: `605,548 -> 605,548`（`±0`）
+  - `M=4` mean: `142,625.8 -> 136,492.2`（`-6,133.6`）
+  - `M=5` mean: `108,595.1 -> 93,216.3`（`-15,378.8`）
+- 判定: 不採用（quickでは改善したが、fullで `M=4/5` が大きく悪化）
+- タグ:
+  - `adaptive-racing-mc`, `group-regression`, `tail-risk-regression`
+
+## 2026-02-15 [T-065] F-48（x05改良: 保守ペナルティ緩和）
+- 背景:
+  - `T-064` は過度に保守的で `M=4/5` を悪化させたため、淘汰条件とリスク重みを緩和しました。
+- 変更:
+  - `solver/src/x05_adaptive_racing_mc.rs` の `candidate cap`, `max rounds`, `confidence_z`, `prune_margin`, `risk_w/downside_w/local_w` を再調整しました。
+- 結果（seed 0..19）:
+  - mean `134,894.6`
+  - median `114,106.5`
+  - min `70,744`
+  - max `388,857`
+  - elapsed `2,262ms`
+- 結果（seed 0..99）:
+  - mean `148,149.3`
+  - median `126,111.5`
+  - min `36,747`
+  - max `605,548`
+  - elapsed `12,356ms`
+- 比較（対 現champion `x01`, seed 0..99）:
+  - mean: `151,174.2 -> 148,149.3`（`-3,024.9`）
+  - median: `127,334 -> 126,111.5`（`-1,222.5`）
+  - min: `50,617 -> 36,747`（`-13,870`）
+  - max: `605,548 -> 605,548`（`±0`）
+  - `M=3` mean: `129,446.4 -> 113,612.2`（`-15,834.2`）
+  - `M=4` mean: `142,625.8 -> 141,014.2`（`-1,611.6`）
+  - `M=5` mean: `108,595.1 -> 105,571.1`（`-3,024.0`）
+- 判定: 不採用（平均/最悪値とも改善できず、`T-064` よりも下振れが増加）
+- タグ:
+  - `adaptive-racing-mc`, `risk-under-tuned`, `tail-risk-regression`
+
 ## 運用ルール
 - 不採用試行も本ファイルへ必ず記録します。
 - 記録粒度は `背景 / 変更 / 結果 / 比較 / 判定 / タグ` を最小セットとします。

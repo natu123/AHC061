@@ -7,6 +7,7 @@
 ## 対象
 - `x01`: `x01_beam_pessimistic`
 - `x02`: `x02_monte_carlo`
+- `x05`: `x05_adaptive_racing_mc`
 
 ## 仕様
 - `xNN`は作成順の固定IDとして扱う。
@@ -16,6 +17,7 @@
 ## 一覧
 - `AHC061_Solver_X01_Beam_Pessimistic.md`
 - `AHC061_Solver_X02_MonteCarloExplore.md`
+- `AHC061_Solver_X05_AdaptiveRacingMC.md`
 
 ## 注意点
 - 実装更新で戦略仕様が変わった場合、当日中に該当ファイルを更新する。
