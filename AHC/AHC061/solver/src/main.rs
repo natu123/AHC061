@@ -612,7 +612,7 @@ fn choose_move(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize)
     } else {
         4
     };
-    if game.m == 5 && phase <= 0.85 && uncertainty >= 0.18 {
+    if game.m == 5 && phase <= 0.80 && uncertainty >= 0.18 {
         beam_width = scored.len();
     } else if game.m == 6 && phase <= 0.72 && uncertainty >= 0.22 {
         beam_width = (beam_width + 3).min(scored.len());
