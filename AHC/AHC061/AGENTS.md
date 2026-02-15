@@ -69,7 +69,7 @@
 - `docs/solver_specs_planned/README.md` - 計画中ソルバ（xNN）の戦略詳細インデックス
 - `docs/solver_specs_planned/AHC061_Solver_X03_Particle_CVaR_Plan.md` - x03計画（Particle + CVaR）
 - `docs/solver_specs_planned/AHC061_Solver_X04_MacroRoute_Plan.md` - x04計画（マクロ経路最適化）
-- `docs/solver_specs_planned/AHC061_Solver_X05_AdaptiveRacingMC_Plan.md` - x05計画（Adaptive Racing MC）
+- `docs/solver_specs_planned/PLANNED_AHC061_Solver_X05_AdaptiveRacingMC_Plan.md` - x05計画（Adaptive Racing MC）
 - `docs/solver_specs_planned/AHC061_Solver_X06_ExpertSwitchHybrid_Plan.md` - x06計画（Expert Switch Hybrid）
 - `N52XwIfp_windows/tools_x86_64-pc-windows-gnu/README.md` - 公式ツール説明
 - 必要になった時点で、提出コードや実験メモの該当ファイルを追加参照する

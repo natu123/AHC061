@@ -17,7 +17,7 @@
 ## 一覧
 - `AHC061_Solver_X03_Particle_CVaR_Plan.md`
 - `AHC061_Solver_X04_MacroRoute_Plan.md`
-- `AHC061_Solver_X05_AdaptiveRacingMC_Plan.md`
+- `PLANNED_AHC061_Solver_X05_AdaptiveRacingMC_Plan.md`
 - `AHC061_Solver_X06_ExpertSwitchHybrid_Plan.md`
 
 ## 注意点
