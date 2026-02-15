@@ -49,8 +49,21 @@
 ## Project Documentation
 - `../AGENTS.md` - AHC共通ルール
 - `AGENTS.md` - AHC061固有ルール
+- `docs/AHC061_Codex_Guide.md` - AHC061向けCodex活用ガイド
+- `docs/AHC061_Game_Rules_Strict.md` - AHC061ゲームルール厳密仕様（tester実装準拠）
+- `docs/AHC061_Initial_Study_2026-02-15.md` - AHC061初期検討プロセスと比較結果
 - `N52XwIfp_windows/tools_x86_64-pc-windows-gnu/README.md` - 公式ツール説明
 - 必要になった時点で、提出コードや実験メモの該当ファイルを追加参照する
+
+## Docs運用（AHC061）
+- Docs運用は `../AGENTS.md` の `Docs Governance` に従う
+- AHC061では次の責務分離を固定する
+  - `docs/AHC061_Codex_Guide.md`: 実行手順・開発運用・Codex利用指針
+  - `docs/AHC061_Game_Rules_Strict.md`: tester実装準拠の厳密ルール
+  - `docs/AHC061_Initial_Study_2026-02-15.md`: 初期検討結果（固定ログ）
+- 新しい検証フェーズを始める場合は `docs/AHC061_Experiment_Log_YYYY-MM.md` を新規作成する
+- 検証結果を会話で報告した場合、採否判断まで含めて当日中にDocsへ反映する
+- 仕様根拠が `README` と実装で食い違う場合、先に `docs/AHC061_Game_Rules_Strict.md` を更新してから他Docsへ反映する
 
 ## Living Document
 このファイルはプロジェクトの成長に伴い継続的に更新する。新しい仕様・設計判断・重要な変更があれば、必要に応じて追記する。
