@@ -1,0 +1,182 @@
+﻿# AHC061 Experiment Log 2026-02
+
+## 2026-02-15 改良0（Ratio-aware Greedy 初版）
+- 背景:
+  - Initial Study で `S0/SA` 比率を直接押し上げる方針を優先し、オンライン対戦状態で動く最小実装を作成しました。
+- 対象:
+  - `bf22766`
+- 変更:
+  - `solver/src/main.rs`
+  - `solver/Cargo.toml`
+- 主な変更:
+  - 対戦状態（`pos/owner/level`）を毎ターン入力として処理するオンラインI/Oに対応。
+  - 単発評価ではなく、比率重視のヒューリスティックで1手選択。
+  - 未領土優先・自領土強化・敵領土攻撃を基本重みで評価。
+- 実験条件:
+  - build:
+    - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r`
+  - test (single seed):
+    - `Get-Content in/0000.txt | tester.exe <solver> > out.txt`
+  - test (seed 0..9):
+    - `Get-Content in/<seed>.txt | tester.exe <solver>`
+- seed範囲:
+  - `0..9`
+- 結果:
+  - mean `73,375.8`
+  - median `78,060`
+  - min `18,418`
+  - max `144,986`
+  - seed別:
+    - `0000:115006, 0001:89330, 0002:44740, 0003:66404, 0004:18418, 0005:37868, 0006:144986, 0007:78060, 0008:103403, 0009:35543`
+- 次アクション:
+  - `seed 0..99` で基準値を確定。
+  - AI行動モデルを導入し、競合予測を改善。
+
+## 2026-02-15 改良1（Online推定つき Ratio-aware Greedy）
+- 背景:
+  - 初版では AI 行動予測が弱く、競合読みの精度不足が目立ちました。
+- 対象:
+  - `bf22766`
+- 変更:
+  - `solver/src/main.rs`
+- 主な変更:
+  - AIごとにオンライン推定モデル（重み `w` と `eps_est`）を保持。
+  - 実観測行動から informative turn のみで推定値を更新。
+  - 競合予測を `model予測` と `uniform予測` のブレンドへ変更。
+- 実験条件:
+  - build:
+    - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r`
+  - test:
+    - `Get-Content in/<seed>.txt | tester.exe <solver>`
+- seed範囲:
+  - quick: `0..9`
+  - full: `0..99`
+- 結果:
+  - `seed 0..9`
+    - mean `92,533.3`
+    - median `75,417.5`
+    - min `38,041`
+    - max `173,652`
+  - `seed 0..99`
+    - mean `97,086.2`
+    - median `85,610.5`
+    - min `18,938`
+    - max `231,384`
+- A/B比較:
+  - baseline（`seed 0..99 mean = 96,107.4`）から改善。
+  - 最悪値も `12,722 -> 18,938` で改善。
+- 次アクション:
+  - 比率評価を1手先ロールアウトへ拡張。
+
+## 2026-02-15 改良2（1ターン先ロールアウト）
+- 背景:
+  - 改良1は改善したものの、中盤以降の分岐評価が弱く伸び悩みました。
+- 対象:
+  - `bf22766`
+- 変更:
+  - `solver/src/main.rs`
+- 主な変更:
+  - AI予測（online model + uniform blend）を使った1ターン先ロールアウト評価。
+  - `simulate_turn` で tester 相当のターン解像度を反映。
+  - 最終選択を `rollout score + 局所評価` の合成で決定。
+- 実験条件:
+  - build:
+    - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r`
+  - test:
+    - `Get-Content in/<seed>.txt | tester.exe <solver>`
+- seed範囲:
+  - quick: `0..9`
+  - full: `0..99`
+- 結果:
+  - `seed 0..9`
+    - mean `94,540.0`
+    - median `91,344.0`
+    - min `27,719`
+    - max `201,372`
+  - `seed 0..99`
+    - mean `123,780.2`
+    - median `116,001.0`
+    - min `27,719`
+    - max `474,405`
+- A/B比較（対 改良1, `seed 0..99`）:
+  - mean: `97,086.2 -> 123,780.2`
+  - median: `85,610.5 -> 116,001.0`
+- 次アクション:
+  - 2手目を近似評価する small-beam を追加。
+
+## 2026-02-15 改良3（small-beam）
+- 背景:
+  - 改良2は1手先のみで、候補間の将来差を十分に拾い切れませんでした。
+- 対象:
+  - `bf22766`
+- 変更:
+  - `solver/src/main.rs`
+- 主な変更:
+  - 1手目上位候補を対象に2手目近似評価する `small-beam` を導入。
+  - `beam_width` を候補数に応じて `4/6/8` に可変化。
+  - 最終選択を `base_total + 0.18 * future` に変更。
+- 実験条件:
+  - build:
+    - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r`
+  - test:
+    - `Get-Content in/<seed>.txt | tester.exe <solver>`
+- seed範囲:
+  - quick: `0..9`
+  - full: `0..99`
+- 結果:
+  - `seed 0..9`
+    - mean `108,662.5`
+    - median `101,166.0`
+    - min `52,534`
+    - max `222,679`
+    - elapsed `795ms`
+  - `seed 0..99`
+    - mean `134,562.5`
+    - median `119,551.0`
+    - min `52,534`
+    - max `534,538`
+    - elapsed `6,960ms`
+- A/B比較（対 改良2, `seed 0..99`）:
+  - mean: `123,780.2 -> 134,562.5`
+  - median: `116,001.0 -> 119,551.0`
+- 次アクション:
+  - `M/U` 別の弱点 seed を抽出して、tail-risk 低減施策を検討。
+
+## 2026-02-15 改良4（不確実性考慮の悲観ロールアウト調整）
+- 背景:
+  - 改良3で平均は伸びましたが、AI行動の不確実性を織り込んだ比率評価ロールアウトに改善余地がありました。
+  - 初期の悲観版は平均を押し上げた一方で、最悪ケースを悪化させすぎました。
+- 対象:
+  - `solver/src/main.rs`
+- 変更:
+  - AI行動確率を信頼度つきで `model + uniform` ブレンド（`blended_ai_probs`）。
+  - AI予測を `top1/top2` で保持し、不確実性を定量化。
+  - 重み上限つきの悲観ロールアウト混合を導入。
+  - 悲観シナリオを「全AIをtop2へ切替」から「高脅威AIのみtop2へ切替」に変更。
+  - 局所競合ペナルティに `M` 依存のリスク倍率を追加。
+- 実験条件:
+  - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r`
+- 評価コマンド:
+  - `cmd /c "type <in>.txt | tester.exe <solver> > tmp_out.txt 2> tmp_err.txt"`
+- seed範囲:
+  - quick: `0..9`
+  - full: `0..99`
+- 結果:
+  - `seed 0..9`
+    - mean `109,521.8`
+    - median `104,940`
+    - min `50,617`
+    - max `230,731`
+  - `seed 0..99`
+    - mean `144,356.2`
+    - median `121,631`
+    - min `50,617`
+    - max `605,548`
+- A/B比較（対 改良3, `seed 0..99`）:
+  - mean: `134,562.5 -> 144,356.2`（`+9,793.7`）
+  - median: `119,551.0 -> 121,631.0`（`+2,080.0`）
+  - min: `52,534 -> 50,617`（`-1,917`）
+  - max: `534,538 -> 605,548`（`+71,010`）
+- 考察:
+  - mean/median の改善幅が十分大きく、次のベースとして継続価値があります。
+  - 最悪値はわずかに悪化しているため、次段は平均を維持したまま tail-risk を圧縮する方針です。
