@@ -1,4 +1,4 @@
-﻿# AHC061 Solver X05 Adaptive Racing MC Plan
+# AHC061 Solver X05 Adaptive Racing MC Plan
 
 ## 目的
 - 固定サンプル数MCで発生した過保守化/過学習を避けつつ、`M=3..5` の `mean/median` を押し上げる。
