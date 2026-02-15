@@ -62,6 +62,7 @@
 - `docs/AHC061_Experiment_Log_2026-02.md` - AHC061実験ログ（2026-02）
 - `docs/AHC061_Experiment_Failures_2026-02.md` - AHC061不採用実験ログ（2026-02）
 - `docs/AHC061_Status_2026-02-15-2113.md` - AHC061状況スナップショット（移行用）
+- `docs/AHC061_Submission_Gap_Log_2026-02.md` - 提出ごとの時刻/スコア差ログ（2026-02）
 - `docs/solver_specs_built/README.md` - 作成済みソルバ（xNN）の戦略詳細インデックス
 - `docs/solver_specs_built/AHC061_Solver_X01_Beam_Pessimistic.md` - x01戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X02_MonteCarloExplore.md` - x02戦略詳細
@@ -105,6 +106,7 @@
   - 実装を `restore` して終了した場合でも、同日中に不採用記録を残す
 - retro の結果はメタ改善として扱い、AHC061ローカルで閉じずに `../AGENTS.md` と `../../AGENTS.md` へ必要差分を反映する
 - 状況共有は `docs/AHC061_Status_YYYY-MM-DD-HHMM.md` のスナップショット方式で行う
+- 提出ごとのスコア差共有は `docs/AHC061_Submission_Gap_Log_YYYY-MM.md` へ追記して履歴化する
 
 ## Living Document
 このファイルはプロジェクトの成長に伴い継続的に更新する。新しい仕様・設計判断・重要な変更があれば、必要に応じて追記する。
