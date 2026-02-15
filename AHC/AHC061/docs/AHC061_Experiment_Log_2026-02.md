@@ -529,3 +529,50 @@
   - 抜本探索で得た新方式を限定適用することで、既存強みを保ちつつ全体を大きく押し上げられました。
   - 次段は `HybridMidMc` を基準に、`M=3..5` 内でサンプル数・リスク重みを最適化し、追加改善を狙います。
 
+## 2026-02-15 [T-063] 現champion再同定（x01 baseline再計測）
+- 背景:
+  - `xNN` 固定運用へ再編後、`docs/AHC061_Status_2026-02-15-2113.md` の既定戦略表記（HybridMidMc）と現行bin構成（`x01/x02`）に差分があるため、現行コード基準の champion を再同定する必要がありました。
+- 対象:
+  - `solver/src/lib.rs`
+  - `solver/src/strategy_mode.rs`
+  - `solver/src/bin/x01_beam_pessimistic.rs`
+  - `solver/src/bin/x02_monte_carlo.rs`
+- 変更:
+  - コード変更なし（再計測のみ）。
+  - `seed 0..99` で `x01` と `x02` を同条件計測し、champion候補を比較しました。
+- 実験条件:
+  - build:
+    - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r --manifest-path solver/Cargo.toml`
+  - test:
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x01_beam_pessimistic.exe > NUL 2> tmp_err_x01_loop.txt"`
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x02_monte_carlo.exe > NUL 2> tmp_err_x02_loop.txt"`
+  - seed範囲:
+    - `0..99`
+- 結果:
+  - `x01`:
+    - mean `151,174.2`
+    - median `127,334`
+    - min `50,617`
+    - max `605,548`
+    - elapsed `14,505ms`
+  - `x02`:
+    - mean `137,293.5`
+    - median `128,650`
+    - min `46,987`
+    - max `311,449`
+    - elapsed `8,033ms`
+- A/B比較:
+  - `x01 - x02`:
+    - mean `+13,880.7`
+    - median `-1,316.0`
+    - min `+3,630`
+    - max `+294,099`
+  - 既存ログ再現性:
+    - `x01` は `T-053` と一致
+    - `x02` は `T-059` と一致
+- 考察:
+  - 現行コードで再現可能な champion は `x01` と判断します（`x02` は探索系ベースライン）。
+  - 今後のA/B基準は `x01` を正本とし、`x02` は比較レーンとして維持します。
+- 次アクション:
+  - `x03/x04` と非重複の新規案として `x05_adaptive_racing_mc` を `solver_specs_planned` へ追加し、次サイクルで実装着手します。
+
