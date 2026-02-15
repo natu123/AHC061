@@ -52,6 +52,7 @@
 - `docs/AHC061_Codex_Guide.md` - AHC061向けCodex活用ガイド
 - `docs/AHC061_Game_Rules_Strict.md` - AHC061ゲームルール厳密仕様（tester実装準拠）
 - `docs/AHC061_Initial_Study_2026-02-15.md` - AHC061初期検討プロセスと比較結果
+- `docs/AHC061_Experiment_Log_2026-02.md` - AHC061実験ログ（2026-02）
 - `N52XwIfp_windows/tools_x86_64-pc-windows-gnu/README.md` - 公式ツール説明
 - 必要になった時点で、提出コードや実験メモの該当ファイルを追加参照する
 
@@ -64,6 +65,12 @@
 - 新しい検証フェーズを始める場合は `docs/AHC061_Experiment_Log_YYYY-MM.md` を新規作成する
 - 検証結果を会話で報告した場合、採否判断まで含めて当日中にDocsへ反映する
 - 仕様根拠が `README` と実装で食い違う場合、先に `docs/AHC061_Game_Rules_Strict.md` を更新してから他Docsへ反映する
+- 文字コードは **UTF-8（BOMなし）** を原則とし、文字化けが見えた時点でファイル全体を再保存してから編集する
+- 見出しと項目名は以下に統一する
+  - 実験ログ: `背景 / 対象 / 変更 / 実験条件 / 結果 / A/B比較 / 考察 / 次アクション`
+  - 仕様書・ガイド: `目的 / 対象 / 仕様（または手順） / 注意点 / 更新ルール`
+- Docs更新時は、保存直後に `Get-Content <file> -Head 20` で文字化け有無を確認する
+- 用語表記は固定する（`seed`, `score`, `ratio`, `mean/median/min/max`, `tail-risk`）
 
 ## Living Document
 このファイルはプロジェクトの成長に伴い継続的に更新する。新しい仕様・設計判断・重要な変更があれば、必要に応じて追記する。
