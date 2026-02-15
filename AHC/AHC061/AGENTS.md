@@ -54,6 +54,7 @@
 - `docs/AHC061_Game_Rules_Strict.md` - AHC061ゲームルール厳密仕様（tester実装準拠）
 - `docs/AHC061_Initial_Study_2026-02-15.md` - AHC061初期検討プロセスと比較結果
 - `docs/AHC061_Experiment_Log_2026-02.md` - AHC061実験ログ（2026-02）
+- `docs/AHC061_Experiment_Failures_2026-02.md` - AHC061不採用実験ログ（2026-02）
 - `N52XwIfp_windows/tools_x86_64-pc-windows-gnu/README.md` - 公式ツール説明
 - 必要になった時点で、提出コードや実験メモの該当ファイルを追加参照する
 
@@ -70,12 +71,16 @@
 - 見出しと項目名は以下に統一する
   - 実験ログ: `背景 / 対象 / 変更 / 実験条件 / 結果 / A/B比較 / 考察 / 次アクション`
   - 仕様書・ガイド: `目的 / 対象 / 仕様（または手順） / 注意点 / 更新ルール`
-- Docs更新時は、保存直後に `Get-Content <file> -Head 20` で文字化け有無を確認する
+- Docs更新時は、保存直後に `Get-Content <file> -Encoding UTF8 -Head 20` で文字化け有無を確認する
 - 用語表記は固定する（`seed`, `score`, `ratio`, `mean/median/min/max`, `tail-risk`）
 - 実験サイクルの確認ロスを減らすため、次を標準運用にする
   - `checkpoint-before`: 新しい仮説実装に入る直前に、直前採用状態の Docs を1コミットして push する
   - `checkpoint-after`: 実験結果が出た時点で、採用/不採用を Docs に追記して1コミットする
   - 上記2つは原則「確認待ち」ではなく自律実行し、例外時のみユーザー確認を取る
+- 不採用実験の記録を必須とする
+  - 採用実験は `docs/AHC061_Experiment_Log_2026-02.md` に記録
+  - 不採用実験は `docs/AHC061_Experiment_Failures_2026-02.md` に `仮説 / 変更 / 結果 / 比較 / 判定 / タグ` で記録
+  - 実装を `restore` して終了した場合でも、同日中に不採用記録を残す
 
 ## Living Document
 このファイルはプロジェクトの成長に伴い継続的に更新する。新しい仕様・設計判断・重要な変更があれば、必要に応じて追記する。

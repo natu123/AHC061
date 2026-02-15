@@ -25,6 +25,7 @@
 - 文字コードは UTF-8（BOMなし）を標準とします。
 - 用語はプロジェクト内で統一します（例: `seed`, `score`, `ratio`, `mean/median/min/max`）。
 - 保存後は `Get-Content <file> -Head 20` で文字化けを確認します。
+- 不採用実験は必ず残し、再発防止タグ（例: `no-op`, `overfit`, `tail-risk-worsen`）を付与します。
 
 ## Checkpoint Workflow
 - 目的: 実験サイクル中の「コミット確認往復」による停止を減らすことです。
