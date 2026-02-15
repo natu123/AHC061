@@ -35,6 +35,12 @@
 - ローカル検証時は時間制限超過を避けるため、ソルバ内に時間ガードを実装する
 - 乱数依存バグの切り分けのため、デバッグ時は固定seedモードを必須とする
 
+## Solver ID / Champion Policy
+- `xNN`（例: `x01`, `x02`, `x10`）は「新規ソルバ作成順」の固定IDとして採番し、後から意味を変更しない
+- `champion` は採用状態ラベルとしてのみ管理し、`xNN` の意味と分離する
+- 提出時は `champion` が指す `xNN` から単一ファイル成果物（例: `submission_x10.rs`）を生成して提出する
+- 提出成果物名には必ず `xNN` を含め、実験ログの採用記録と1対1で辿れる状態を維持する
+
 ## Local Execution (PowerShell)
 - ツール配置ディレクトリ:
   - `cd "N52XwIfp_windows/tools_x86_64-pc-windows-gnu"`
