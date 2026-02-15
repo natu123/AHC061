@@ -2,7 +2,7 @@ use std::env;
 
 use crate::{
     x01_beam_pessimistic, x02_monte_carlo, x03_particle_cvar, x05_adaptive_racing_mc,
-    x06_expert_switch_hybrid, AiModel, Game, State,
+    x04_macro_route, x06_expert_switch_hybrid, AiModel, Game, State,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -10,6 +10,7 @@ pub enum StrategyMode {
     Champion,
     MonteCarloExplore,
     ParticleCvar,
+    MacroRoute,
     HybridMidMc,
     AdaptiveRacingMc,
     ExpertSwitchHybrid,
@@ -20,6 +21,7 @@ pub fn strategy_from_env() -> StrategyMode {
         Some("champion") => StrategyMode::Champion,
         Some("mc") | Some("mc_sample") | Some("monte_carlo") => StrategyMode::MonteCarloExplore,
         Some("x03") | Some("particle_cvar") | Some("particle") => StrategyMode::ParticleCvar,
+        Some("x04") | Some("macro_route") | Some("macro") => StrategyMode::MacroRoute,
         Some("hybrid_mid_mc") | Some("mid_mc") => StrategyMode::HybridMidMc,
         Some("x05") | Some("adaptive_racing_mc") | Some("armc") => StrategyMode::AdaptiveRacingMc,
         Some("x06") | Some("expert_switch_hybrid") | Some("expert_switch") => {
@@ -43,6 +45,7 @@ pub(crate) fn choose_move(
         StrategyMode::ParticleCvar => {
             x03_particle_cvar::choose_move_x03_particle_cvar(game, state, models)
         }
+        StrategyMode::MacroRoute => x04_macro_route::choose_move_x04_macro_route(game, state, models),
         StrategyMode::HybridMidMc => {
             if (3..=5).contains(&game.m) {
                 x02_monte_carlo::choose_move_monte_carlo(game, state, models)

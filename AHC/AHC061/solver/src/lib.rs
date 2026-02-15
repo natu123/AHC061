@@ -5,6 +5,7 @@ mod strategy_mode;
 mod x01_beam_pessimistic;
 mod x02_monte_carlo;
 mod x03_particle_cvar;
+mod x04_macro_route;
 mod x05_adaptive_racing_mc;
 mod x06_expert_switch_hybrid;
 
