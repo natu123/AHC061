@@ -202,3 +202,25 @@
 - 考察:
   - 最悪値の悪化が大きく、採用基準を満たしません。
   - 本変更は不採用とし、`solver/src/main.rs` は改良4ベースへ復元済みです。
+
+## 2026-02-15 改良6（M=5近傍向け leader level1 攻撃補正）
+- 背景:
+  - `M=5` 帯の伸び悩みに対して、leader の `level=1` を崩す局所補正を試しました。
+- 対象:
+  - `solver/src/main.rs`
+- 変更:
+  - `evaluate_local_move` の「他領土・level=1・leader」評価に、`M=5` 近傍ほど強く働く小さな加点を追加しました。
+- 実験条件:
+  - build: `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r --manifest-path solver/Cargo.toml`
+  - test: `cmd /c "type <in>.txt | tester.exe <solver> > tmp_out.txt 2> tmp_err.txt"`
+  - seed範囲: `0..99`
+- 結果:
+  - `seed 0..99`: mean `144,518.7`, median `121,631`, min `50,617`, max `605,548`
+- A/B比較（対 改良4, `seed 0..99`）:
+  - mean: `144,356.2 -> 144,518.7`（`+162.5`）
+  - median: `121,631 -> 121,631`（`±0`）
+  - min: `50,617 -> 50,617`（`±0`）
+  - max: `605,548 -> 605,548`（`±0`）
+- 考察:
+  - 改善幅は小さいものの悪化指標がなく、暫定採用候補として扱います。
+  - 次段は `M=5` 専用の補正を増やすより、2手目評価の質向上で下振れ抑制を狙います。
