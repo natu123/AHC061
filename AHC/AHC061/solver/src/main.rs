@@ -426,10 +426,12 @@ fn evaluate_local_move(
     } else {
         let opp = owner as usize;
         let threat = ((scores[opp] as f64 - s0).max(0.0)) / max_ai;
+        let m5_focus = (1.0 - ((game.m as f64 - 5.0).abs() / 2.0)).clamp(0.0, 1.0);
         if level == 1 {
             score += (1.25 + 0.85 * threat) * value;
             if is_leader[opp] {
                 score += 0.45 * phase * value;
+                score += (0.10 + 0.20 * phase) * m5_focus * (0.5 + threat) * value;
             }
         } else {
             score += (0.32 + 0.45 * threat) * value / level as f64;
