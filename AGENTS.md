@@ -26,7 +26,7 @@
 - 用語はプロジェクト内で統一します（例: `seed`, `score`, `ratio`, `mean/median/min/max`）。
 - 保存後は `Get-Content <file> -Head 20` で文字化けを確認します。
 - 不採用実験は必ず残し、再発防止タグ（例: `no-op`, `overfit`, `tail-risk-worsen`）を付与します。
-- 試行IDは `T-xxx (Syy-zz)` 形式を推奨し、`T-xxx`（全体通番）と `Syy-zz`（戦略ファミリ通番）を併記して探索履歴を管理します。
+- 試行IDは `T-xxx (Xyy-zz) S/F-kk` 形式を推奨し、`T-xxx`（全体通番）と `Xyy-zz`（戦略ファミリ通番）と `S/F-kk`（採否通番）を併記して探索履歴を管理します。
 
 ## Checkpoint Workflow
 - 目的: 実験サイクル中の「コミット確認往復」による停止を減らすことです。
