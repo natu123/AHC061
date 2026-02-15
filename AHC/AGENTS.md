@@ -72,6 +72,7 @@
 - **Deterministic Mode**: 乱数seed固定モードを用意し、デバッグ時は必ず固定で検証する
 - **Log Hygiene**: 提出コードには過剰ログを残さず、検証用ログは切替可能にする
 - **User-Led Final Check**: 最終提出判断はユーザー主導。AIは比較結果とリスクを明示する
+- **Meta Improvement**: 失敗や運用漏れは retro して、同日中に手順・Docs・上位ルールへ反映する
 
 ## Conventions
 - まず既存ファイルを編集し、新規ファイル追加は必要最小限にする
