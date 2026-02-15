@@ -12,6 +12,9 @@
 - `x07`: Dual Horizon Route Blend（短期/中期の二重地平線探索）
 - `x08`: Pressure Frontier Control（前線圧力主導の局所制御）
 - `x09`: Regret Mix Policy（複数expertの反実仮想混合）
+- `x10`: Phase Adaptive Mix（フェーズ別に expert を切替）
+- `x11`: Contest Frontier Recovery（対立前線回収重視）
+- `x12`: Advisor Vote Ensemble（advisor投票重み付き統合）
 
 ## 仕様
 - 各計画は `狙い / 別系統性 / 期待効果 / 実装スコープ / 検証計画` を必須記載とする。
@@ -25,6 +28,9 @@
 - `AHC061_Solver_X07_DualHorizonRoute_Plan.md`
 - `AHC061_Solver_X08_PressureFrontier_Plan.md`
 - `AHC061_Solver_X09_RegretMix_Plan.md`
+- `AHC061_Solver_X10_PhaseAdaptiveMix_Plan.md`
+- `AHC061_Solver_X11_ContestFrontierRecovery_Plan.md`
+- `AHC061_Solver_X12_AdvisorVoteEnsemble_Plan.md`
 
 ## 注意点
 - 計画段階のため、採用主張は書かない。
