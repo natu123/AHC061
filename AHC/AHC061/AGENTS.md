@@ -70,11 +70,12 @@
 - `docs/solver_specs_built/AHC061_Solver_X01_Beam_Pessimistic.md` - x01戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X02_MonteCarloExplore.md` - x02戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X03_Particle_CVaR.md` - x03戦略詳細
+- `docs/solver_specs_built/AHC061_Solver_X04_MacroRoute.md` - x04戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X05_AdaptiveRacingMC.md` - x05戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X06_ExpertSwitchHybrid.md` - x06戦略詳細
 - `docs/solver_specs_planned/README.md` - 計画中ソルバ（xNN）の戦略詳細インデックス
 - `docs/solver_specs_planned/AHC061_Solver_X03_Particle_CVaR_Plan.md` - x03計画（Particle + CVaR）
-- `docs/solver_specs_planned/AHC061_Solver_X04_MacroRoute_Plan.md` - x04計画（マクロ経路最適化）
+- `docs/solver_specs_planned/ARCHIVED_AHC061_Solver_X04_MacroRoute_Plan.md` - x04計画（移管済み）
 - `docs/solver_specs_planned/ARCHIVED_AHC061_Solver_X05_AdaptiveRacingMC_Plan.md` - x05計画（Adaptive Racing MC）
 - `docs/solver_specs_planned/AHC061_Solver_X06_ExpertSwitchHybrid_Plan.md` - x06計画（Expert Switch Hybrid）
 - `N52XwIfp_windows/tools_x86_64-pc-windows-gnu/README.md` - 公式ツール説明

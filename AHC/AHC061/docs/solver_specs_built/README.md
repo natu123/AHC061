@@ -8,6 +8,7 @@
 - `x01`: `x01_beam_pessimistic`
 - `x02`: `x02_monte_carlo`
 - `x03`: `x03_particle_cvar`
+- `x04`: `x04_macro_route`
 - `x05`: `x05_adaptive_racing_mc`
 - `x06`: `x06_expert_switch_hybrid`
 
@@ -20,6 +21,7 @@
 - `AHC061_Solver_X01_Beam_Pessimistic.md`
 - `AHC061_Solver_X02_MonteCarloExplore.md`
 - `AHC061_Solver_X03_Particle_CVaR.md`
+- `AHC061_Solver_X04_MacroRoute.md`
 - `AHC061_Solver_X05_AdaptiveRacingMC.md`
 - `AHC061_Solver_X06_ExpertSwitchHybrid.md`
 

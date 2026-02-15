@@ -9,7 +9,7 @@
 - 系統名: `x06_expert_switch_hybrid`
 - 実装本体: `solver/src/x06_expert_switch_hybrid.rs`
 - 実行bin: `solver/src/bin/x06_expert_switch_hybrid.rs`
-- 状態: 実装済み（現採用）
+- 状態: 実装済み（採用履歴あり・現非採用）
 
 ## 仕様
 - 意思決定の中核:

@@ -4,9 +4,11 @@
 - 1手評価中心から中期計画型へ移行し、育成と侵攻の連鎖効率を改善する。
 
 ## 対象
-- 系統ID（予定）: `x04`
-- 系統名（予定）: `x04_macro_route`
-- 状態: 実装着手（2026-02-15）
+- 系統ID: `x04`
+- 系統名: `x04_macro_route`
+- 状態: 移管済み（2026-02-15）
+- 参照先（built）: `docs/solver_specs_built/AHC061_Solver_X04_MacroRoute.md`
+- 採用ログ: `docs/AHC061_Experiment_Log_2026-02.md` の `T-069`
 - 起点commit: `437733e`
 - 初期パラメータ（着手時）:
   - 計画長: `6..8`（`M`依存）

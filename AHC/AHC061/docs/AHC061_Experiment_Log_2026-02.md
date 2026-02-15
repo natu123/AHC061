@@ -621,3 +621,55 @@
   - 計算時間も短縮できたため、採用基準を満たす有力な代替候補と判断します。
 - 次アクション:
   - championを `x06` として運用し、次ループは `x03` または `x04` の抜本系を継続探索します。
+
+## 2026-02-15 [T-069] 改良17（x04 Macro Route 実装 + phase境界最適化）
+- 背景:
+  - `x06` が現championでしたが、`M=4` 帯は改善余地が残っていました。
+  - `x04` は中期経路最適化で改善が出る一方、適用区間次第で tail-risk が悪化したため、`phase` 境界を最適化しました。
+- 対象:
+  - `solver/src/lib.rs`
+  - `solver/src/strategy_mode.rs`
+  - `solver/src/x04_macro_route.rs`
+  - `solver/src/bin/x04_macro_route.rs`
+- 変更:
+  - `x04_macro_route` を実装し、`StrategyMode::MacroRoute` / `x04` 専用binを追加しました。
+  - 適用帯を `M=4` のみに限定し、他帯は `x06` へフォールバックしました。
+  - `phase` 境界を `AHC_X04_PHASE_CUTOFF` で切替可能にし、最終既定値を `0.75` に設定しました。
+- 実験条件:
+  - build:
+    - `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r --manifest-path solver/Cargo.toml`
+  - test:
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x06_expert_switch_hybrid.exe > NUL 2> tmp_err_x06_f100_final_<seed>.txt"`
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x04_macro_route.exe > NUL 2> tmp_err_x04_f100_final_<seed>.txt"`
+  - seed範囲:
+    - quick: `0..19`（`phase_cutoff=0.60/0.65/0.70/0.75/1.00` をスイープ）
+    - full: `0..99`（有望値のみ）
+- 結果:
+  - quick（`seed 0..19`）:
+    - `x06`: mean `146,623.6`, median `119,019.5`, min `70,744`, max `388,857`, elapsed `2,116ms`
+    - `x04` cutoff `0.60`: mean `154,089.2`, median `131,229.5`, min `70,744`, elapsed `10,435ms`
+    - `x04` cutoff `0.65`: mean `150,024.2`, median `120,483.5`, min `70,744`, elapsed `11,421ms`
+    - `x04` cutoff `0.75`: mean `149,810.2`, median `120,062.5`, min `70,744`, elapsed `12,678ms`
+    - `x04` cutoff `1.00`: mean `151,064.8`, median `131,229.5`, min `70,744`, elapsed `16,437ms`
+  - full（`seed 0..99`）:
+    - `x06`: mean `155,863.2`, median `133,042.5`, min `51,023`, max `605,548`, elapsed `9,667ms`
+    - `x04` cutoff `0.65`: mean `158,151.4`, median `133,469`, min `52,543`, max `605,548`, elapsed `35,733ms`
+    - `x04` cutoff `0.75`（最終）: mean `158,549.1`, median `138,335.5`, min `52,543`, max `605,548`, elapsed `40,144ms`
+    - `x04` cutoff `0.80`: mean `158,079.7`, median `139,806.5`, min `52,017`, max `605,548`, elapsed `42,998ms`
+  - 実行時間分布（`x04`, cutoff `0.75`, seed `0..99`）:
+    - overall: mean `401.3ms`, p95 `1,663ms`, max `1,860ms`
+    - `M=4`: mean `1,454.1ms`, p95 `1,855ms`, max `1,860ms`
+- A/B比較:
+  - 対 現champion `x06`（`seed 0..99`）:
+    - mean: `155,863.2 -> 158,549.1`（`+2,685.9`）
+    - median: `133,042.5 -> 138,335.5`（`+5,293.0`）
+    - min: `51,023 -> 52,543`（`+1,520`）
+    - max: `605,548 -> 605,548`（`±0`）
+    - elapsed: `9,667ms -> 40,144ms`（`+30,477ms`）
+- 考察:
+  - `x04` は `M=4` 帯を押し上げ、全体 `mean/median/min` を同時改善しました。
+  - cutoff `0.75` は `0.65` より平均・中央値が高く、`0.80` より最小値が安定しており、総合最適と判断しました。
+  - 実行時間は増加しましたが、実測max `1,860ms` で時間ガード範囲内に収まることを確認しました。
+- 次アクション:
+  - championを `x04` として運用します。
+  - 次ループは `x03/x06` 系の新規アイデアを `x04` ベースに対してA/Bし、`mean` 上積みと `elapsed` 圧縮を同時に狙います。

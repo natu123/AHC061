@@ -6,7 +6,7 @@
 
 ## 対象
 - `x03`: Particle相手モデル + CVaR最適化（実装済み・非採用、builtへ移管）
-- `x04`: マクロ行動計画（複数ターン経路最適化）（計画）
+- `x04`: マクロ行動計画（複数ターン経路最適化）（実装済み・採用、builtへ移管）
 - `x05`: Adaptive Racing Monte Carlo（逐次サンプル配分 + 候補淘汰）（計画）
 - `x06`: Expert Switch Hybrid（x01/x02切替メタ方策）（計画）
 
@@ -16,7 +16,7 @@
 
 ## 一覧
 - `AHC061_Solver_X03_Particle_CVaR_Plan.md`
-- `AHC061_Solver_X04_MacroRoute_Plan.md`
+- `ARCHIVED_AHC061_Solver_X04_MacroRoute_Plan.md`
 - `ARCHIVED_AHC061_Solver_X05_AdaptiveRacingMC_Plan.md`
 - `AHC061_Solver_X06_ExpertSwitchHybrid_Plan.md`
 
