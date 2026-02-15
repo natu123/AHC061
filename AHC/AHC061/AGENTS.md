@@ -1,6 +1,7 @@
 ﻿# AHC061 - AGENTS Instructions
 
 ## Inheritance
+- AtCoder共通ルールは `../../AGENTS.md` を正本として継承する
 - AHC共通ルールは `../AGENTS.md` を正本として継承する
 - このファイルは AHC061 固有事項のみを定義する
 - 共通ルールと矛盾する場合は、AHC061 の実行要件に必要な範囲でこのファイルを優先する

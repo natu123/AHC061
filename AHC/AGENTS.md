@@ -2,9 +2,11 @@
 
 ## Scope
 - このファイルは `AHC/` 配下の共通ルールを定義する
+- `../AGENTS.md`（AtCoder共通）を継承する
 - 各コンテスト配下（例: `AHC061/AGENTS.md`）は、この共通ルールを継承しつつ固有ルールで上書きできる
 
 ## Source Of Truth
+- AtCoder共通の運用方針は `../AGENTS.md` を正本とする
 - AHC共通の運用方針はこのファイルを正本（single source of truth）とする
 - 各コンテスト固有の仕様・手順は各ディレクトリの `AGENTS.md` を正本とする
 - ルール変更はまず該当スコープの `AGENTS.md` を更新し、必要な差分のみ他ファイルに反映する
