@@ -1,9 +1,15 @@
 use std::collections::{HashMap, VecDeque};
-use std::env;
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
 
+mod strategy_mode;
+mod x01_beam_pessimistic;
+mod x02_monte_carlo;
+
+pub use strategy_mode::{strategy_from_env, StrategyMode};
+use strategy_mode::choose_move;
+
 #[derive(Clone)]
-struct Game {
+pub(crate) struct Game {
     n: usize,
     m: usize,
     t: usize,
@@ -12,7 +18,7 @@ struct Game {
 }
 
 #[derive(Clone)]
-struct State {
+pub(crate) struct State {
     pos: Vec<(usize, usize)>,
     owner: Vec<Vec<i32>>,
     level: Vec<Vec<usize>>,
@@ -20,7 +26,7 @@ struct State {
 }
 
 #[derive(Clone)]
-struct AiModel {
+pub(crate) struct AiModel {
     w: [f64; 4],
     eps_est: f64,
     seen: u32,
@@ -38,39 +44,23 @@ impl AiModel {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum StrategyMode {
-    Champion,
-    MonteCarloExplore,
-    HybridMidMc,
-}
-
-fn strategy_from_env() -> StrategyMode {
-    match env::var("AHC_STRATEGY").ok().as_deref() {
-        Some("champion") => StrategyMode::Champion,
-        Some("mc") | Some("mc_sample") | Some("monte_carlo") => StrategyMode::MonteCarloExplore,
-        Some("hybrid_mid_mc") | Some("mid_mc") => StrategyMode::HybridMidMc,
-        _ => StrategyMode::HybridMidMc,
-    }
-}
-
-struct FastRng {
+pub(crate) struct FastRng {
     state: u64,
 }
 
 impl FastRng {
-    fn new(seed: u64) -> Self {
+    pub(crate) fn new(seed: u64) -> Self {
         Self { state: seed | 1 }
     }
 
-    fn next_u64(&mut self) -> u64 {
+    pub(crate) fn next_u64(&mut self) -> u64 {
         self.state ^= self.state << 7;
         self.state ^= self.state >> 9;
         self.state ^= self.state << 8;
         self.state
     }
 
-    fn next_f64(&mut self) -> f64 {
+    pub(crate) fn next_f64(&mut self) -> f64 {
         let x = self.next_u64() >> 11;
         (x as f64) * (1.0 / ((1_u64 << 53) as f64))
     }
@@ -116,11 +106,11 @@ impl<R: BufRead> Scanner<R> {
     }
 }
 
-fn in_bounds(n: usize, x: isize, y: isize) -> bool {
+pub(crate) fn in_bounds(n: usize, x: isize, y: isize) -> bool {
     x >= 0 && y >= 0 && (x as usize) < n && (y as usize) < n
 }
 
-fn occupied_by_other(state: &State, player: usize, x: usize, y: usize) -> bool {
+pub(crate) fn occupied_by_other(state: &State, player: usize, x: usize, y: usize) -> bool {
     for (i, &(px, py)) in state.pos.iter().enumerate() {
         if i != player && px == x && py == y {
             return true;
@@ -129,7 +119,7 @@ fn occupied_by_other(state: &State, player: usize, x: usize, y: usize) -> bool {
     false
 }
 
-fn get_candidates(game: &Game, state: &State, player: usize) -> Vec<(usize, usize)> {
+pub(crate) fn get_candidates(game: &Game, state: &State, player: usize) -> Vec<(usize, usize)> {
     let mut reachable = Vec::new();
     let mut visited = vec![vec![false; game.n]; game.n];
     let mut q = VecDeque::new();
@@ -164,7 +154,7 @@ fn get_candidates(game: &Game, state: &State, player: usize) -> Vec<(usize, usiz
     reachable
 }
 
-fn calc_scores(game: &Game, state: &State) -> Vec<i64> {
+pub(crate) fn calc_scores(game: &Game, state: &State) -> Vec<i64> {
     let mut scores = vec![0_i64; game.m];
     for i in 0..game.n {
         for j in 0..game.n {
@@ -177,7 +167,7 @@ fn calc_scores(game: &Game, state: &State) -> Vec<i64> {
     scores
 }
 
-fn ai_features(
+pub(crate) fn ai_features(
     game: &Game,
     state: &State,
     player: usize,
@@ -203,11 +193,11 @@ fn ai_features(
     }
 }
 
-fn dot4(w: &[f64; 4], x: &[f64; 4]) -> f64 {
+pub(crate) fn dot4(w: &[f64; 4], x: &[f64; 4]) -> f64 {
     w[0] * x[0] + w[1] * x[1] + w[2] * x[2] + w[3] * x[3]
 }
 
-fn predict_ai_distribution(
+pub(crate) fn predict_ai_distribution(
     game: &Game,
     state: &State,
     player: usize,
@@ -255,7 +245,7 @@ fn predict_ai_distribution(
     probs
 }
 
-fn blended_ai_probs(
+pub(crate) fn blended_ai_probs(
     game: &Game,
     state: &State,
     player: usize,
@@ -277,7 +267,7 @@ fn blended_ai_probs(
         .collect()
 }
 
-fn estimate_conflict_map(game: &Game, state: &State, models: &[AiModel]) -> Vec<Vec<f64>> {
+pub(crate) fn estimate_conflict_map(game: &Game, state: &State, models: &[AiModel]) -> Vec<Vec<f64>> {
     let mut map = vec![vec![0.0_f64; game.n]; game.n];
     for ai_idx in 0..(game.m.saturating_sub(1)) {
         let player = ai_idx + 1;
@@ -293,7 +283,7 @@ fn estimate_conflict_map(game: &Game, state: &State, models: &[AiModel]) -> Vec<
     map
 }
 
-fn simulate_turn(game: &Game, state: &State, moves: &[(usize, usize)]) -> State {
+pub(crate) fn simulate_turn(game: &Game, state: &State, moves: &[(usize, usize)]) -> State {
     let mut next = state.clone();
     let mut temp_pos = moves.to_vec();
     let mut move_counts = HashMap::<(usize, usize), usize>::new();
@@ -345,14 +335,14 @@ fn simulate_turn(game: &Game, state: &State, moves: &[(usize, usize)]) -> State 
     next
 }
 
-fn absolute_score(game: &Game, state: &State) -> f64 {
+pub(crate) fn absolute_score(game: &Game, state: &State) -> f64 {
     let scores = calc_scores(game, state);
     let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
     let ratio = scores[0] as f64 / sa;
     1e5 * (1.0 + ratio).log2()
 }
 
-fn choose_predicted_ai_top2_moves(
+pub(crate) fn choose_predicted_ai_top2_moves(
     game: &Game,
     state: &State,
     models: &[AiModel],
@@ -383,7 +373,7 @@ fn choose_predicted_ai_top2_moves(
     moves
 }
 
-fn uncertainty_risk(top2: &[((usize, usize), (usize, usize), f64)]) -> f64 {
+pub(crate) fn uncertainty_risk(top2: &[((usize, usize), (usize, usize), f64)]) -> f64 {
     if top2.is_empty() {
         return 0.0;
     }
@@ -394,7 +384,7 @@ fn uncertainty_risk(top2: &[((usize, usize), (usize, usize), f64)]) -> f64 {
     (sum / top2.len() as f64).clamp(0.0, 0.5)
 }
 
-fn build_secondary_ai_moves(
+pub(crate) fn build_secondary_ai_moves(
     scores: &[i64],
     top2: &[((usize, usize), (usize, usize), f64)],
     switch_cap: usize,
@@ -422,7 +412,7 @@ fn build_secondary_ai_moves(
     moves
 }
 
-fn sample_index(probs: &[f64], rng: &mut FastRng) -> usize {
+pub(crate) fn sample_index(probs: &[f64], rng: &mut FastRng) -> usize {
     if probs.is_empty() {
         return 0;
     }
@@ -437,7 +427,7 @@ fn sample_index(probs: &[f64], rng: &mut FastRng) -> usize {
     probs.len() - 1
 }
 
-fn build_ai_candidates_and_probs(
+pub(crate) fn build_ai_candidates_and_probs(
     game: &Game,
     state: &State,
     models: &[AiModel],
@@ -456,7 +446,7 @@ fn build_ai_candidates_and_probs(
     all
 }
 
-fn frontier_potential(game: &Game, state: &State) -> f64 {
+pub(crate) fn frontier_potential(game: &Game, state: &State) -> f64 {
     let mut frontier = 0.0_f64;
     let mut growth = 0.0_f64;
     let mut vulnerability = 0.0_f64;
@@ -499,11 +489,11 @@ fn frontier_potential(game: &Game, state: &State) -> f64 {
     0.022 * frontier + 0.090 * growth - 0.060 * vulnerability
 }
 
-fn strategic_score(game: &Game, state: &State) -> f64 {
+pub(crate) fn strategic_score(game: &Game, state: &State) -> f64 {
     absolute_score(game, state) + frontier_potential(game, state)
 }
 
-fn pessimism_weight(game: &Game, uncertainty: f64) -> f64 {
+pub(crate) fn pessimism_weight(game: &Game, uncertainty: f64) -> f64 {
     if uncertainty < 0.08 {
         return 0.0;
     }
@@ -511,7 +501,7 @@ fn pessimism_weight(game: &Game, uncertainty: f64) -> f64 {
     (0.05 + 0.22 * uncertainty + 0.10 * m_factor).clamp(0.05, 0.32)
 }
 
-fn evaluate_local_move(
+pub(crate) fn evaluate_local_move(
     game: &Game,
     state: &State,
     cand: (usize, usize),
@@ -592,291 +582,6 @@ fn evaluate_local_move(
     }
 
     score + value * 1e-6 - (x as f64 * 31.0 + y as f64) * 1e-9
-}
-
-fn best_one_step_score(game: &Game, state: &State, models: &[AiModel]) -> f64 {
-    let candidates = get_candidates(game, state, 0);
-    if candidates.is_empty() {
-        return 0.0;
-    }
-    let scores = calc_scores(game, state);
-    let ai_top2 = choose_predicted_ai_top2_moves(game, state, models);
-    let predicted_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
-    let uncertainty = uncertainty_risk(&ai_top2);
-    let secondary_cap = if game.m >= 7 && uncertainty >= 0.40 {
-        3
-    } else if game.m >= 6 && uncertainty >= 0.28 {
-        2
-    } else {
-        1
-    };
-    let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2, secondary_cap);
-    let risk_w = pessimism_weight(game, uncertainty);
-
-    if candidates.len() == 1 {
-        let mut primary = Vec::with_capacity(game.m);
-        primary.push(candidates[0]);
-        primary.extend_from_slice(&predicted_primary);
-        let score_primary = absolute_score(game, &simulate_turn(game, state, &primary));
-
-        let mut secondary = Vec::with_capacity(game.m);
-        secondary.push(candidates[0]);
-        secondary.extend_from_slice(&predicted_secondary);
-        let score_secondary = absolute_score(game, &simulate_turn(game, state, &secondary));
-        return (1.0 - risk_w) * score_primary + risk_w * score_secondary;
-    }
-
-    let s0 = scores[0] as f64;
-    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
-    let phase = state.turn as f64 / game.t as f64;
-    let conflict_map = estimate_conflict_map(game, state, models);
-    let cur = state.pos[0];
-
-    let mut is_leader = vec![false; game.m];
-    for p in 1..game.m {
-        if scores[p] == max_ai_i64 {
-            is_leader[p] = true;
-        }
-    }
-
-    let mut best_val = f64::NEG_INFINITY;
-    for &mv in &candidates {
-        let local_score = evaluate_local_move(
-            game,
-            state,
-            mv,
-            &scores,
-            s0,
-            max_ai_i64,
-            phase,
-            &conflict_map,
-            cur,
-            &is_leader,
-        );
-
-        let mut primary = Vec::with_capacity(game.m);
-        primary.push(mv);
-        primary.extend_from_slice(&predicted_primary);
-        let score_primary = absolute_score(game, &simulate_turn(game, state, &primary));
-
-        let mut secondary = Vec::with_capacity(game.m);
-        secondary.push(mv);
-        secondary.extend_from_slice(&predicted_secondary);
-        let score_secondary = absolute_score(game, &simulate_turn(game, state, &secondary));
-
-        let rollout = (1.0 - risk_w) * score_primary + risk_w * score_secondary;
-        let total = rollout + 0.12 * local_score;
-        if total > best_val {
-            best_val = total;
-        }
-    }
-    best_val
-}
-
-fn choose_move_champion(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize) {
-    let candidates = get_candidates(game, state, 0);
-    if candidates.len() == 1 {
-        return candidates[0];
-    }
-
-    let scores = calc_scores(game, state);
-    let s0 = scores[0] as f64;
-    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
-    let phase = state.turn as f64 / game.t as f64;
-    let conflict_map = estimate_conflict_map(game, state, models);
-    let cur = state.pos[0];
-    let ai_top2 = choose_predicted_ai_top2_moves(game, state, models);
-    let predicted_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
-    let uncertainty = uncertainty_risk(&ai_top2);
-    let secondary_cap = if game.m >= 7 && uncertainty >= 0.40 {
-        3
-    } else if game.m >= 6 && uncertainty >= 0.28 {
-        2
-    } else {
-        1
-    };
-    let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2, secondary_cap);
-    let risk_w = pessimism_weight(game, uncertainty);
-
-    let mut is_leader = vec![false; game.m];
-    for p in 1..game.m {
-        if scores[p] == max_ai_i64 {
-            is_leader[p] = true;
-        }
-    }
-
-    let mut scored: Vec<((usize, usize), f64, State)> = Vec::with_capacity(candidates.len());
-
-    for &(x, y) in &candidates {
-        let local_score = evaluate_local_move(
-            game,
-            state,
-            (x, y),
-            &scores,
-            s0,
-            max_ai_i64,
-            phase,
-            &conflict_map,
-            cur,
-            &is_leader,
-        );
-
-        let mut primary = Vec::with_capacity(game.m);
-        primary.push((x, y));
-        primary.extend_from_slice(&predicted_primary);
-        let next_state = simulate_turn(game, state, &primary);
-        let score_primary = absolute_score(game, &next_state);
-
-        let mut secondary = Vec::with_capacity(game.m);
-        secondary.push((x, y));
-        secondary.extend_from_slice(&predicted_secondary);
-        let score_secondary = absolute_score(game, &simulate_turn(game, state, &secondary));
-
-        let rollout_score = (1.0 - risk_w) * score_primary + risk_w * score_secondary;
-        let base_total = rollout_score + 0.12 * local_score;
-        scored.push(((x, y), base_total, next_state));
-    }
-
-    scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-    let mut beam_width = if scored.len() >= 32 {
-        8
-    } else if scored.len() >= 16 {
-        6
-    } else {
-        4
-    };
-    if game.m == 5 && phase <= 0.80 && uncertainty >= 0.18 {
-        beam_width = scored.len();
-    } else if game.m == 6 && phase <= 0.72 && uncertainty >= 0.22 {
-        beam_width = (beam_width + 3).min(scored.len());
-    }
-
-    let mut best = scored[0].0;
-    let mut best_total = f64::NEG_INFINITY;
-    for (idx, (mv, base_total, next_state)) in scored.iter().enumerate() {
-        if idx >= beam_width {
-            break;
-        }
-        let future = if state.turn + 1 < game.t {
-            best_one_step_score(game, next_state, models)
-        } else {
-            0.0
-        };
-        let total = *base_total + 0.18 * future;
-        if total > best_total {
-            best_total = total;
-            best = *mv;
-        }
-    }
-    best
-}
-
-fn choose_move_monte_carlo(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize) {
-    let candidates = get_candidates(game, state, 0);
-    if candidates.len() <= 1 {
-        return candidates.first().copied().unwrap_or(state.pos[0]);
-    }
-
-    let scores = calc_scores(game, state);
-    let s0 = scores[0] as f64;
-    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
-    let phase = state.turn as f64 / game.t as f64;
-    let conflict_map = estimate_conflict_map(game, state, models);
-    let cur = state.pos[0];
-    let mut is_leader = vec![false; game.m];
-    for p in 1..game.m {
-        if scores[p] == max_ai_i64 {
-            is_leader[p] = true;
-        }
-    }
-
-    let mut ranked: Vec<((usize, usize), f64)> = Vec::with_capacity(candidates.len());
-    for &mv in &candidates {
-        let local = evaluate_local_move(
-            game,
-            state,
-            mv,
-            &scores,
-            s0,
-            max_ai_i64,
-            phase,
-            &conflict_map,
-            cur,
-            &is_leader,
-        );
-        ranked.push((mv, local));
-    }
-    ranked.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-
-    let candidate_cap = if ranked.len() >= 24 {
-        14
-    } else if ranked.len() >= 14 {
-        10
-    } else {
-        ranked.len()
-    };
-    let sample_count = if game.m >= 7 {
-        10
-    } else if game.m >= 5 {
-        8
-    } else {
-        6
-    };
-
-    let ai_options = build_ai_candidates_and_probs(game, state, models);
-    let seed = ((state.turn as u64 + 1) * 0x9e37_79b9_7f4a_7c15)
-        ^ (scores[0] as u64)
-        ^ ((game.m as u64) << 32)
-        ^ ((game.u as u64) << 48);
-    let mut rng = FastRng::new(seed);
-
-    let mut best_mv = ranked[0].0;
-    let mut best_val = f64::NEG_INFINITY;
-    for &(mv, local) in ranked.iter().take(candidate_cap) {
-        let mut acc = 0.0_f64;
-        let mut acc2 = 0.0_f64;
-        for _ in 0..sample_count {
-            let mut sampled = Vec::with_capacity(game.m);
-            sampled.push(mv);
-            for (cands, probs) in &ai_options {
-                let idx = sample_index(probs, &mut rng);
-                sampled.push(cands[idx]);
-            }
-            let next_state = simulate_turn(game, state, &sampled);
-            let v = strategic_score(game, &next_state);
-            acc += v;
-            acc2 += v * v;
-        }
-        let mean = acc / sample_count as f64;
-        let var = (acc2 / sample_count as f64 - mean * mean).max(0.0);
-        let std = var.sqrt();
-        let risk_w = if game.m >= 6 { 0.40 } else { 0.25 };
-        let total = mean - risk_w * std + 0.09 * local;
-        if total > best_val {
-            best_val = total;
-            best_mv = mv;
-        }
-    }
-    best_mv
-}
-
-fn choose_move(
-    game: &Game,
-    state: &State,
-    models: &[AiModel],
-    strategy: StrategyMode,
-) -> (usize, usize) {
-    match strategy {
-        StrategyMode::Champion => choose_move_champion(game, state, models),
-        StrategyMode::MonteCarloExplore => choose_move_monte_carlo(game, state, models),
-        StrategyMode::HybridMidMc => {
-            if (3..=5).contains(&game.m) {
-                choose_move_monte_carlo(game, state, models)
-            } else {
-                choose_move_champion(game, state, models)
-            }
-        }
-    }
 }
 
 fn update_model_for_player(
@@ -1018,7 +723,7 @@ fn read_feedback<R: BufRead>(
     Some(selected)
 }
 
-fn main() {
+pub fn run_with_strategy(strategy: StrategyMode) {
     let stdin = io::stdin();
     let mut sc = Scanner::new(BufReader::new(stdin.lock()));
     let stdout = io::stdout();
@@ -1029,7 +734,6 @@ fn main() {
         None => return,
     };
 
-    let strategy = strategy_from_env();
     let mut models = vec![AiModel::new(); game.m.saturating_sub(1)];
 
     for _ in 0..game.t {
