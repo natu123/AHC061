@@ -4,6 +4,7 @@ use std::io::{self, BufRead, BufReader, BufWriter, Write};
 mod strategy_mode;
 mod x01_beam_pessimistic;
 mod x02_monte_carlo;
+mod x05_adaptive_racing_mc;
 
 pub use strategy_mode::{strategy_from_env, StrategyMode};
 use strategy_mode::choose_move;
