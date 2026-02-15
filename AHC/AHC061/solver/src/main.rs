@@ -483,7 +483,13 @@ fn best_one_step_score(game: &Game, state: &State, models: &[AiModel]) -> f64 {
     let ai_top2 = choose_predicted_ai_top2_moves(game, state, models);
     let predicted_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
     let uncertainty = uncertainty_risk(&ai_top2);
-    let secondary_cap = if game.m >= 6 && uncertainty >= 0.28 { 2 } else { 1 };
+    let secondary_cap = if game.m >= 7 && uncertainty >= 0.40 {
+        3
+    } else if game.m >= 6 && uncertainty >= 0.28 {
+        2
+    } else {
+        1
+    };
     let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2, secondary_cap);
     let risk_w = pessimism_weight(game, uncertainty);
 
@@ -562,7 +568,13 @@ fn choose_move(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize)
     let ai_top2 = choose_predicted_ai_top2_moves(game, state, models);
     let predicted_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
     let uncertainty = uncertainty_risk(&ai_top2);
-    let secondary_cap = if game.m >= 6 && uncertainty >= 0.28 { 2 } else { 1 };
+    let secondary_cap = if game.m >= 7 && uncertainty >= 0.40 {
+        3
+    } else if game.m >= 6 && uncertainty >= 0.28 {
+        2
+    } else {
+        1
+    };
     let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2, secondary_cap);
     let risk_w = pessimism_weight(game, uncertainty);
 
