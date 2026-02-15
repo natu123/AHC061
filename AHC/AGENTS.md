@@ -73,6 +73,9 @@
 - **Log Hygiene**: 提出コードには過剰ログを残さず、検証用ログは切替可能にする
 - **User-Led Final Check**: 最終提出判断はユーザー主導。AIは比較結果とリスクを明示する
 - **Meta Improvement**: 失敗や運用漏れは retro して、同日中に手順・Docs・上位ルールへ反映する
+- **Plateau Pivot**: 直近 `8` 試行採用 `0` 件、または `10` 試行平均改善率 `+0.3%` 未満なら、微調整を打ち切り `Exploit 5% / Explore 95%` の抜本探索へ移行する
+- **Portfolio Exploration**: 抜本探索時は最低 `2` 系統、推奨 `4` 系統以上の異種アプローチを並列で評価する
+- **Adaptive Allocation**: `EGR = P(hit) * Gain / Cost` に基づき、`10` 試行ごとに Exploit/Explore 配分を更新する
 
 ## Conventions
 - まず既存ファイルを編集し、新規ファイル追加は必要最小限にする
