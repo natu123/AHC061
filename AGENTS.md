@@ -22,6 +22,7 @@
 
 ## Docs Governance
 - Docs は 1ファイル1責務を原則とします。
+- 運用改善の反映は「必要なファイルに必要な分だけ」を原則とし、全md一括更新を禁止します。
 - 文字コードは UTF-8（BOMなし）を標準とします。
 - 用語はプロジェクト内で統一します（例: `seed`, `score`, `ratio`, `mean/median/min/max`）。
 - 保存後は `Get-Content <file> -Head 20` で文字化けを確認します。

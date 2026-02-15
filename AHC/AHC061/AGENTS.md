@@ -61,6 +61,7 @@
 
 ## Docs運用（AHC061）
 - Docs運用は `../AGENTS.md` の `Docs Governance` に従う
+- AHC061では、運用変更の反映先を必要ファイルに限定し、全md一括更新は行わない
 - AHC061では次の責務分離を固定する
   - `docs/AHC061_Codex_Guide.md`: 実行手順・開発運用・Codex利用指針
   - `docs/AHC061_Game_Rules_Strict.md`: tester実装準拠の厳密ルール
