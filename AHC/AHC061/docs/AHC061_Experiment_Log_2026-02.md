@@ -180,3 +180,25 @@
 - 考察:
   - mean/median の改善幅が十分大きく、次のベースとして継続価値があります。
   - 最悪値はわずかに悪化しているため、次段は平均を維持したまま tail-risk を圧縮する方針です。
+
+## 2026-02-15 改良5（tail-risk ペナルティ試行, 不採用）
+- 背景:
+  - 改良4の最悪値を改善する目的で、primary/secondary の下振れ幅に追加ペナルティを導入しました。
+- 対象:
+  - `solver/src/main.rs`
+- 変更:
+  - `tail_risk_penalty` を追加し、`best_one_step_score` と `choose_move` のロールアウト合成に反映しました。
+- 実験条件:
+  - build: `& "$env:USERPROFILE\.cargo\bin\cargo.exe" build -r`
+  - test: `cmd /c "type <in>.txt | tester.exe <solver> > tmp_out.txt 2> tmp_err.txt"`
+  - seed範囲: `0..9`, `0..99`
+- 結果:
+  - `seed 0..9`: mean `112,395.0`, median `104,940`, min `50,617`, max `215,823`
+  - `seed 0..99`: mean `142,205.9`, median `124,177`, min `34,505`, max `605,548`
+- A/B比較（対 改良4, `seed 0..99`）:
+  - mean: `144,356.2 -> 142,205.9`（`-2,150.3`）
+  - median: `121,631 -> 124,177`（`+2,546`）
+  - min: `50,617 -> 34,505`（`-16,112`）
+- 考察:
+  - 最悪値の悪化が大きく、採用基準を満たしません。
+  - 本変更は不採用とし、`solver/src/main.rs` は改良4ベースへ復元済みです。
