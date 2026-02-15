@@ -613,7 +613,7 @@ fn choose_move(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize)
         4
     };
     if game.m == 5 && phase <= 0.85 && uncertainty >= 0.18 {
-        beam_width = (beam_width + 2).min(scored.len());
+        beam_width = (beam_width + 3).min(scored.len());
     }
 
     let mut best = scored[0].0;
