@@ -484,7 +484,8 @@ fn best_one_step_score(game: &Game, state: &State, models: &[AiModel]) -> f64 {
     let ai_top2 = choose_predicted_ai_top2_moves(game, state, models);
     let predicted_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
     let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2);
-    let risk_w = pessimism_weight(game, uncertainty_risk(&ai_top2));
+    let uncertainty = uncertainty_risk(&ai_top2);
+    let risk_w = pessimism_weight(game, uncertainty);
 
     if candidates.len() == 1 {
         let mut primary = Vec::with_capacity(game.m);
@@ -561,7 +562,8 @@ fn choose_move(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize)
     let ai_top2 = choose_predicted_ai_top2_moves(game, state, models);
     let predicted_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
     let predicted_secondary = build_secondary_ai_moves(&scores, &ai_top2);
-    let risk_w = pessimism_weight(game, uncertainty_risk(&ai_top2));
+    let uncertainty = uncertainty_risk(&ai_top2);
+    let risk_w = pessimism_weight(game, uncertainty);
 
     let mut is_leader = vec![false; game.m];
     for p in 1..game.m {
@@ -603,13 +605,16 @@ fn choose_move(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize)
     }
 
     scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-    let beam_width = if scored.len() >= 32 {
+    let mut beam_width = if scored.len() >= 32 {
         8
     } else if scored.len() >= 16 {
         6
     } else {
         4
     };
+    if game.m == 5 && phase <= 0.85 && uncertainty >= 0.18 {
+        beam_width = (beam_width + 2).min(scored.len());
+    }
 
     let mut best = scored[0].0;
     let mut best_total = f64::NEG_INFINITY;
