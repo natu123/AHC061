@@ -192,7 +192,7 @@ pub(super) fn choose_move_x04_macro_route(
     let phase_cutoff = std::env::var("AHC_X04_PHASE_CUTOFF")
         .ok()
         .and_then(|x| x.parse::<f64>().ok())
-        .unwrap_or(0.75);
+        .unwrap_or(0.65);
     let phase_now = state.turn as f64 / game.t as f64;
     if phase_now > phase_cutoff {
         return x06_expert_switch_hybrid::choose_move_x06_expert_switch(game, state, models);
@@ -239,13 +239,14 @@ pub(super) fn choose_move_x04_macro_route(
     }
     ranked.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
     let candidate_cap = if ranked.len() >= 20 {
-        8
+        7
     } else {
-        ranked.len().min(6)
+        ranked.len().min(5)
     };
 
-    let plan_len = 7;
-    let beam_width = 5;
+    let fast_phase = phase_now > 0.50;
+    let plan_len = if fast_phase { 6 } else { 7 };
+    let beam_width = if fast_phase { 4 } else { 5 };
     let branch_width = 2;
 
     let mut best_mv = ranked[0].0;
