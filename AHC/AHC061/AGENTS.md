@@ -37,6 +37,10 @@
 - `docs/AHC061_Submission_Gap_Log_YYYY-MM.md` の最新 `ratio = my_score / top1_score` を、探索新規性の配分判断に使う
 - `ratio >= 0.85` は微調整主体、`0.75 <= ratio < 0.85` は混合探索、`ratio < 0.75` は抜本探索主体とする
 - `ratio < 0.75` の場合、Explore内訳は `新規アーキテクチャ 80% / 既存派生 15% / Exploit監視 5%` を標準配分とする
+- `ratio < 0.70` または `top20_ratio < 0.75`（`my_score / top20_score`）の場合は Explore Gear-Shift を発動し、次の `3` ループで以下を固定運用する
+  - 各ループで新規性の高い仮説を最低 `2` 件（推奨 `3` 件）実装して quick 評価（`seed 0..19`）まで実施する
+  - full 評価（`seed 0..99`）へ進むのは quick 上位 `1` 件のみとし、探索密度を優先する
+  - 既存方針の微調整のみの試行は全体の `20%` 以下に抑える
 
 ## Solver ID / Champion Policy
 - `xNN`（例: `x01`, `x02`, `x10`）は「新規ソルバ作成順」の固定IDとして採番し、後から意味を変更しない
