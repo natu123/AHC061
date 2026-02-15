@@ -8,6 +8,9 @@ mod x03_particle_cvar;
 mod x04_macro_route;
 mod x05_adaptive_racing_mc;
 mod x06_expert_switch_hybrid;
+mod x07_dual_horizon_route;
+mod x08_pressure_frontier;
+mod x09_regret_mix;
 
 pub use strategy_mode::{strategy_from_env, StrategyMode};
 use strategy_mode::choose_move;

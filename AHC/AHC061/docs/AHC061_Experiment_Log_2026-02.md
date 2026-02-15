@@ -720,3 +720,46 @@
 - 考察:
   - オンラインで問題化した tail time を抑えつつ、スコアは維持以上を確認しました。
   - 次回提出は本軽量版 `x04` を基準にします。
+
+## 2026-02-16 [T-071..T-073] Gear-Shift Loop #1（新規3仮説の高速選抜）
+- 背景:
+  - `SG-002` を起点にした Gear-Shift 運用として、新規性の高い仮説を3件（`x07/x08/x09`）実装し、quick上位1件のみfullへ進めました。
+- 対象:
+  - baseline: `solver/src/bin/x04_macro_route.rs`
+  - candidates:
+    - `solver/src/bin/x07_dual_horizon_route.rs`
+    - `solver/src/bin/x08_pressure_frontier.rs`
+    - `solver/src/bin/x09_regret_mix.rs`
+- 変更:
+  - `x07/x08/x09` の新規戦略を実装し、`StrategyMode` と専用binを追加しました。
+  - 先行して `docs/solver_specs_planned` に計画を追加し、実装後に `docs/solver_specs_built` へ反映しました。
+- 実験条件:
+  - build: `& "$env:USERPROFILE\\.cargo\\bin\\cargo.exe" build -r --manifest-path solver/Cargo.toml`
+  - quick（全候補）:
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\<candidate>.exe > NUL 2> tmp_err_<candidate>_q_<seed>.txt"`
+    - seed範囲: `0..19`
+  - full（quick上位1件 `x07` のみ）:
+    - `cmd /c "type in\\<seed>.txt | .\\tester.exe ..\\..\\solver\\target\\release\\x07_dual_horizon_route.exe > NUL 2> tmp_err_x07_f100_<seed>.txt"`
+    - seed範囲: `0..99`
+- 結果:
+  - champion baseline再計測（`x04`, full `seed 0..99`）:
+    - mean `158,923.8`, median `138,335.5`, min `52,543`, max `605,548`, elapsed `32,128ms`
+  - quick（`seed 0..19`）順位:
+    - `x04`: mean `147,335.4`, median `119,019.5`, min `70,744`, max `388,857`, elapsed `9,173ms`
+    - `x07`: mean `137,783.7`, median `114,450`, min `70,744`, max `388,857`, elapsed `2,198ms`
+    - `x09`: mean `125,930.3`, median `107,568.5`, min `51,051`, max `456,591`, elapsed `8,975ms`
+    - `x08`: mean `125,655.7`, median `113,953.5`, min `48,933`, max `388,857`, elapsed `1,701ms`
+  - full（quick上位 `x07`）:
+    - `x07`: mean `155,182.1`, median `130,877`, min `52,543`, max `605,548`, elapsed `10,834ms`
+- A/B比較:
+  - `x07` vs champion `x04`（full `seed 0..99`）:
+    - mean: `158,923.8 -> 155,182.1`（`-3,741.7`）
+    - median: `138,335.5 -> 130,877`（`-7,458.5`）
+    - min/max: 同値
+    - elapsed: `32,128ms -> 10,834ms`（`-21,294ms`）
+- 考察:
+  - Loop #1 は 3仮説すべて不採用でした。`x07` は速度改善が顕著でしたが、score指標で採用基準を満たしませんでした。
+  - 微調整-only 試行は実施せず、新規アーキテクチャ3件で Gear-Shift ルールを満たしました。
+- 次アクション:
+  - Gear-Shift Loop #2 へ移行し、`x07` の速度優位を活かした「score復元系」仮説を含む新規2-3件を追加実装します。
+  - 不採用詳細は `docs/AHC061_Experiment_Failures_2026-02.md` の `T-071..T-073` を参照します。

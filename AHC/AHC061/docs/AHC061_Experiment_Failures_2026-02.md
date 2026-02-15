@@ -1134,6 +1134,81 @@
 - タグ:
   - `x04-local-guard`, `quick-regression`, `restore`
 
+## 2026-02-16 [T-071] F-51（x07初版: Dual Horizon Route Blend）
+- 背景:
+  - Gear-Shift Loop #1 の新規探索として、`x04` の単一horizon評価ではなく短期/中期の二重horizon混合を検証しました。
+  - 速度を落とさずに tail-risk を抑えた改善を狙いました。
+- 変更:
+  - `solver/src/x07_dual_horizon_route.rs` を新規実装しました。
+  - `solver/src/bin/x07_dual_horizon_route.rs` を追加しました。
+  - `solver/src/strategy_mode.rs` に `DualHorizonRoute` を追加しました。
+  - `solver/src/lib.rs` に `x07` モジュールを追加しました。
+- 結果（quick, seed 0..19）:
+  - `x04`: mean `147,335.4`, median `119,019.5`, min `70,744`, max `388,857`, elapsed `9,173ms`
+  - `x07`: mean `137,783.7`, median `114,450`, min `70,744`, max `388,857`, elapsed `2,198ms`
+- 結果（full, seed 0..99）:
+  - `x04`: mean `158,923.8`, median `138,335.5`, min `52,543`, max `605,548`, elapsed `32,128ms`
+  - `x07`: mean `155,182.1`, median `130,877`, min `52,543`, max `605,548`, elapsed `10,834ms`
+- 比較（対 現champion `x04`）:
+  - quick:
+    - mean: `147,335.4 -> 137,783.7`（`-9,551.7`）
+    - median: `119,019.5 -> 114,450`（`-4,569.5`）
+    - min/max: 同値
+    - elapsed: `9,173ms -> 2,198ms`（`-6,975ms`）
+  - full:
+    - mean: `158,923.8 -> 155,182.1`（`-3,741.7`）
+    - median: `138,335.5 -> 130,877`（`-7,458.5`）
+    - min/max: 同値
+    - elapsed: `32,128ms -> 10,834ms`（`-21,294ms`）
+- 判定:
+  - 不採用（速度は改善したが score 指標が採用基準未達）
+- タグ:
+  - `new-architecture`, `dual-horizon-route`, `speed-gain-score-loss`, `full-regression`
+
+## 2026-02-16 [T-072] F-52（x08初版: Pressure Frontier）
+- 背景:
+  - Gear-Shift Loop #1 の新規探索として、route探索を使わず前線圧力主導の高速局所制御を検証しました。
+- 変更:
+  - `solver/src/x08_pressure_frontier.rs` を新規実装しました。
+  - `solver/src/bin/x08_pressure_frontier.rs` を追加しました。
+  - `solver/src/strategy_mode.rs` に `PressureFrontier` を追加しました。
+  - `solver/src/lib.rs` に `x08` モジュールを追加しました。
+- 結果（quick, seed 0..19）:
+  - `x04`: mean `147,335.4`, median `119,019.5`, min `70,744`, max `388,857`, elapsed `9,173ms`
+  - `x08`: mean `125,655.7`, median `113,953.5`, min `48,933`, max `388,857`, elapsed `1,701ms`
+- 比較（対 現champion `x04`, seed 0..19）:
+  - mean: `147,335.4 -> 125,655.7`（`-21,679.7`）
+  - median: `119,019.5 -> 113,953.5`（`-5,066.0`）
+  - min: `70,744 -> 48,933`（`-21,811`）
+  - max: 同値
+  - elapsed: `9,173ms -> 1,701ms`（`-7,472ms`）
+- 判定:
+  - 不採用（quick段階で大幅悪化のため full 未実施）
+- タグ:
+  - `new-architecture`, `pressure-frontier`, `quick-regression`, `speed-gain-score-loss`
+
+## 2026-02-16 [T-073] F-53（x09初版: Regret Mix Policy）
+- 背景:
+  - Gear-Shift Loop #1 の新規探索として、`x04/x06/x02` の提案手を反実仮想で毎ターン選抜する動的混合を検証しました。
+- 変更:
+  - `solver/src/x09_regret_mix.rs` を新規実装しました。
+  - `solver/src/bin/x09_regret_mix.rs` を追加しました。
+  - `solver/src/strategy_mode.rs` に `RegretMix` を追加しました。
+  - `solver/src/lib.rs` に `x09` モジュールを追加しました。
+- 結果（quick, seed 0..19）:
+  - `x04`: mean `147,335.4`, median `119,019.5`, min `70,744`, max `388,857`, elapsed `9,173ms`
+  - `x09`: mean `125,930.3`, median `107,568.5`, min `51,051`, max `456,591`, elapsed `8,975ms`
+- 比較（対 現champion `x04`, seed 0..19）:
+  - mean: `147,335.4 -> 125,930.3`（`-21,405.1`）
+  - median: `119,019.5 -> 107,568.5`（`-11,451.0`）
+  - min: `70,744 -> 51,051`（`-19,693`）
+  - max: `388,857 -> 456,591`（`+67,734`）
+  - elapsed: `9,173ms -> 8,975ms`（`-198ms`）
+- 判定:
+  - 不採用（quick段階で平均/中央値/最小値が悪化したため full 未実施）
+- タグ:
+  - `new-architecture`, `regret-mix`, `quick-regression`, `variance-spike`
+
 ## 運用ルール
 - 不採用試行も本ファイルへ必ず記録します。
 - 記録粒度は `背景 / 変更 / 結果 / 比較 / 判定 / タグ` を最小セットとします。

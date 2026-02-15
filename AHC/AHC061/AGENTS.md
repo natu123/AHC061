@@ -77,11 +77,17 @@
 - `docs/solver_specs_built/AHC061_Solver_X04_MacroRoute.md` - x04戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X05_AdaptiveRacingMC.md` - x05戦略詳細
 - `docs/solver_specs_built/AHC061_Solver_X06_ExpertSwitchHybrid.md` - x06戦略詳細
+- `docs/solver_specs_built/AHC061_Solver_X07_DualHorizonRoute.md` - x07戦略詳細
+- `docs/solver_specs_built/AHC061_Solver_X08_PressureFrontier.md` - x08戦略詳細
+- `docs/solver_specs_built/AHC061_Solver_X09_RegretMix.md` - x09戦略詳細
 - `docs/solver_specs_planned/README.md` - 計画中ソルバ（xNN）の戦略詳細インデックス
 - `docs/solver_specs_planned/AHC061_Solver_X03_Particle_CVaR_Plan.md` - x03計画（Particle + CVaR）
 - `docs/solver_specs_planned/ARCHIVED_AHC061_Solver_X04_MacroRoute_Plan.md` - x04計画（移管済み）
 - `docs/solver_specs_planned/ARCHIVED_AHC061_Solver_X05_AdaptiveRacingMC_Plan.md` - x05計画（Adaptive Racing MC）
 - `docs/solver_specs_planned/AHC061_Solver_X06_ExpertSwitchHybrid_Plan.md` - x06計画（Expert Switch Hybrid）
+- `docs/solver_specs_planned/AHC061_Solver_X07_DualHorizonRoute_Plan.md` - x07計画（Dual Horizon Route）
+- `docs/solver_specs_planned/AHC061_Solver_X08_PressureFrontier_Plan.md` - x08計画（Pressure Frontier）
+- `docs/solver_specs_planned/AHC061_Solver_X09_RegretMix_Plan.md` - x09計画（Regret Mix）
 - `N52XwIfp_windows/tools_x86_64-pc-windows-gnu/README.md` - 公式ツール説明
 - 必要になった時点で、提出コードや実験メモの該当ファイルを追加参照する
 

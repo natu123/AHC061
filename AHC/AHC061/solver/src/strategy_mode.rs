@@ -2,7 +2,8 @@ use std::env;
 
 use crate::{
     x01_beam_pessimistic, x02_monte_carlo, x03_particle_cvar, x05_adaptive_racing_mc,
-    x04_macro_route, x06_expert_switch_hybrid, AiModel, Game, State,
+    x04_macro_route, x06_expert_switch_hybrid, x07_dual_horizon_route, x08_pressure_frontier,
+    x09_regret_mix, AiModel, Game, State,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -14,6 +15,9 @@ pub enum StrategyMode {
     HybridMidMc,
     AdaptiveRacingMc,
     ExpertSwitchHybrid,
+    DualHorizonRoute,
+    PressureFrontier,
+    RegretMix,
 }
 
 pub fn strategy_from_env() -> StrategyMode {
@@ -27,6 +31,13 @@ pub fn strategy_from_env() -> StrategyMode {
         Some("x06") | Some("expert_switch_hybrid") | Some("expert_switch") => {
             StrategyMode::ExpertSwitchHybrid
         }
+        Some("x07") | Some("dual_horizon_route") | Some("dual_horizon") => {
+            StrategyMode::DualHorizonRoute
+        }
+        Some("x08") | Some("pressure_frontier") | Some("frontier") => {
+            StrategyMode::PressureFrontier
+        }
+        Some("x09") | Some("regret_mix") | Some("regret") => StrategyMode::RegretMix,
         _ => StrategyMode::HybridMidMc,
     }
 }
@@ -59,5 +70,12 @@ pub(crate) fn choose_move(
         StrategyMode::ExpertSwitchHybrid => {
             x06_expert_switch_hybrid::choose_move_x06_expert_switch(game, state, models)
         }
+        StrategyMode::DualHorizonRoute => {
+            x07_dual_horizon_route::choose_move_x07_dual_horizon_route(game, state, models)
+        }
+        StrategyMode::PressureFrontier => {
+            x08_pressure_frontier::choose_move_x08_pressure_frontier(game, state, models)
+        }
+        StrategyMode::RegretMix => x09_regret_mix::choose_move_x09_regret_mix(game, state, models),
     }
 }

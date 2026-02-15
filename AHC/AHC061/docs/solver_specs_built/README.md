@@ -11,6 +11,9 @@
 - `x04`: `x04_macro_route`
 - `x05`: `x05_adaptive_racing_mc`
 - `x06`: `x06_expert_switch_hybrid`
+- `x07`: `x07_dual_horizon_route`
+- `x08`: `x08_pressure_frontier`
+- `x09`: `x09_regret_mix`
 
 ## 仕様
 - `xNN`は作成順の固定IDとして扱う。
@@ -24,6 +27,9 @@
 - `AHC061_Solver_X04_MacroRoute.md`
 - `AHC061_Solver_X05_AdaptiveRacingMC.md`
 - `AHC061_Solver_X06_ExpertSwitchHybrid.md`
+- `AHC061_Solver_X07_DualHorizonRoute.md`
+- `AHC061_Solver_X08_PressureFrontier.md`
+- `AHC061_Solver_X09_RegretMix.md`
 
 ## 注意点
 - 実装更新で戦略仕様が変わった場合、当日中に該当ファイルを更新する。
