@@ -1,5 +1,4 @@
 use std::collections::{HashMap, VecDeque};
-use std::env;
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
 
 #[derive(Clone)]
@@ -393,82 +392,6 @@ fn pessimism_weight(game: &Game, uncertainty: f64) -> f64 {
     (0.05 + 0.22 * uncertainty + 0.10 * m_factor).clamp(0.05, 0.32)
 }
 
-#[derive(Default)]
-struct BeamDebugStats {
-    turns: u32,
-    m5_turns: u32,
-    m6_turns: u32,
-    rule_fired: u32,
-    widened_turns: u32,
-    full_beam_turns: u32,
-    fired_no_change: u32,
-    delta_sum: i64,
-}
-
-impl BeamDebugStats {
-    fn record(
-        &mut self,
-        m: usize,
-        candidate_len: usize,
-        base_beam: usize,
-        final_beam: usize,
-        m5_rule_fired: bool,
-        m6_rule_fired: bool,
-    ) {
-        self.turns += 1;
-        if m == 5 {
-            self.m5_turns += 1;
-        } else if m == 6 {
-            self.m6_turns += 1;
-        }
-        if m5_rule_fired || m6_rule_fired {
-            self.rule_fired += 1;
-            if final_beam == base_beam {
-                self.fired_no_change += 1;
-            }
-        }
-        if final_beam > base_beam {
-            self.widened_turns += 1;
-            self.delta_sum += (final_beam - base_beam) as i64;
-        }
-        if final_beam == candidate_len {
-            self.full_beam_turns += 1;
-        }
-    }
-
-    fn emit(&self) {
-        if self.turns == 0 {
-            return;
-        }
-        let widen_rate = self.widened_turns as f64 / self.turns as f64;
-        let rule_rate = self.rule_fired as f64 / self.turns as f64;
-        let no_change_rate = if self.rule_fired == 0 {
-            0.0
-        } else {
-            self.fired_no_change as f64 / self.rule_fired as f64
-        };
-        let avg_delta = if self.widened_turns == 0 {
-            0.0
-        } else {
-            self.delta_sum as f64 / self.widened_turns as f64
-        };
-        eprintln!(
-            "BEAM_STATS turns={} m5_turns={} m6_turns={} rule_fired={} rule_rate={:.3} widened_turns={} widen_rate={:.3} full_beam_turns={} fired_no_change={} no_change_rate={:.3} avg_delta={:.3}",
-            self.turns,
-            self.m5_turns,
-            self.m6_turns,
-            self.rule_fired,
-            rule_rate,
-            self.widened_turns,
-            widen_rate,
-            self.full_beam_turns,
-            self.fired_no_change,
-            no_change_rate,
-            avg_delta
-        );
-    }
-}
-
 fn evaluate_local_move(
     game: &Game,
     state: &State,
@@ -624,12 +547,7 @@ fn best_one_step_score(game: &Game, state: &State, models: &[AiModel]) -> f64 {
     best_val
 }
 
-fn choose_move(
-    game: &Game,
-    state: &State,
-    models: &[AiModel],
-    stats: Option<&mut BeamDebugStats>,
-) -> (usize, usize) {
+fn choose_move(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize) {
     let candidates = get_candidates(game, state, 0);
     if candidates.len() == 1 {
         return candidates[0];
@@ -694,25 +612,10 @@ fn choose_move(
     } else {
         4
     };
-    let base_beam_width = beam_width;
-    let mut m5_rule_fired = false;
-    let mut m6_rule_fired = false;
     if game.m == 5 && phase <= 0.80 && uncertainty >= 0.18 {
         beam_width = scored.len();
-        m5_rule_fired = true;
     } else if game.m == 6 && phase <= 0.72 && uncertainty >= 0.22 {
         beam_width = (beam_width + 3).min(scored.len());
-        m6_rule_fired = true;
-    }
-    if let Some(s) = stats {
-        s.record(
-            game.m,
-            scored.len(),
-            base_beam_width,
-            beam_width,
-            m5_rule_fired,
-            m6_rule_fired,
-        );
     }
 
     let mut best = scored[0].0;
@@ -885,19 +788,11 @@ fn main() {
         None => return,
     };
 
-    let trace_beam = env::var("AHC_TRACE_BEAM")
-        .map(|v| v != "0" && !v.is_empty())
-        .unwrap_or(false);
     let mut models = vec![AiModel::new(); game.m.saturating_sub(1)];
-    let mut beam_stats = if trace_beam {
-        Some(BeamDebugStats::default())
-    } else {
-        None
-    };
 
     for _ in 0..game.t {
         let prev_state = state.clone();
-        let (x, y) = choose_move(&game, &prev_state, &models, beam_stats.as_mut());
+        let (x, y) = choose_move(&game, &prev_state, &models);
 
         if writeln!(out, "{} {}", x, y).is_err() {
             return;
@@ -911,9 +806,5 @@ fn main() {
             None => return,
         };
         update_models(&game, &prev_state, &selected, &mut models);
-    }
-
-    if let Some(stats) = beam_stats.as_ref() {
-        stats.emit();
     }
 }
