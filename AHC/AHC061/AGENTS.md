@@ -55,6 +55,7 @@
 - `docs/AHC061_Initial_Study_2026-02-15.md` - AHC061初期検討プロセスと比較結果
 - `docs/AHC061_Experiment_Log_2026-02.md` - AHC061実験ログ（2026-02）
 - `docs/AHC061_Experiment_Failures_2026-02.md` - AHC061不採用実験ログ（2026-02）
+- `docs/AHC061_Status_2026-02-15-2113.md` - AHC061状況スナップショット（移行用）
 - `N52XwIfp_windows/tools_x86_64-pc-windows-gnu/README.md` - 公式ツール説明
 - 必要になった時点で、提出コードや実験メモの該当ファイルを追加参照する
 
@@ -84,6 +85,7 @@
   - 不採用実験は `docs/AHC061_Experiment_Failures_2026-02.md` に `仮説 / 変更 / 結果 / 比較 / 判定 / タグ` で記録
   - 実装を `restore` して終了した場合でも、同日中に不採用記録を残す
 - retro の結果はメタ改善として扱い、AHC061ローカルで閉じずに `../AGENTS.md` と `../../AGENTS.md` へ必要差分を反映する
+- 状況共有は `docs/AHC061_Status_YYYY-MM-DD-HHMM.md` のスナップショット方式で行う
 
 ## Living Document
 このファイルはプロジェクトの成長に伴い継続的に更新する。新しい仕様・設計判断・重要な変更があれば、必要に応じて追記する。
