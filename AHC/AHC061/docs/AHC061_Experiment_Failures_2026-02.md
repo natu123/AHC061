@@ -1087,6 +1087,33 @@
 - タグ:
   - `adaptive-racing-mc`, `risk-under-tuned`, `tail-risk-regression`
 
+## 2026-02-15 [T-067] F-49（x03初版: Particle + CVaR）
+- 背景:
+  - SG比率ベースの抜本探索として、`x01/x02` の延長ではない新規探索器を追加しました。
+  - 相手分布を単一推定で固定せず、粒子モデル + `CVaR` で下振れ制御する仮説を検証しました。
+- 変更:
+  - `solver/src/x03_particle_cvar.rs` を新規実装しました。
+  - `solver/src/bin/x03_particle_cvar.rs` を追加しました。
+  - `solver/src/strategy_mode.rs` に `ParticleCvar` を追加しました。
+  - 試行過程で `M` 適用帯を見直し、最終版は `M=3..5` のみ `x03` を適用、他帯は `x06` フォールバックにしました。
+- 結果（quick, seed 0..19）:
+  - `x06`: mean `146,623.6`, median `119,019.5`, min `70,744`, max `388,857`, elapsed `1,920ms`
+  - `x03`（最終版）: mean `148,606.6`, median `123,776`, min `70,744`, max `388,857`, elapsed `2,142ms`
+- 結果（full, seed 0..99）:
+  - `x06`: mean `155,863.2`, median `133,042.5`, min `51,023`, max `605,548`, elapsed `9,705ms`
+  - `x03`（最終版）: mean `154,876.7`, median `129,861`, min `44,717`, max `605,548`, elapsed `10,539ms`
+- 比較（対 現champion `x06`, seed 0..99）:
+  - mean: `155,863.2 -> 154,876.7`（`-986.5`）
+  - median: `133,042.5 -> 129,861`（`-3,181.5`）
+  - min: `51,023 -> 44,717`（`-6,306`）
+  - max: `605,548 -> 605,548`（`±0`）
+  - elapsed: `9,705ms -> 10,539ms`（`+834ms`）
+  - 帯別観測: `M=5` は改善（`+3,103.1`）した一方、`M=3/4` の悪化が上回りました。
+- 判定:
+  - 不採用（quickでは有望でもfullで `mean/median/min` 同時悪化）
+- タグ:
+  - `new-architecture`, `particle-cvar`, `full-regression`, `group-regression`, `tail-risk-worsen`
+
 ## 運用ルール
 - 不採用試行も本ファイルへ必ず記録します。
 - 記録粒度は `背景 / 変更 / 結果 / 比較 / 判定 / タグ` を最小セットとします。
