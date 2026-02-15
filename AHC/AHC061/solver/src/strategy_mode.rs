@@ -1,6 +1,9 @@
 use std::env;
 
-use crate::{x01_beam_pessimistic, x02_monte_carlo, x05_adaptive_racing_mc, AiModel, Game, State};
+use crate::{
+    x01_beam_pessimistic, x02_monte_carlo, x05_adaptive_racing_mc, x06_expert_switch_hybrid,
+    AiModel, Game, State,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum StrategyMode {
@@ -8,6 +11,7 @@ pub enum StrategyMode {
     MonteCarloExplore,
     HybridMidMc,
     AdaptiveRacingMc,
+    ExpertSwitchHybrid,
 }
 
 pub fn strategy_from_env() -> StrategyMode {
@@ -16,6 +20,9 @@ pub fn strategy_from_env() -> StrategyMode {
         Some("mc") | Some("mc_sample") | Some("monte_carlo") => StrategyMode::MonteCarloExplore,
         Some("hybrid_mid_mc") | Some("mid_mc") => StrategyMode::HybridMidMc,
         Some("x05") | Some("adaptive_racing_mc") | Some("armc") => StrategyMode::AdaptiveRacingMc,
+        Some("x06") | Some("expert_switch_hybrid") | Some("expert_switch") => {
+            StrategyMode::ExpertSwitchHybrid
+        }
         _ => StrategyMode::HybridMidMc,
     }
 }
@@ -40,6 +47,9 @@ pub(crate) fn choose_move(
         }
         StrategyMode::AdaptiveRacingMc => {
             x05_adaptive_racing_mc::choose_move_x05_adaptive_racing(game, state, models)
+        }
+        StrategyMode::ExpertSwitchHybrid => {
+            x06_expert_switch_hybrid::choose_move_x06_expert_switch(game, state, models)
         }
     }
 }
