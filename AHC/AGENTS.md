@@ -90,6 +90,10 @@
 - 採用基準: 平均改善だけでなく、最悪ケース悪化と時間超過リスクを許容範囲内に収める
 - 大きな変更（探索方式変更など）は段階導入し、1ステップずつ効果検証する
 - 試行IDは `T-xxx (Xyy-zz) S/F-kk` を推奨形式とし、全体通番・戦略ファミリ通番・採否通番を併記して管理する
+- quick/full 選抜の標準ゲート（推奨）:
+  - quick（少数 seed）比較後、`mean` 上位候補から `2.5%` 以内かつ `median` または `min` が baseline の一定比率を満たしたものを full 進出候補にする。
+  - 進出候補が複数ある場合は上位 `3` 件まで full（ただし 0 件なら full 不実施）。
+  - これにより、近接競争候補を複数並行検証し、後段 full コストを抑制する。
 
 ## Solver Lineage
 - ソルバ系統IDは `x01, x02, ...` の作成順で採番し、既存IDの意味は変更しない
@@ -113,6 +117,8 @@
 - `docs/solver_specs_built` と `docs/solver_specs_planned` を標準フォルダ名として使用し、日本語ディレクトリ名は使用しない
 - 作成済み/計画中でファイルを分離し、`xNN`ごとに1ファイルで戦略詳細を管理する
 - 新規ソルバ作成時は、実装前に `solver_specs_planned`、実装後に `solver_specs_built` へ追記または移管する
+- `solver_specs_built/README.md` は各 `xNN` の `狙い` と `結果`（`mean/median/min/max/elapsed` かつ seed 範囲）を必須で記載し、採否判断と失敗要因も併記する。
+- 同じ `xNN` コンセプトの重複提案を避けるため、既存 `built README` を起点に新規仮説を立案する。
 
 ### 命名規則（共通）
 - 形式: `<ContestID>_<DocType>[_YYYY-MM-DD].md`

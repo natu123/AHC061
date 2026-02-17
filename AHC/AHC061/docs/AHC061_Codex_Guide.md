@@ -176,6 +176,8 @@
     - `BreadthFirst`: `mode_weight = 0.55`, `efficiency_weight = 0.25`, `full limit 3`
   - 有望候補が 1 件のみなら 1 件、競合が複数なら上位の `final_score` から上限数まで full。
   - 有望候補が無ければ full は実施しない。
+- `quick` 集約局面では `-QuickOnly` スイッチで `full` を完全停止できます。`x60~x62` のように保留候補を監視するフェーズでは `tmp_eval_loop10.ps1 -QuickOnly` を使って quick 集約を継続してください。
+- full 進出は速度効率優先時に `gain/sec` 上位 1〜2 件を優先し、同率時は `final_score` で同点分解します（実運用では `-FullCandidateLimit 2` を標準上限にします）。
 - 進行時の確認:
   - full 実施前に「quickと現champion比較」を更新し、`mode/final_score/selection_score/quality_score/novelty_score/efficiency_score` とともに `mean/median/min` の悪化要因を明示。
   - full 複数実施時は `tail-risk`（最悪ケース）を必ず併記し、再現性を確認する。

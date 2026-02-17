@@ -10,6 +10,16 @@ out/
 outputs/
 results/
 
+# Local experiment/runtime artifacts
+N52XwIfp_local/
+N52XwIfp_windows/
+N52XwIfp_windows/tools_x86_64-pc-windows-gnu/run_solver_trace.cmd
+N52XwIfp_windows/tools_x86_64-pc-windows-gnu/tmp_*.*
+N52XwIfp_windows/tools_x86_64-pc-windows-gnu/tmp_eval_*/
+N52XwIfp_windows/tools_x86_64-pc-windows-gnu/webvis_outputs_*/
+N52XwIfp_windows/tools_x86_64-pc-windows-gnu/vis_batch_*/
+N52XwIfp_windows/tools_x86_64-pc-windows-gnu/*/ # for debug subfolders
+
 # Build artifacts
 build/
 dist/
@@ -37,6 +47,16 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# evaluation scratch
+tmp_eval_loop*.ps1
+tmp_eval_*/
+tmp_eval*.err
+tmp_eval*.txt
+tmp_single_err.txt
+tmp_single_err2.txt
+tmp_test.err
+tmp_run*.ps1
 
 
 # IDE/OS
