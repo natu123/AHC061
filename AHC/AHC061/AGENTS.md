@@ -34,12 +34,28 @@
 - 検証では `平均・中央値・最小スコア` と `実行時間` を最低限併記する
 - ローカル検証時は時間制限超過を避けるため、ソルバ内に時間ガードを実装する
 - 乱数依存バグの切り分けのため、デバッグ時は固定seedモードを必須とする
+- 実験スクリプト実行前にワークスペース健全性を検査し、`C:\Users\kenji\projects\AHC\...` のような誤ディレクトリ起点実行を拒否し、`...\\AtCoder\\AHC\\AHC061` での実行を前提とする
+- quick/full 選抜は `quality_score/novelty_score` に時間効率補正を加えた `final_score` を採用する
+  - `final_score = (1-efficiency_weight) * selection_score + efficiency_weight * efficiency_score`
+  - `quality_score`/`novelty_score`/`selection_score` は `tmp_eval_loop10.ps1` と共通化する
+- 10試行以上継続する大規模Loopでは `Exploit` と `Explore` の配分を監視する
+  - 基本: `Exploit 5% / Explore 95%`
+  - Explore 内訳: `new 30% / pair 50% / blend 20%`
 - `docs/AHC061_Submission_Gap_Log_YYYY-MM.md` の最新 `ratio = my_score / top1_score` を、探索新規性の配分判断に使う
-- `ratio >= 0.85` は微調整主体、`0.75 <= ratio < 0.85` は混合探索、`ratio < 0.75` は抜本探索主体とする
-- `ratio < 0.75` の場合、Explore内訳は `新規アーキテクチャ 80% / 既存派生 15% / Exploit監視 5%` を標準配分とする
-- `ratio < 0.70` または `top20_ratio < 0.75`（`my_score / top20_score`）の場合は Explore Gear-Shift を発動し、次の `3` ループで以下を固定運用する
+- `ratio >= 0.98` は微調整主軸（ただし time_budget と `min` 悪化抑制を維持）
+- `0.90 <= ratio < 0.98` は混合（微調整 + 新規改良）
+- `ratio < 0.90` は抜本改善中心
+- `ratio < 0.95` の場合、Explore配分は `新規アーキテクチャ 80% / 既存派生 15% / Exploit監視 5%` を標準配分とする
+- `ratio < 0.90`、`top20_ratio < 0.75`（`my_score / top20_score`）、または `10試行平均改善率 < +0.3%` の場合は Explore Gear-Shift を発動し、次の `3` ループで以下を固定運用する
   - 各ループで新規性の高い仮説を最低 `2` 件（推奨 `3` 件）実装して quick 評価（`seed 0..19`）まで実施する
-  - full 評価（`seed 0..99`）へ進むのは quick 上位 `1` 件のみとし、探索密度を優先する
+  - quick 上位の競合性を使って full 進出候補を選別する。
+    - quick は `mean` 降順で整列し、`seed 0..19` の比較 baseline は現 `champion` quick 指標（`mean / median / min`）を固定する
+    - 競争候補条件をすべて満たす場合のみ full へ進める
+      - `top1` と `topk` の `mean` 差が `2.5%` 以内（`top1` は quick 1位）
+      - `mean` が `champion mean` の `98.5%` 以上
+      - `median` が `champion median` の `98.5%` 以上、または `min` が `champion min` の `90%` 以上
+    - 有望競争群は最大 `3` 件まで full（`seed 0..99`）へ進める
+    - 競争群が空の場合は full を行わず、そのループは不採用候補を終了する
   - 既存方針の微調整のみの試行は全体の `20%` 以下に抑える
 
 ## Solver ID / Champion Policy
@@ -100,6 +116,7 @@
   - `docs/AHC061_Initial_Study_2026-02-15.md`: 初期検討結果（固定ログ）
   - `docs/solver_specs_built/`: 作成済みソルバ（xNN）の戦略詳細
   - `docs/solver_specs_planned/`: 計画中ソルバ（xNN）の戦略詳細
+  - `docs/solver_specs_built/README.md`: xNN別の「狙い/結果」を即参照できる索引（採否・失敗要因を必須掲載）
 - 新しい検証フェーズを始める場合は `docs/AHC061_Experiment_Log_YYYY-MM.md` を新規作成する
 - 検証結果を会話で報告した場合、採否判断まで含めて当日中にDocsへ反映する
 - 仕様根拠が `README` と実装で食い違う場合、先に `docs/AHC061_Game_Rules_Strict.md` を更新してから他Docsへ反映する

@@ -123,6 +123,72 @@
 - ルール変更時は `AGENTS.md` を先に更新し、本ファイルへ必要差分を反映します。
 - 検討結果・実験ログは `docs/AHC061_Initial_Study_2026-02-15.md` を参照します。
 - 採用実験は `docs/AHC061_Experiment_Log_2026-02.md`、不採用実験は `docs/AHC061_Experiment_Failures_2026-02.md` を参照します。
+- 実行スクリプトが誤ったワークスペース（`C:\Users\kenji\projects\AHC\...` のような構成）で起動すると、`tmp_eval_loop10.ps1` は事前に失敗させて再発防止します。  
+  期待ルートは `C:\Users\kenji\projects\AtCoder\AHC\AHC061` です。
+
+## quick/full 選抜ルール
+- quick を実行して、full 進出候補を競合ベースで決めます。
+- 目的関数は `final_score` を基本にし、速度効率も評価に入れます。
+  - `selection_score = mode_weight * quality_score + (1-mode_weight) * novelty_score`
+  - `efficiency_score = gain_per_sec / max(gain_per_sec)`（`quick` にて正規化）
+  - `final_score = (1-efficiency_weight) * selection_score + efficiency_weight * efficiency_score`
+  - `QualityFirst`: `mode_weight=0.85`, `efficiency_weight=0.15`
+  - `Balanced`: `mode_weight=0.70`, `efficiency_weight=0.20`
+  - `BreadthFirst`: `mode_weight=0.55`, `efficiency_weight=0.25`
+- `EGR` は quick での近似期待値として  
+  `EGR = max(0, mean_ratio - 1) / cost_sec`  
+  を記録し、10試行単位で運用判断に加味します。
+- なお、探索は「Depth（Quality）」と「Breadth（Novelty）」を明示的に切り分けます。
+  - Depth（品質）: 既存 `champion` への `mean/median/min` 比率維持を優先し、既存知見の精緻化・収束品質を狙います。
+  - Breadth（新規性）: `champion` の指標からの変位（`mean/median/min` の差分ベクトル）を活かして、別路線の有力性を測ります。
+- 探索配分の標準（Loop単位）:
+  - Exploit: 5%
+  - Explore: 95%
+- Explore 内訳:
+    - 新規戦略（Explore Fresh）: 30%
+    - 新規戦略x新規戦略複合（Explore Pair）: 50%
+    - 新規戦略x既存戦略複合（Explore Blend）: 20%
+- 探索ログ上の表示を揃えるため、`tmp_eval_loop10.ps1` では候補に分類ラベルを付与できます。
+  - `xNN:exploit`, `xNN:fresh`, `xNN:pair`, `xNN:blend`  
+    （`xNN` 単体は未指定として新規戦略寄りに寄せて扱う）
+- 基準:
+  - quick を mean 降順で並べる（`seed 0..19`）。
+  - 基準統計は `seed 0..19` quick の `mean/median/min` から取得する。
+  - まず `champion` 比較で共通門番を作る（`x04` または現採用）。  
+  - 次に「Depth/Breadth」それぞれで以下を判定する。
+    - Depth Gate:
+      - `mean >= 0.99 * champion mean`
+      - `median >= 0.985 * champion median` または `min >= 0.95 * champion min`（QualityFirst）
+    - Breadth Gate:
+      - `novelty_score >= 0.12`（QualityFirst）/`0.10`（Balanced）/`0.08`（BreadthFirst）を起点に採択
+      - `mean >= 0.95 * champion mean`（QualityFirst）/`0.94`（Balanced）/`0.93`（BreadthFirst）
+      - `median >= 0.92 * champion median`（QualityFirst）/`0.90`（Balanced）/`0.88`（BreadthFirst）
+      - `min >= 0.85 * champion min`（QualityFirst）/`0.84`（Balanced）/`0.82`（BreadthFirst）
+  - 両ゲートを統合し、`selection_score` で再整列する。
+    - `quality_score = 0.45 * (mean/champion_mean) + 0.35 * (median/champion_median) + 0.20 * (min/champion_min)`
+    - `quality_score = Clamp01(quality_score)` で 0..1 に丸める
+    - `novelty_score = Clamp01((0.45 * |1 - mean_ratio| + 0.35 * |1 - median_ratio| + 0.20 * |1 - min_ratio|) / 0.40)`
+    - `selection_score = mode_weight * quality_score + (1-mode_weight) * novelty_score`
+    - `final_score = (1-efficiency_weight) * selection_score + efficiency_weight * efficiency_score`
+  - 運用モード:
+    - `QualityFirst`（現推奨）: `mode_weight = 0.85`, `efficiency_weight = 0.15`, `full limit 2`
+    - `Balanced`: `mode_weight = 0.70`, `efficiency_weight = 0.20`, `full limit 2`
+    - `BreadthFirst`: `mode_weight = 0.55`, `efficiency_weight = 0.25`, `full limit 3`
+  - 有望候補が 1 件のみなら 1 件、競合が複数なら上位の `final_score` から上限数まで full。
+  - 有望候補が無ければ full は実施しない。
+- 進行時の確認:
+  - full 実施前に「quickと現champion比較」を更新し、`mode/final_score/selection_score/quality_score/novelty_score/efficiency_score` とともに `mean/median/min` の悪化要因を明示。
+  - full 複数実施時は `tail-risk`（最悪ケース）を必ず併記し、再現性を確認する。
+- ループ運用:
+  - `10試行` ごとに `採用率` と `EGR` を見て `mode` を更新する（上昇候補は `QualityFirst` 側、停滞時は `Balanced/BreadthFirst` へ）。
+  - `Exploit` は監視候補であり、`Explore` 内訳は `tmp_eval_loop10.ps1` の `allocation` を参照してログで検証する。
+- `tmp_eval_loop10.ps1` は `explore`/`exploit` を同時に候補評価し、上位配分ルールに収まるかを必ずログ出力します。
+- 運用実装は `tmp_eval_loop10.ps1 -Mode QualityFirst|Balanced|BreadthFirst` に反映。 
+- ratio（`my_score / top1_score`）連動の全体配分は以下を採用します。
+  - `ratio >= 0.98`: 微調整主軸（ただし time_budget と `min` 悪化抑制を維持）
+  - `0.90 <= ratio < 0.98`: 混合（微調整 + 新規改良）
+  - `ratio < 0.90`: 抜本改善を優先（`80/15/5` 内訳）
+  - `ratio < 0.90`、`top20_ratio < 0.75`、または `10試行平均改善率 < +0.3%` では Gear-Shift を発動し、次の `3` ループは高度化・幅優先を優先
 
 ## ソルバIDと提出運用
 - ソルバIDは `x01, x02, ...` の作成順で採番し、既存IDの意味を変更しません。
@@ -155,3 +221,4 @@
 2. 影響: 何が再発リスクになったか
 3. 改善: どのルール/チェックを追加したか
 4. 展開: どの上位 `AGENTS.md` に反映したか
+
