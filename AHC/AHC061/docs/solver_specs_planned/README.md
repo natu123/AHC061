@@ -12,9 +12,60 @@
 - `x07`: Dual Horizon Route Blend（短期/中期の二重地平線探索）
 - `x08`: Pressure Frontier Control（前線圧力主導の局所制御）
 - `x09`: Regret Mix Policy（複数expertの反実仮想混合）
-- `x10`: Phase Adaptive Mix（フェーズ別に expert を切替）
-- `x11`: Contest Frontier Recovery（対立前線回収重視）
-- `x12`: Advisor Vote Ensemble（advisor投票重み付き統合）
+- `x10`: Phase Adaptive Mix（実装済み）
+- `x11`: Contest Frontier Recovery（実装済み）
+- `x12`: Advisor Vote Ensemble（実装済み）
+- `x13`: Frontier Consensus（実装済み）
+- `x14`: Adaptive Risk Lane（実装済み）
+- `x15`: Band Adaptive Route（計画）
+- `x16`: Safe Recovery Route（計画）
+- `x17`: Mid-Band Dual-Lane（計画）
+- `x18`: Robust Minmax Guard（計画）
+- `x19`: Frontier Recovery Sweep（実装済み）
+- `x20`: Band Stage Ensemble（計画）
+- `x21`: Band Stage Adaptive Guard（実装済み・不採用、builtへ移管）
+- `x22`: Band Stage Recovery Boost（実装済み・不採用、builtへ移管）
+- `x23`: Band Stage Frontier Guard（実装済み・不採用、builtへ移管）
+- `x24`: Band Stage Adaptive Switch（実装済み・不採用、builtへ移管）
+- `x25`: Race Adaptive Recovery（実装済み・不採用、builtへ移管）
+- `x26`: Reactive Frontier Pressure（実装済み・不採用、builtへ移管）
+- `x30`: Macro Route Path Focus（実装済み）
+- `x31`: Macro Route Local Bias（実装済み）
+- `x32`: Macro Route Wide Frontier（実装済み）
+- `x33`: Macro Route Balanced Focus（実装済み）
+- `x34`: Macro Route Early Converge（実装済み）
+- `x35`: Macro Route Route Boost（実装済み）
+- `x36`: Macro Route Candidate Rich（実装済み）
+- `x37`: Macro Route Light Fast（実装済み）
+- `x38`: Macro Route Pressure Protect（実装済み）
+- `x39`: Macro Route Pressure Attack（実装済み）
+- `x40`: Macro Route Pressure Balanced（実装済み）
+- `x41`: Macro Route Pressure Aggressive Target（実装済み）
+- `x42`: Macro Route Pressure Frontier Shield（実装済み）
+- `x43`: Macro Route Pressure Adaptive Lane（実装済み）
+- `x44`: Macro Route Pressure Dual Window（計画）
+- `x45`: Macro Route Pressure Recovery Damp（計画）
+- `x46`: Macro Route Pressure Hybrid Length（計画）
+- `x47`: Macro Route Pressure Dual Guard（計画）
+- `x48`: Macro Route Pressure Conservative Shield（計画）
+- `x49`: Macro Route Pressure Fast Rush（計画）
+- `x50`: Macro Route Pressure Dual-Guard Focus（計画）
+- `x51`: Macro Route Pressure Dual-Guard Recover（計画）
+- `x52`: Macro Route Pressure Mid-Recover Pressure（計画）
+- `x53`: Macro Route Pressure Mid-Boost Pressure（計画）
+- `x54`: Macro Route Pressure Late Boost（計画）
+- `x55`: Macro Route Pressure Recovery Branch Boost（計画）
+- `x56`: Macro Route Pressure Mid-Recover Stabilized（計画）
+- `x57`: Macro Route Pressure Focus Recover Blend（計画）
+- `x58`: Macro Route Pressure Late Recover Balance（計画）
+- `x59`: Macro Route Pressure Recover Guard Blend（計画）
+- `x60`: Macro Route Adaptive Frontier Pressure（計画）
+- `x61`: Macro Route Recovery Ensemble Switch（計画）
+- `x62`: Macro Route Dynamic Pressure Lane（計画）
+- `x63`: Macro Route Structural Reset（実装済み）
+- `x64`: Portfolio Mixer Base（実装済み）
+- `x65`: Portfolio Mixer Aggro（実装済み）
+- `x66`: Portfolio Mixer Guard（実装済み）
 
 ## 仕様
 - 各計画は `狙い / 別系統性 / 期待効果 / 実装スコープ / 検証計画` を必須記載とする。
@@ -31,6 +82,57 @@
 - `AHC061_Solver_X10_PhaseAdaptiveMix_Plan.md`
 - `AHC061_Solver_X11_ContestFrontierRecovery_Plan.md`
 - `AHC061_Solver_X12_AdvisorVoteEnsemble_Plan.md`
+- `AHC061_Solver_X13_FrontierConsensus_Plan.md`
+- `AHC061_Solver_X14_AdaptiveRiskLane_Plan.md`
+- `AHC061_Solver_X15_BandAdaptiveRoute_Plan.md`
+- `AHC061_Solver_X16_SafeRecoveryRoute_Plan.md`
+- `AHC061_Solver_X17_MidBandDualLane_Plan.md`
+- `AHC061_Solver_X18_RobustMinmaxGuard_Plan.md`
+- `AHC061_Solver_X19_FrontierRecoverySweep_Plan.md`
+- `AHC061_Solver_X20_BandStageEnsemble_Plan.md`
+- `AHC061_Solver_X21_BandStageAdaptiveGuard_Plan.md`
+- `AHC061_Solver_X22_BandStageRecoveryBoost_Plan.md`
+- `AHC061_Solver_X23_BandStageFrontierGuard_Plan.md`
+- `AHC061_Solver_X24_BandStageAdaptiveSwitch_Plan.md`
+- `AHC061_Solver_X25_RaceAdaptiveRecovery_Plan.md`
+- `AHC061_Solver_X26_ReactiveFrontierPressure_Plan.md`
+- `AHC061_Solver_X30_MacroRoutePathFocus_Plan.md`
+- `AHC061_Solver_X31_MacroRouteLocalBias_Plan.md`
+- `AHC061_Solver_X32_MacroRouteWideFrontier_Plan.md`
+- `AHC061_Solver_X33_MacroRouteBalancedFocus_Plan.md`
+- `AHC061_Solver_X34_MacroRouteEarlyConverge_Plan.md`
+- `AHC061_Solver_X35_MacroRouteRouteBoost_Plan.md`
+- `AHC061_Solver_X36_MacroRouteCandidateRich_Plan.md`
+- `AHC061_Solver_X37_MacroRouteLightFast_Plan.md`
+- `AHC061_Solver_X38_MacroRoutePressureProtect_Plan.md`
+- `AHC061_Solver_X39_MacroRoutePressureAttack_Plan.md`
+- `AHC061_Solver_X40_MacroRoutePressureBalanced_Plan.md`
+- `AHC061_Solver_X41_MacroRoutePressureAggressiveTarget_Plan.md`
+- `AHC061_Solver_X42_MacroRoutePressureFrontierShield_Plan.md`
+- `AHC061_Solver_X43_MacroRoutePressureAdaptiveLane_Plan.md`
+- `AHC061_Solver_X44_MacroRoutePressureDualWindow_Plan.md`
+- `AHC061_Solver_X45_MacroRoutePressureRecoveryDamp_Plan.md`
+- `AHC061_Solver_X46_MacroRoutePressureHybridLength_Plan.md`
+- `AHC061_Solver_X47_MacroRoutePressureDualGuard_Plan.md`
+- `AHC061_Solver_X48_MacroRoutePressureConservativeShield_Plan.md`
+- `AHC061_Solver_X49_MacroRoutePressureFastRush_Plan.md`
+- `AHC061_Solver_X50_PressureDualGuardFocus_Plan.md`
+- `AHC061_Solver_X51_PressureDualGuardRecover_Plan.md`
+- `AHC061_Solver_X52_MidRecoverPressure_Plan.md`
+- `AHC061_Solver_X53_MidBoostPressure_Plan.md`
+- `AHC061_Solver_X54_LatePressureBoost_Plan.md`
+- `AHC061_Solver_X55_RecoveryBranchBoost_Plan.md`
+- `AHC061_Solver_X56_MidRecoverStabilized_Plan.md`
+- `AHC061_Solver_X57_FocusRecoverBlend_Plan.md`
+- `AHC061_Solver_X58_LateRecoverBalance_Plan.md`
+- `AHC061_Solver_X59_RecoverGuardBlend_Plan.md`
+- `AHC061_Solver_X60_AdaptiveFrontierPressure_Plan.md`
+- `AHC061_Solver_X61_RecoveryEnsembleSwitch_Plan.md`
+- `AHC061_Solver_X62_DynamicPressureLane_Plan.md`
+- `AHC061_Solver_X63_StructuralReset_Plan.md`
+- `AHC061_Solver_X64_PortfolioMixerBase_Plan.md`
+- `AHC061_Solver_X65_PortfolioMixerAggro_Plan.md`
+- `AHC061_Solver_X66_PortfolioMixerGuard_Plan.md`
 
 ## 注意点
 - 計画段階のため、採用主張は書かない。
@@ -39,3 +141,4 @@
 ## 更新ルール
 - 新規案を追加する場合は `xNN` を採番して同フォーマットで追加する。
 - 廃案化した計画も削除せず、廃案理由を追記して残す。
+

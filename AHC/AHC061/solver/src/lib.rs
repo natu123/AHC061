@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+﻿use std::collections::{HashMap, VecDeque};
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
 
 mod strategy_mode;
@@ -11,6 +11,24 @@ mod x06_expert_switch_hybrid;
 mod x07_dual_horizon_route;
 mod x08_pressure_frontier;
 mod x09_regret_mix;
+mod x10_phase_adaptive_mix;
+mod x11_contest_frontier_recovery;
+mod x12_advisor_vote_ensemble;
+mod x13_frontier_consensus;
+mod x14_adaptive_risk_lane;
+mod x15_band_adaptive_route;
+mod x16_safe_recovery_route;
+mod x17_mid_band_dual_lane;
+mod x18_robust_minmax_guard;
+mod x19_frontier_recovery_sweep;
+mod x20_band_stage_ensemble;
+mod x21_band_stage_adaptive_guard;
+mod x22_band_stage_recovery_boost;
+mod x23_band_stage_frontier_guard;
+mod x24_band_stage_adaptive_switch;
+mod x25_race_adaptive_recovery;
+mod x26_reactive_frontier_pressure;
+mod x64_portfolio_mixer;
 
 pub use strategy_mode::{strategy_from_env, StrategyMode};
 use strategy_mode::choose_move;
@@ -135,7 +153,7 @@ pub(crate) fn get_candidates(game: &Game, state: &State, player: usize) -> Vec<(
     q.push_back(start);
     visited[start.0][start.1] = true;
 
-    // tools/src/lib.rs の近傍順を維持。
+    // tools/src/lib.rs 縺ｮ霑大ｍ鬆・ｒ邯ｭ謖√・
     const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
 
     while let Some((x, y)) = q.pop_front() {
@@ -292,7 +310,8 @@ pub(crate) fn estimate_conflict_map(game: &Game, state: &State, models: &[AiMode
 
 pub(crate) fn simulate_turn(game: &Game, state: &State, moves: &[(usize, usize)]) -> State {
     let mut next = state.clone();
-    let mut temp_pos = moves.to_vec();
+    let temp_pos = moves.to_vec();
+    let mut next_pos = state.pos.clone();
     let mut move_counts = HashMap::<(usize, usize), usize>::new();
     for &mv in moves {
         *move_counts.entry(mv).or_insert(0) += 1;
@@ -300,8 +319,13 @@ pub(crate) fn simulate_turn(game: &Game, state: &State, moves: &[(usize, usize)]
 
     let mut collected = vec![false; game.m];
     for i in 0..game.m {
-        let target = temp_pos[i];
-        if move_counts[&target] >= 2 {
+        let target = if i < temp_pos.len() {
+            temp_pos[i]
+        } else {
+            state.pos[i]
+        };
+        let collision_count = move_counts.get(&target).copied().unwrap_or(0);
+        if collision_count >= 2 {
             let owner = next.owner[target.0][target.1];
             if i as i32 != owner {
                 collected[i] = true;
@@ -313,7 +337,11 @@ pub(crate) fn simulate_turn(game: &Game, state: &State, moves: &[(usize, usize)]
         if collected[i] {
             continue;
         }
-        let (x, y) = temp_pos[i];
+        let (x, y) = if i < temp_pos.len() {
+            temp_pos[i]
+        } else {
+            state.pos[i]
+        };
         let owner = next.owner[x][y];
         if owner == -1 {
             next.owner[x][y] = i as i32;
@@ -331,14 +359,15 @@ pub(crate) fn simulate_turn(game: &Game, state: &State, moves: &[(usize, usize)]
                 collected[i] = true;
             }
         }
+        next_pos[i] = (x, y);
     }
 
     for i in 0..game.m {
         if collected[i] {
-            temp_pos[i] = state.pos[i];
+            next_pos[i] = state.pos[i];
         }
     }
-    next.pos = temp_pos;
+    next.pos = next_pos;
     next
 }
 
@@ -761,3 +790,6 @@ pub fn run_with_strategy(strategy: StrategyMode) {
         update_models(&game, &prev_state, &selected, &mut models);
     }
 }
+
+
+

@@ -4,12 +4,13 @@ param(
     [int]$LoopCount = 3,
     [int]$QuickSeedTo = 19,
     [int]$FullSeedTo = 99,
-    [string[]]$CandidateIds = @('x42', 'x47', 'x48', 'x49', 'x38', 'x39', 'x40', 'x41'),
+    [string[]]$CandidateIds = @('x64:n', 'x65:n', 'x66:n', 'x63:n', 'x56:nn', 'x58:nn', 'x60:ne', 'x61:ne', 'x62:ne'),
     [string[]]$ExploitCandidateIds = @(),
     [string[]]$ExploreFreshIds = @(),
     [string[]]$ExplorePairIds = @(),
     [string[]]$ExploreBlendIds = @(),
-    [int]$FullCandidateLimit = 3
+    [int]$FullCandidateLimit = 2,
+    [switch]$QuickOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -229,6 +230,15 @@ function Build-AllocationCaps {
         [hashtable]$Cfg,
         [int]$Limit
     )
+    if ($Limit -le 0) {
+        return @{
+            Exploit = 0
+            ExploreFresh = 0
+            ExplorePair = 0
+            ExploreBlend = 0
+        }
+    }
+
     $exploitCap = [int][Math]::Floor($Limit * $Cfg.Allocation.Exploit)
     $exploreCap = $Limit - $exploitCap
     $freshCap = [int][Math]::Floor($exploreCap * $Cfg.Allocation.ExploreFresh)
@@ -335,7 +345,8 @@ foreach ($id in $candidateIdsToRun) {
 }
 
 $cfg = $modeConfig[$Mode]
-$fullSelectionLimit = [Math]::Min($cfg.FullLimit, [Math]::Max(1, $FullCandidateLimit))
+$effectiveFullCandidateLimit = if ($QuickOnly) { 0 } else { $FullCandidateLimit }
+$fullSelectionLimit = [Math]::Min($cfg.FullLimit, [Math]::Max(0, $effectiveFullCandidateLimit))
 $effectiveCompetitionCap = [Math]::Min($cfg.CompetitionCap, $fullSelectionLimit)
 $caps = Build-AllocationCaps -Cfg $cfg -Limit $fullSelectionLimit
 $exploreCap = $caps.ExploreFresh + $caps.ExplorePair + $caps.ExploreBlend
@@ -346,9 +357,14 @@ Write-Output ("=== mode: {0} / quality_weight={1} / efficiency_weight={2} / quic
 Write-Output ("=== Allocation plan: Exploit={0:P0}, Explore={1:P0} (Fresh={2:P0}/Pair={3:P0}/Blend={4:P0}) / caps E/F/P/B={5}/{6}/{7}/{8} ===" -f ((1 - $exploreCap / [Math]::Max(1, $fullSelectionLimit)), ($exploreCap / [Math]::Max(1, $fullSelectionLimit)), ($caps.ExploreFresh / $exploreTotal), ($caps.ExplorePair / $exploreTotal), ($caps.ExploreBlend / $exploreTotal), $caps.Exploit, $caps.ExploreFresh, $caps.ExplorePair, $caps.ExploreBlend))
 
 $baselineQuick = Eval-Set -Name 'x04' -BinPath (Resolve-Path $bins['x04']) -SeedTo $QuickSeedTo
-$baselineFull = Eval-Set -Name 'x04_full' -BinPath (Resolve-Path $bins['x04']) -SeedTo $FullSeedTo
 Write-Output ("Baseline quick (x04): mean=$($baselineQuick.Mean), median=$($baselineQuick.Median), min=$($baselineQuick.Min), max=$($baselineQuick.Max), elapsed=$($baselineQuick.ElapsedMs)ms")
-Write-Output ("Baseline full  (x04): mean=$($baselineFull.Mean), median=$($baselineFull.Median), min=$($baselineFull.Min), max=$($baselineFull.Max), elapsed=$($baselineFull.ElapsedMs)ms")
+if ($QuickOnly) {
+    $baselineFull = $null
+    Write-Output 'Baseline full  (x04): skipped in quick-only mode'
+} else {
+    $baselineFull = Eval-Set -Name 'x04_full' -BinPath (Resolve-Path $bins['x04']) -SeedTo $FullSeedTo
+    Write-Output ("Baseline full  (x04): mean=$($baselineFull.Mean), median=$($baselineFull.Median), min=$($baselineFull.Min), max=$($baselineFull.Max), elapsed=$($baselineFull.ElapsedMs)ms")
+}
 
 for ($loop = 1; $loop -le $LoopCount; $loop++) {
     Write-Output ('')
@@ -464,7 +480,7 @@ for ($loop = 1; $loop -le $LoopCount; $loop++) {
         }
     }
 
-    if ($selectedForFull.Count -eq 0 -and $quickDisplay.Count -gt 0) {
+    if ($selectedForFull.Count -eq 0 -and -not $QuickOnly -and $quickDisplay.Count -gt 0) {
         $fallback = $quickDisplay | Where-Object { $_.Mean -ge ($cfg.FallbackMeanRatio * $baselineQuick.Mean) } | Select-Object -First 1
         if ($fallback) {
             $fallback | Add-Member -NotePropertyName 'AllocatedClass' -NotePropertyValue $fallback.CandidateClass -Force
