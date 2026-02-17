@@ -50,6 +50,7 @@ venv/
 
 # evaluation scratch
 tmp_eval_loop*.ps1
+tmp_eval*.ps1
 tmp_eval_*/
 tmp_eval*.err
 tmp_eval*.txt
