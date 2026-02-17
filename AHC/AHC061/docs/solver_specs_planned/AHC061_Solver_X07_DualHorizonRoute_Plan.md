@@ -26,7 +26,9 @@
 - quick:
   - seed `0..19` で `x04` と A/B。
 - full移行条件:
-  - Loop内 quick 上位1件になった場合のみ seed `0..99` 実施。
+  - quick 0..19 の quick結果を mean 降順で並べ、まず `top1` と `topk` の mean 差が `2.5%` 以内かつ、`mean` が `champion mean` の `98.5%` を満たす候補を競争候補とする。
+  - 併せて `median` が `champion median` の `98.5%` 以上、または `min` が `champion min` の `90%` 以上を満たす場合のみ full 判定へ進める。
+  - 競争ゲート条件を満たす上位候補が複数ある場合は `seed 0..99` を上位から最大 `3` 件 full 実施する（0件なら full は行わない）。
 - 記録必須:
   - mean/median/min/max, elapsed, `M=4` 帯の差分観測。
 

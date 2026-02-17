@@ -30,7 +30,7 @@
 - quick:
   - seed `0..19` で `x04` と A/B。
 - full移行条件:
-  - Loop内 quick 上位1件のみ seed `0..99` へ拡張。
+  - Loop内の quick 競争ゲートで有望候補を選抜し、`seed 0..99` full を上位最大3件まで実施（0件は full 不実施）。
 - 記録必須:
   - mean/median/min/max, elapsed, expert候補採択比率。
 

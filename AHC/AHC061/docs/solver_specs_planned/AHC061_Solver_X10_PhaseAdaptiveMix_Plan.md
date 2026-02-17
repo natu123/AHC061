@@ -21,5 +21,5 @@
 
 ## 検証計画
 - `seed 0..19` で quick 比較。
-- quick 上位1件のみ `seed 0..99` full。
+- quick で有望候補を競争ゲートで抽出し、`seed 0..99` の full を最大3件まで実施（0件は full 不実施）。
 - 評価: `mean/median/min/max, elapsed`。

@@ -29,7 +29,7 @@
 - quick:
   - seed `0..19` で `x04` と A/B。
 - full移行条件:
-  - Loop内 quick 上位1件のみ seed `0..99` 実施。
+  - Loop内で quick 競争ゲートにより有望候補を選抜し、`seed 0..99` full は上位最大3件まで実施（0件は full 不実施）。
 - 記録必須:
   - mean/median/min/max, elapsed, seedごとの時間分布（mean/p95/max）。
 
