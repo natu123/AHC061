@@ -1,4 +1,4 @@
-﻿use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
 
 mod strategy_mode;
@@ -29,6 +29,14 @@ mod x24_band_stage_adaptive_switch;
 mod x25_race_adaptive_recovery;
 mod x26_reactive_frontier_pressure;
 mod x64_portfolio_mixer;
+mod x67_gear_shift_hybrid;
+mod x73_selective_unlocked_macro;
+mod x75_risk_gated_unlocked_macro;
+mod x76_crossband_route_hybrid;
+mod x210_adaptive_beam_route;
+mod x211_deep_mc_expectimax;
+mod x212_maxn_mcts;
+mod x213_hybrid_portfolio;
 
 pub use strategy_mode::{strategy_from_env, StrategyMode};
 use strategy_mode::choose_move;
@@ -153,7 +161,7 @@ pub(crate) fn get_candidates(game: &Game, state: &State, player: usize) -> Vec<(
     q.push_back(start);
     visited[start.0][start.1] = true;
 
-    // tools/src/lib.rs 縺ｮ霑大ｍ鬆・ｒ邯ｭ謖√・
+    // Keep neighbor traversal order aligned with the official tools implementation.
     const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
 
     while let Some((x, y)) = q.pop_front() {
