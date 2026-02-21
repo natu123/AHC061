@@ -96,7 +96,7 @@ pub(super) fn choose_move_x03_particle_cvar(
     state: &State,
     models: &[AiModel],
 ) -> (usize, usize) {
-    // 初版観測では中人数帯で優位だったため、適用帯を限定する。
+    // Historical runs showed advantages mainly in mid-player bands, so gate usage.
     if !(3..=5).contains(&game.m) {
         return x06_expert_switch_hybrid::choose_move_x06_expert_switch(game, state, models);
     }

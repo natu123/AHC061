@@ -63,7 +63,7 @@ pub(super) fn choose_move_x05_adaptive_racing(
     state: &State,
     models: &[AiModel],
 ) -> (usize, usize) {
-    // x05は中人数帯を対象にし、それ以外はx01の安定版を再利用する。
+    // Keep x05 on mid-player bands and reuse x01 elsewhere for stability.
     if !(3..=5).contains(&game.m) {
         return x01_beam_pessimistic::choose_move_x01_beam_pessimistic(game, state, models);
     }
