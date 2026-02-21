@@ -1,4 +1,4 @@
-﻿use std::env;
+use std::env;
 
 use crate::{
     x01_beam_pessimistic, x02_monte_carlo, x03_particle_cvar, x04_macro_route, x05_adaptive_racing_mc,
@@ -8,7 +8,10 @@ use crate::{
     x17_mid_band_dual_lane, x18_robust_minmax_guard, x19_frontier_recovery_sweep,
     x20_band_stage_ensemble, x21_band_stage_adaptive_guard, x22_band_stage_recovery_boost,
     x23_band_stage_frontier_guard, x24_band_stage_adaptive_switch, x25_race_adaptive_recovery,
-    x26_reactive_frontier_pressure, x64_portfolio_mixer,
+    x26_reactive_frontier_pressure, x64_portfolio_mixer, x67_gear_shift_hybrid,
+    x73_selective_unlocked_macro, x75_risk_gated_unlocked_macro, x76_crossband_route_hybrid,
+    x210_adaptive_beam_route, x211_deep_mc_expectimax, x212_maxn_mcts,
+    x213_hybrid_portfolio,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -41,6 +44,14 @@ pub enum StrategyMode {
     RaceAdaptiveRecovery,
     ReactiveFrontierPressure,
     PortfolioMixer,
+    GearShiftHybrid,
+    SelectiveUnlockedMacro,
+    RiskGatedUnlockedMacro,
+    CrossbandRouteHybrid,
+    AdaptiveBeamRoute,
+    DeepMcExpectimax,
+    MaxnMcts,
+    HybridPortfolio,
 }
 
 pub fn strategy_from_env() -> StrategyMode {
@@ -117,6 +128,29 @@ pub fn strategy_from_env() -> StrategyMode {
             | Some("portfolio_mixer")
             | Some("portfolio")
             | Some("meta_portfolio") => StrategyMode::PortfolioMixer,
+        Some("x67")
+            | Some("gear_shift_hybrid")
+            | Some("gear_shift")
+            | Some("novel_hybrid") => StrategyMode::GearShiftHybrid,
+        Some("x73") | Some("selective_unlocked_macro") | Some("sel_unlocked") => {
+            StrategyMode::SelectiveUnlockedMacro
+        }
+        Some("x75") | Some("risk_gated_unlocked_macro") | Some("gated_unlocked") => {
+            StrategyMode::RiskGatedUnlockedMacro
+        }
+        Some("x76") | Some("crossband_route_hybrid") | Some("crossband") => {
+            StrategyMode::CrossbandRouteHybrid
+        }
+        Some("x210") | Some("adaptive_beam_route") | Some("adaptive_beam") => {
+            StrategyMode::AdaptiveBeamRoute
+        }
+        Some("x211") | Some("deep_mc_expectimax") | Some("expectimax") => {
+            StrategyMode::DeepMcExpectimax
+        }
+        Some("x212") | Some("maxn_mcts") | Some("mcts_accurate") => StrategyMode::MaxnMcts,
+        Some("x213") | Some("hybrid_portfolio") | Some("portfolio_hybrid") => {
+            StrategyMode::HybridPortfolio
+        }
         _ => StrategyMode::HybridMidMc,
     }
 }
@@ -233,6 +267,38 @@ pub(crate) fn choose_move(
         }
         StrategyMode::PortfolioMixer => {
             x64_portfolio_mixer::choose_move_x64_portfolio_mixer(game, state, models)
+        }
+        StrategyMode::GearShiftHybrid => {
+            x67_gear_shift_hybrid::choose_move_x67_gear_shift_hybrid(game, state, models)
+        }
+        StrategyMode::SelectiveUnlockedMacro => {
+            x73_selective_unlocked_macro::choose_move_x73_selective_unlocked_macro(game, state, models)
+        }
+        StrategyMode::RiskGatedUnlockedMacro => {
+            x75_risk_gated_unlocked_macro::choose_move_x75_risk_gated_unlocked_macro(game, state, models)
+        }
+        StrategyMode::CrossbandRouteHybrid => {
+            x76_crossband_route_hybrid::choose_move_x76_crossband_route_hybrid(game, state, models)
+        }
+        StrategyMode::AdaptiveBeamRoute => {
+            x210_adaptive_beam_route::choose_move_x210_adaptive_beam_route(game, state, models)
+        }
+        StrategyMode::DeepMcExpectimax => {
+            if game.m == 4 {
+                x04_macro_route::choose_move_x04_macro_route(game, state, models)
+            } else {
+                x211_deep_mc_expectimax::choose_move_x211_deep_mc_expectimax(game, state, models)
+            }
+        }
+        StrategyMode::MaxnMcts => {
+            if game.m == 4 {
+                x04_macro_route::choose_move_x04_macro_route(game, state, models)
+            } else {
+                x212_maxn_mcts::choose_move_x212_maxn_mcts(game, state, models)
+            }
+        }
+        StrategyMode::HybridPortfolio => {
+            x213_hybrid_portfolio::choose_move_x213_hybrid_portfolio(game, state, models)
         }
     }
 }
