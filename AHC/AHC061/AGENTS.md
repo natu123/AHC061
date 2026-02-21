@@ -38,6 +38,11 @@
 - quick/full 選抜は `quality_score/novelty_score` に時間効率補正を加えた `final_score` を採用する
   - `final_score = (1-efficiency_weight) * selection_score + efficiency_weight * efficiency_score`
   - `quality_score`/`novelty_score`/`selection_score` は `tmp_eval_loop10.ps1` と共通化する
+ - 競争力不足の候補を早期打ち切りするため、以下の即却下ルールを標準化する
+   - 基準候補は現 `champion`（現時点では `x47`）とし、quick (`seed 0..19`) で `mean < 1.01 * champion_mean` の候補は即却下する
+   - `improvement_per_sec = (mean_ratio - 1.0) / mean_seed_sec` を計算し、`improvement_per_sec <= 0` の候補は即却下する
+   - `ratio < 0.90` の間は `Exploit 0% / Explore 100%` を原則とし、既存 Macro 派生は探索全体の `10%` 以下に制限する
+   - full (`seed 0..99`) へ進めるのは、上記 2 条件を満たす quick 上位 `2` 件までとする
 - 10試行以上継続する大規模Loopでは `Exploit` と `Explore` の配分を監視する
   - 基本: `Exploit 5% / Explore 95%`
   - Explore 内訳: `new 30% / pair 50% / blend 20%`

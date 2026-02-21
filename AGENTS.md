@@ -58,3 +58,12 @@
 
 ## Living Document
 - 新しい運用知見が出た場合は、このファイルへ先に反映します。
+
+## Meta Improvement Addendum (2026-02-17)
+- High-multiplier goals (e.g., 1.5x over current) require strict early rejection to protect iteration speed.
+- Recommended gates for quick-stage candidates:
+  - Reject candidates that do not beat current champion quick mean (optionally require +1% margin).
+  - Compute `improvement_per_sec = (mean_ratio - 1.0) / mean_seed_sec` and reject when `<= 0`.
+  - Run full-stage evaluation only for top 1-2 quick candidates that pass both gates.
+- In stagnation phases, cap derivative tweaks and prioritize novel architectures.
+- Record rejection reasons in experiment logs to preserve reproducibility and future reuse.

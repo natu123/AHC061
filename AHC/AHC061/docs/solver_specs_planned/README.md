@@ -66,10 +66,27 @@
 - `x64`: Portfolio Mixer Base（実装済み）
 - `x65`: Portfolio Mixer Aggro（実装済み）
 - `x66`: Portfolio Mixer Guard（実装済み）
+- `x67`: Gear Shift Hybrid（実装済み・quick不採用）
+- `x68`: Gear Shift Hybrid Attack（実装済み・quick不採用）
+- `x69`: Gear Shift Hybrid Balanced（実装済み・quick不採用）
+- `x70`: Gear Shift Hybrid Guard（実装済み・quick不採用）
+- `x71`: Macro Route Unlocked Balanced（実装済み・quick不採用）
+- `x72`: Macro Route Unlocked Deep（実装済み・quick不採用）
+- `x73`: Selective Unlocked Macro（実装済み・full不採用）
+- `x75`: Risk Gated Unlocked Macro（実装済み・full不採用）
+- `x76`: Crossband Route Hybrid（実装済み・full不採用）
 
 ## 仕様
 - 各計画は `狙い / 別系統性 / 期待効果 / 実装スコープ / 検証計画` を必須記載とする。
 - 実装に着手した時点で、計画ファイルへ `着手日` と `最初のブランチ/コミット` を追記する。
+
+## 評価ゲート（2026-02-17更新）
+- 目的が「現状比 1.5x」到達のため、低効率候補は即却下する。
+- quick (`seed 0..19`) の採用下限:
+  - `mean >= 1.01 * champion_mean`（基準 `champion` は現時点 `x47`）
+  - `improvement_per_sec = (mean_ratio - 1.0) / mean_seed_sec > 0`
+- 上記を満たさない候補は full 不実施で終了する。
+- `ratio < 0.90` 中は `Exploit 0% / Explore 100%` を基本とし、既存 Macro 派生の試行は全探索の `10%` 以下に制限する。
 
 ## 一覧
 - `AHC061_Solver_X03_Particle_CVaR_Plan.md`

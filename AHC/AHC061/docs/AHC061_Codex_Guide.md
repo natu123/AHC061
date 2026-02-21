@@ -127,6 +127,13 @@
   期待ルートは `C:\Users\kenji\projects\AtCoder\AHC\AHC061` です。
 
 ## quick/full 選抜ルール
+- 即却下ルール（時間効率優先）:
+  - 基準候補は現 `champion`（現時点では `x47`）とする。
+  - quick (`seed 0..19`) で `mean < 1.01 * champion_mean` の候補は即却下する。
+  - `improvement_per_sec = (mean_ratio - 1.0) / mean_seed_sec` を計算し、`improvement_per_sec <= 0` の候補は即却下する。
+  - `ratio < 0.90` では `Exploit 0% / Explore 100%` を基本とし、既存 Macro 派生は探索全体の `10%` 以下に制限する。
+  - full (`seed 0..99`) は、上記 2 条件を満たす quick 上位 `2` 件に限定する。
+
 - quick を実行して、full 進出候補を競合ベースで決めます。
 - 目的関数は `final_score` を基本にし、速度効率も評価に入れます。
   - `selection_score = mode_weight * quality_score + (1-mode_weight) * novelty_score`

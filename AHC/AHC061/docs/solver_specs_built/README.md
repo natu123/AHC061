@@ -703,6 +703,56 @@
   - `solver/src/bin/x66_portfolio_mixer_guard.rs`
   - `docs/solver_specs_planned/AHC061_Solver_X66_PortfolioMixerGuard_Plan.md`
 
+### x67 - Gear Shift Hybrid
+- 狙い
+  - 非Macro系 advisor と複数シナリオ先読みを合成し、Gear-Shift用の新規アーキテクチャを検証する。
+- 結果
+  - quick `0..9`: `mean 112,200.8`, `median 102,260`, `min 51,816`, `max 235,957`
+- 状態
+  - 不採用（quick で baseline を大きく下回る）。
+- 参照
+  - `solver/src/x67_gear_shift_hybrid.rs`
+  - `solver/src/bin/x67_gear_shift_hybrid.rs`
+
+### x58 - Macro Route Pressure Late Recover Balance
+- 狙い
+  - `x56` 系の median 改善を維持しつつ、late recover の平均値伸長を狙う。
+- 結果
+  - quick `0..19`: `mean 151,294.4`, `median 119,020`, `min 70,744`, `max 388,857`
+  - full `0..99`: `mean 158,960.4`, `median 135,590`, `min 52,543`, `max 605,548`, `elapsed 263,257ms`
+  - baseline `x04_full` 比: `mean +2.52%`, `median +1.92%`, `min +0.00%`
+- 状態
+  - 現在の平均最良候補（提出候補）。
+- 参照
+  - `solver/src/bin/x58_macro_route_pressure_late_recover_balance.rs`
+  - `submissions/submission_x58.rs`
+
+### x75 - Risk Gated Unlocked Macro
+- 狙い
+  - 帯域と局面で unlocked macro の発火を制御し、`min` 保全と `mean` 改善の両立を狙う。
+- 結果
+  - quick `0..19`: `mean 155,464.9`, `median 123,984`, `min 92,456`, `max 388,857`
+  - full `0..99`: `mean 157,951.5`, `median 134,732`, `min 56,283`, `max 605,548`, `elapsed 602,232ms`
+  - baseline `x04_full` 比: `mean +1.87%`, `median +1.27%`, `min +7.12%`
+- 状態
+  - 不採用（`x58` の mean を上回れない）。
+- 参照
+  - `solver/src/x75_risk_gated_unlocked_macro.rs`
+  - `solver/src/bin/x75_risk_gated_unlocked_macro.rs`
+
+### x76 - Crossband Route Hybrid
+- 狙い
+  - `M` 帯別に unlocked/locked macro を切り替え、`x75` の上振れのみを抽出する。
+- 結果
+  - quick `0..19`: `mean 155,269.6`, `median 123,984`, `min 88,551`, `max 388,857`
+  - full `0..99`: `mean 158,022.9`, `median 134,732`, `min 56,283`, `max 605,548`, `elapsed 595,368ms`
+  - baseline `x04_full` 比: `mean +1.92%`, `median +1.27%`, `min +7.12%`
+- 状態
+  - 不採用（`x58` 比で `mean -0.59%`）。
+- 参照
+  - `solver/src/x76_crossband_route_hybrid.rs`
+  - `solver/src/bin/x76_crossband_route_hybrid.rs`
+
 ## メタ運用（再利用指針）
 - 狙い:
   - 同じ失敗を繰り返さないため、xNNの設計意図を固定形式で保持する。
