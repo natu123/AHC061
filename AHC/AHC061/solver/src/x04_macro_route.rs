@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::{x06_expert_switch_hybrid, AiModel, Game, State};
 #[derive(Clone)]
 struct RouteNode {
@@ -172,6 +174,7 @@ fn beam_route_score(
     pressure_weight_late: f64,
     local_coeff: f64,
     route_coeff: f64,
+    deadline: Instant,
 ) -> f64 {
     let mut moves = Vec::with_capacity(game.m);
     moves.push(first_mv);
@@ -224,6 +227,9 @@ fn beam_route_score(
     }];
 
     for step in 1..plan_len {
+        if Instant::now() >= deadline {
+            break;
+        }
         let mut next_beam = Vec::<RouteNode>::new();
         for node in &beam {
             let scores = crate::calc_scores(game, &node.state);
@@ -303,8 +309,14 @@ pub(super) fn choose_move_x04_macro_route(
     state: &State,
     models: &[AiModel],
 ) -> (usize, usize) {
-    // full結果の帯別分析で M=4 のみ優位が大きかったため、適用帯を限定する。
-    if game.m != 4 {
+    // AHC_X04_ALLOWED_M で許可された M 値のみ beam search を適用（未設定時は M=4 のみ）
+    let m_allowed = match std::env::var("AHC_X04_ALLOWED_M") {
+        Ok(val) => val
+            .split(',')
+            .any(|s| s.trim().parse::<usize>().map_or(false, |v| v == game.m)),
+        Err(_) => game.m == 4,
+    };
+    if !m_allowed {
         return x06_expert_switch_hybrid::choose_move_x06_expert_switch(game, state, models);
     }
     let phase_cutoff = env_f64("AHC_X04_PHASE_CUTOFF", 0.65, 0.20, 0.95);
@@ -348,6 +360,14 @@ pub(super) fn choose_move_x04_macro_route(
         2.0,
     );
     let pressure_phase_split = env_f64("AHC_X04_PRESSURE_PHASE_SPLIT", 0.60, 0.20, 0.90);
+    let time_limit_ms: u64 = std::env::var("AHC_TIME_LIMIT_MS")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(2000);
+    let per_turn = time_limit_ms / game.t as u64;
+    let budget_ms = (per_turn * 85 / 100).max(5);
+    let deadline = Instant::now() + std::time::Duration::from_millis(budget_ms);
+
     let phase_now = state.turn as f64 / game.t as f64;
     if phase_now > phase_cutoff {
         return x06_expert_switch_hybrid::choose_move_x06_expert_switch(game, state, models);
@@ -410,23 +430,30 @@ pub(super) fn choose_move_x04_macro_route(
     let mut best_mv = ranked[0].0;
     let mut best_score = f64::NEG_INFINITY;
     for &(mv, local) in ranked.iter().take(candidate_cap) {
+        if Instant::now() >= deadline {
+            break;
+        }
         let mut best_target_score = f64::NEG_INFINITY;
         for &target in targets.iter().take(target_eval) {
-        let route_score = beam_route_score(
-            game,
-            state,
-            models,
-            mv,
-            target,
-            plan_len,
-            beam_width,
-            branch_width,
-            pressure_phase_split,
-            pressure_route_weight_early,
-            pressure_route_weight_late,
-            local_coeff,
-            route_coeff,
-        );
+            if Instant::now() >= deadline {
+                break;
+            }
+            let route_score = beam_route_score(
+                game,
+                state,
+                models,
+                mv,
+                target,
+                plan_len,
+                beam_width,
+                branch_width,
+                pressure_phase_split,
+                pressure_route_weight_early,
+                pressure_route_weight_late,
+                local_coeff,
+                route_coeff,
+                deadline,
+            );
             if route_score > best_target_score {
                 best_target_score = route_score;
             }
