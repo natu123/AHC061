@@ -1,4 +1,4 @@
-﻿use std::env;
+use std::env;
 
 use ahc061_solver::{run_with_strategy, StrategyMode};
 
