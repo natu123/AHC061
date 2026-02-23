@@ -1,0 +1,6683 @@
+pub use __cargo_equip::prelude::*;
+
+use std::env;
+
+use ahc061_solver::{run_with_strategy_bayes, StrategyMode};
+
+fn main() {
+    // x378: Extended MCTS Dispatch
+    //
+    // MCTS for U=1 (M!=2,6) + M=5 U=2-3 + M=4 U=5 + M=3 U=2.
+    // Projected improvement: +11-12% over x333(3s) on 100-seed evaluation.
+
+    unsafe {
+        env::set_var("AHC_TIME_LIMIT_MS", "3000");
+
+        // Expectimax params (same as x333)
+        env::set_var("AHC_X332_DEPTH", "3");
+        env::set_var("AHC_X332_DEPTH_M2_U3", "4");
+        env::set_var("AHC_X332_BRANCH_TOP", "8");
+        env::set_var("AHC_X332_BRANCH_DEEP", "4");
+
+        // Beam params (same as x333)
+        env::set_var("AHC_X04_ZONE_BONUS", "1.0");
+        env::set_var("AHC_ZONE_SIZE", "4");
+        env::set_var("AHC_X04_FALLBACK", "u_aware_v4");
+        env::set_var("AHC_X04_ALLOWED_M", "3,4");
+        env::set_var("AHC_X04_LEADER_TARGET_BONUS", "0.5");
+
+        env::set_var("AHC_X04_PHASE_CUTOFF", "0.92");
+        env::set_var("AHC_X04_PHASE_CUTOFF_M4_U1", "0.92");
+        env::set_var("AHC_X04_PHASE_CUTOFF_M4_U2", "0.92");
+        env::set_var("AHC_X04_PHASE_CUTOFF_M4_U3", "0.20");
+        env::set_var("AHC_X04_PHASE_CUTOFF_M4_U4", "0.30");
+        env::set_var("AHC_X04_PHASE_CUTOFF_M4_U5", "0.25");
+
+        env::set_var("AHC_X04_PHASE_SPLIT", "0.56");
+        env::set_var("AHC_X04_TARGET_COUNT", "9");
+        env::set_var("AHC_X04_TARGET_EVAL", "8");
+        env::set_var("AHC_X04_CANDIDATE_CAP", "10");
+        env::set_var("AHC_X04_PLAN_LEN_FAST", "6");
+        env::set_var("AHC_X04_PLAN_LEN_SLOW", "8");
+        env::set_var("AHC_X04_BEAM_WIDTH_FAST", "7");
+        env::set_var("AHC_X04_BEAM_WIDTH_SLOW", "9");
+        env::set_var("AHC_X04_BRANCH_WIDTH", "2");
+        env::set_var("AHC_X04_LOCAL_WEIGHT", "0.11");
+        env::set_var("AHC_X04_LOCAL_COEFF", "0.09");
+        env::set_var("AHC_X04_ROUTE_COEFF", "46.8");
+
+        env::set_var("AHC_X04_TARGET_PRESSURE_WEIGHT", "0.76");
+        env::set_var("AHC_X04_PRESSURE_WEIGHT", "0.36");
+        env::set_var("AHC_X04_PRESSURE_WEIGHT_EARLY", "0.02");
+        env::set_var("AHC_X04_PRESSURE_WEIGHT_LATE", "1.36");
+        env::set_var("AHC_X04_ROUTE_PRESSURE_WEIGHT", "0.08");
+        env::set_var("AHC_X04_ROUTE_PRESSURE_WEIGHT_EARLY", "0.24");
+        env::set_var("AHC_X04_ROUTE_PRESSURE_WEIGHT_LATE", "0.72");
+        env::set_var("AHC_X04_PRESSURE_PHASE_SPLIT", "0.62");
+
+        env::set_var("AHC_X04_PHASE_CUTOFF_M3", "0.92");
+        env::set_var("AHC_X04_TARGET_COUNT_M3", "8");
+        env::set_var("AHC_X04_TARGET_EVAL_M3", "6");
+        env::set_var("AHC_X04_CANDIDATE_CAP_M3", "8");
+        env::set_var("AHC_X04_PLAN_LEN_FAST_M3", "6");
+        env::set_var("AHC_X04_PLAN_LEN_SLOW_M3", "8");
+        env::set_var("AHC_X04_BEAM_WIDTH_FAST_M3", "7");
+        env::set_var("AHC_X04_BEAM_WIDTH_SLOW_M3", "8");
+        env::set_var("AHC_X04_BRANCH_WIDTH_M3", "2");
+
+        // MCTS params
+        env::set_var("AHC_X343_ROLLOUT_DEPTH", "5");
+    }
+
+    run_with_strategy_bayes(StrategyMode::ExtendedMcts);
+}
+
+// The following code was expanded by `cargo-equip`.
+
+///  # Bundled libraries
+///
+///  - `path+file:///C:/Users/kenji/projects/AtCoder/AHC/AHC061-2/solver#ahc061-solver@0.1.0` published in **missing** licensed under **missing** as `crate::__cargo_equip::crates::ahc061_solver`
+#[allow(unused)]
+mod __cargo_equip {
+    pub(crate) mod crates {
+        pub mod ahc061_solver {
+            use std::collections::{HashMap, VecDeque};
+            use std::io::{self, BufRead, BufReader, BufWriter, Write};
+            use std::sync::OnceLock;
+            use std::time::Instant;
+
+            mod strategy_mode {
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    x378_extended_mcts, AiModel, Game, State,
+                };
+
+                #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+                pub enum StrategyMode {
+                    ExtendedMcts,
+                }
+
+                pub fn strategy_from_env() -> StrategyMode {
+                    StrategyMode::ExtendedMcts
+                }
+
+                pub(in crate::__cargo_equip::crates::ahc061_solver) fn choose_move(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    strategy: StrategyMode,
+                ) -> (usize, usize) {
+                    match strategy {
+                        StrategyMode::ExtendedMcts => {
+                            x378_extended_mcts::choose_move_x378_extended_mcts(game, state, models)
+                        }
+                    }
+                }
+            }
+            mod x01_beam_pessimistic {
+                use crate::__cargo_equip::crates::ahc061_solver::{AiModel, Game, State};
+
+                type ScoreFn = fn(&Game, &State) -> f64;
+
+                fn resolve_score_fn() -> ScoreFn {
+                    if std::env::var("AHC_X01_USE_DENIAL_SCORE")
+                        .map(|v| v == "1")
+                        .unwrap_or(false)
+                    {
+                        crate::__cargo_equip::crates::ahc061_solver::denial_score
+                    } else if std::env::var("AHC_X01_USE_STRATEGIC_SCORE")
+                        .map(|v| v == "1")
+                        .unwrap_or(false)
+                    {
+                        crate::__cargo_equip::crates::ahc061_solver::strategic_score
+                    } else if std::env::var("AHC_X01_USE_ZONE_SCORE")
+                        .map(|v| v == "1")
+                        .unwrap_or(false)
+                    {
+                        crate::__cargo_equip::crates::ahc061_solver::zone_absolute_score
+                    } else {
+                        crate::__cargo_equip::crates::ahc061_solver::absolute_score
+                    }
+                }
+
+                fn env_f64(key: &str, default: f64) -> f64 {
+                    std::env::var(key)
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(default)
+                }
+
+                fn best_n_step_score(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    score_fn: ScoreFn,
+                    depth: usize,
+                ) -> f64 {
+                    if depth == 0 || state.turn >= game.t {
+                        return score_fn(game, state);
+                    }
+                    let candidates =
+                        crate::__cargo_equip::crates::ahc061_solver::get_candidates(game, state, 0);
+                    if candidates.is_empty() {
+                        return score_fn(game, state);
+                    }
+                    let scores =
+                        crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state);
+                    let ai_top2 =
+                        crate::__cargo_equip::crates::ahc061_solver::choose_predicted_ai_top2_moves(
+                            game, state, models,
+                        );
+                    let predicted_primary: Vec<(usize, usize)> =
+                        ai_top2.iter().map(|x| x.0).collect();
+                    let uncertainty =
+                        crate::__cargo_equip::crates::ahc061_solver::uncertainty_risk(&ai_top2);
+                    let secondary_cap = if game.m >= 7 && uncertainty >= 0.40 {
+                        3
+                    } else if game.m >= 6 && uncertainty >= 0.28 {
+                        2
+                    } else {
+                        1
+                    };
+                    let predicted_secondary =
+                        crate::__cargo_equip::crates::ahc061_solver::build_secondary_ai_moves(
+                            &scores,
+                            &ai_top2,
+                            secondary_cap,
+                        );
+                    let risk_w = crate::__cargo_equip::crates::ahc061_solver::pessimism_weight(
+                        game,
+                        uncertainty,
+                    );
+
+                    if candidates.len() == 1 {
+                        let mut primary = Vec::with_capacity(game.m);
+                        primary.push(candidates[0]);
+                        primary.extend_from_slice(&predicted_primary);
+                        let next = crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                            game, state, &primary,
+                        );
+                        let score_primary =
+                            best_n_step_score(game, &next, models, score_fn, depth - 1);
+
+                        let mut secondary = Vec::with_capacity(game.m);
+                        secondary.push(candidates[0]);
+                        secondary.extend_from_slice(&predicted_secondary);
+                        let score_secondary = best_n_step_score(
+                            game,
+                            &crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                                game, state, &secondary,
+                            ),
+                            models,
+                            score_fn,
+                            depth - 1,
+                        );
+                        return (1.0 - risk_w) * score_primary + risk_w * score_secondary;
+                    }
+
+                    let s0 = scores[0] as f64;
+                    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                    let phase = state.turn as f64 / game.t as f64;
+                    let conflict_map =
+                        crate::__cargo_equip::crates::ahc061_solver::estimate_conflict_map(
+                            game, state, models,
+                        );
+                    let cur = state.pos[0];
+
+                    let mut is_leader = vec![false; game.m];
+                    for p in 1..game.m {
+                        if scores[p] == max_ai_i64 {
+                            is_leader[p] = true;
+                        }
+                    }
+
+                    let eval_limit = if depth > 1 {
+                        4.min(candidates.len())
+                    } else {
+                        candidates.len()
+                    };
+
+                    let mut ranked: Vec<((usize, usize), f64)> =
+                        Vec::with_capacity(candidates.len());
+                    for &mv in &candidates {
+                        let local_score =
+                            crate::__cargo_equip::crates::ahc061_solver::evaluate_local_move(
+                                game,
+                                state,
+                                mv,
+                                &scores,
+                                s0,
+                                max_ai_i64,
+                                phase,
+                                &conflict_map,
+                                cur,
+                                &is_leader,
+                            );
+                        ranked.push((mv, local_score));
+                    }
+                    ranked
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    let mut best_val = f64::NEG_INFINITY;
+                    for &(mv, local_score) in ranked.iter().take(eval_limit) {
+                        let mut primary = Vec::with_capacity(game.m);
+                        primary.push(mv);
+                        primary.extend_from_slice(&predicted_primary);
+                        let next_primary =
+                            crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                                game, state, &primary,
+                            );
+                        let score_primary = if depth > 1 {
+                            best_n_step_score(game, &next_primary, models, score_fn, depth - 1)
+                        } else {
+                            score_fn(game, &next_primary)
+                        };
+
+                        let mut secondary = Vec::with_capacity(game.m);
+                        secondary.push(mv);
+                        secondary.extend_from_slice(&predicted_secondary);
+                        let score_secondary = if depth > 1 {
+                            best_n_step_score(
+                                game,
+                                &crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                                    game, state, &secondary,
+                                ),
+                                models,
+                                score_fn,
+                                depth - 1,
+                            )
+                        } else {
+                            score_fn(
+                                game,
+                                &crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                                    game, state, &secondary,
+                                ),
+                            )
+                        };
+
+                        let rollout = (1.0 - risk_w) * score_primary + risk_w * score_secondary;
+                        let total = rollout + 0.12 * local_score;
+                        if total > best_val {
+                            best_val = total;
+                        }
+                    }
+                    best_val
+                }
+
+                pub(super) fn choose_move_x01_beam_pessimistic(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates =
+                        crate::__cargo_equip::crates::ahc061_solver::get_candidates(game, state, 0);
+                    if candidates.len() == 1 {
+                        return candidates[0];
+                    }
+
+                    let score_fn = resolve_score_fn();
+                    let (local_w, future_w) = if game.m == 2 {
+                        (
+                            env_f64("AHC_X01_M2_LOCAL_WEIGHT", 0.12),
+                            env_f64("AHC_X01_M2_FUTURE_WEIGHT", 0.18),
+                        )
+                    } else {
+                        (
+                            env_f64("AHC_X01_LOCAL_WEIGHT", 0.12),
+                            env_f64("AHC_X01_FUTURE_WEIGHT", 0.18),
+                        )
+                    };
+
+                    let scores =
+                        crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state);
+                    let s0 = scores[0] as f64;
+                    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                    let phase = state.turn as f64 / game.t as f64;
+                    let conflict_map =
+                        crate::__cargo_equip::crates::ahc061_solver::estimate_conflict_map(
+                            game, state, models,
+                        );
+                    let cur = state.pos[0];
+                    let ai_top2 =
+                        crate::__cargo_equip::crates::ahc061_solver::choose_predicted_ai_top2_moves(
+                            game, state, models,
+                        );
+                    let predicted_primary: Vec<(usize, usize)> =
+                        ai_top2.iter().map(|x| x.0).collect();
+                    let uncertainty =
+                        crate::__cargo_equip::crates::ahc061_solver::uncertainty_risk(&ai_top2);
+                    let secondary_cap = if game.m >= 7 && uncertainty >= 0.40 {
+                        3
+                    } else if game.m >= 6 && uncertainty >= 0.28 {
+                        2
+                    } else {
+                        1
+                    };
+                    let predicted_secondary =
+                        crate::__cargo_equip::crates::ahc061_solver::build_secondary_ai_moves(
+                            &scores,
+                            &ai_top2,
+                            secondary_cap,
+                        );
+                    let risk_w = crate::__cargo_equip::crates::ahc061_solver::pessimism_weight(
+                        game,
+                        uncertainty,
+                    );
+
+                    let mut is_leader = vec![false; game.m];
+                    for p in 1..game.m {
+                        if scores[p] == max_ai_i64 {
+                            is_leader[p] = true;
+                        }
+                    }
+
+                    let mut scored: Vec<((usize, usize), f64, State)> =
+                        Vec::with_capacity(candidates.len());
+
+                    for &(x, y) in &candidates {
+                        let local_score =
+                            crate::__cargo_equip::crates::ahc061_solver::evaluate_local_move(
+                                game,
+                                state,
+                                (x, y),
+                                &scores,
+                                s0,
+                                max_ai_i64,
+                                phase,
+                                &conflict_map,
+                                cur,
+                                &is_leader,
+                            );
+
+                        let mut primary = Vec::with_capacity(game.m);
+                        primary.push((x, y));
+                        primary.extend_from_slice(&predicted_primary);
+                        let next_state = crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                            game, state, &primary,
+                        );
+                        let score_primary = score_fn(game, &next_state);
+
+                        let mut secondary = Vec::with_capacity(game.m);
+                        secondary.push((x, y));
+                        secondary.extend_from_slice(&predicted_secondary);
+                        let score_secondary = score_fn(
+                            game,
+                            &crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                                game, state, &secondary,
+                            ),
+                        );
+
+                        let rollout_score =
+                            (1.0 - risk_w) * score_primary + risk_w * score_secondary;
+                        let base_total = rollout_score + local_w * local_score;
+                        scored.push(((x, y), base_total, next_state));
+                    }
+
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+                    let mut beam_width = if scored.len() >= 32 {
+                        8
+                    } else if scored.len() >= 16 {
+                        6
+                    } else {
+                        4
+                    };
+                    if std::env::var("AHC_X01_FULL_BEAM")
+                        .map(|v| v == "1")
+                        .unwrap_or(false)
+                    {
+                        beam_width = scored.len();
+                    } else if game.m == 5 && phase <= 0.80 && uncertainty >= 0.18 {
+                        beam_width = scored.len();
+                    } else if game.m == 6 && phase <= 0.72 && uncertainty >= 0.22 {
+                        beam_width = (beam_width + 3).min(scored.len());
+                    }
+
+                    let future_depth = if let Ok(v) = std::env::var("AHC_X01_DEPTH") {
+                        v.parse::<usize>().unwrap_or(1)
+                    } else if game.m == 2 {
+                        std::env::var("AHC_X01_M2_DEPTH")
+                            .ok()
+                            .and_then(|v| v.parse::<usize>().ok())
+                            .unwrap_or(1)
+                    } else {
+                        1
+                    };
+
+                    let mut best = scored[0].0;
+                    let mut best_total = f64::NEG_INFINITY;
+                    for (idx, (mv, base_total, next_state)) in scored.iter().enumerate() {
+                        if idx >= beam_width {
+                            break;
+                        }
+                        let future = if state.turn + 1 < game.t {
+                            best_n_step_score(game, next_state, models, score_fn, future_depth)
+                        } else {
+                            0.0
+                        };
+                        let total = *base_total + future_w * future;
+                        if total > best_total {
+                            best_total = total;
+                            best = *mv;
+                        }
+                    }
+                    best
+                }
+            }
+            mod x02_monte_carlo {
+                use crate::__cargo_equip::crates::ahc061_solver::{AiModel, FastRng, Game, State};
+
+                pub(super) fn choose_move_monte_carlo(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates =
+                        crate::__cargo_equip::crates::ahc061_solver::get_candidates(game, state, 0);
+                    if candidates.len() <= 1 {
+                        return candidates.first().copied().unwrap_or(state.pos[0]);
+                    }
+
+                    let scores =
+                        crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state);
+                    let s0 = scores[0] as f64;
+                    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                    let phase = state.turn as f64 / game.t as f64;
+                    let conflict_map =
+                        crate::__cargo_equip::crates::ahc061_solver::estimate_conflict_map(
+                            game, state, models,
+                        );
+                    let cur = state.pos[0];
+                    let mut is_leader = vec![false; game.m];
+                    for p in 1..game.m {
+                        if scores[p] == max_ai_i64 {
+                            is_leader[p] = true;
+                        }
+                    }
+
+                    let mut ranked: Vec<((usize, usize), f64)> =
+                        Vec::with_capacity(candidates.len());
+                    for &mv in &candidates {
+                        let local =
+                            crate::__cargo_equip::crates::ahc061_solver::evaluate_local_move(
+                                game,
+                                state,
+                                mv,
+                                &scores,
+                                s0,
+                                max_ai_i64,
+                                phase,
+                                &conflict_map,
+                                cur,
+                                &is_leader,
+                            );
+                        ranked.push((mv, local));
+                    }
+                    ranked
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    let candidate_cap = if ranked.len() >= 24 {
+                        14
+                    } else if ranked.len() >= 14 {
+                        10
+                    } else {
+                        ranked.len()
+                    };
+                    let sample_count_default = if game.m >= 7 {
+                        10
+                    } else if game.m >= 5 {
+                        8
+                    } else {
+                        6
+                    };
+                    let sample_count: usize = std::env::var("AHC_X02_SAMPLE_COUNT")
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(sample_count_default)
+                        .max(2)
+                        .min(50);
+
+                    let ai_options =
+                        crate::__cargo_equip::crates::ahc061_solver::build_ai_candidates_and_probs(
+                            game, state, models,
+                        );
+                    let seed = ((state.turn as u64 + 1) * 0x9e37_79b9_7f4a_7c15)
+                        ^ (scores[0] as u64)
+                        ^ ((game.m as u64) << 32)
+                        ^ ((game.u as u64) << 48);
+                    let mut rng = FastRng::new(seed);
+
+                    let mut best_mv = ranked[0].0;
+                    let mut best_val = f64::NEG_INFINITY;
+                    for &(mv, local) in ranked.iter().take(candidate_cap) {
+                        let mut acc = 0.0_f64;
+                        let mut acc2 = 0.0_f64;
+                        for _ in 0..sample_count {
+                            let mut sampled = Vec::with_capacity(game.m);
+                            sampled.push(mv);
+                            for (cands, probs) in &ai_options {
+                                let idx = crate::__cargo_equip::crates::ahc061_solver::sample_index(
+                                    probs, &mut rng,
+                                );
+                                sampled.push(cands[idx]);
+                            }
+                            let next_state =
+                                crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                                    game, state, &sampled,
+                                );
+                            let v = if std::env::var("AHC_X02_USE_ZONE_SCORE")
+                                .map(|s| s == "1")
+                                .unwrap_or(false)
+                            {
+                                crate::__cargo_equip::crates::ahc061_solver::zone_absolute_score(
+                                    game,
+                                    &next_state,
+                                )
+                            } else {
+                                crate::__cargo_equip::crates::ahc061_solver::strategic_score(
+                                    game,
+                                    &next_state,
+                                )
+                            };
+                            acc += v;
+                            acc2 += v * v;
+                        }
+                        let mean = acc / sample_count as f64;
+                        let var = (acc2 / sample_count as f64 - mean * mean).max(0.0);
+                        let std = var.sqrt();
+                        let risk_w_default = if game.m >= 6 { 0.40 } else { 0.25 };
+                        let risk_w: f64 = std::env::var("AHC_X02_RISK_W")
+                            .ok()
+                            .and_then(|v| v.parse().ok())
+                            .unwrap_or(risk_w_default);
+                        let mc_local_w: f64 = std::env::var("AHC_X02_LOCAL_W")
+                            .ok()
+                            .and_then(|v| v.parse().ok())
+                            .unwrap_or(0.09);
+                        let total = mean - risk_w * std + mc_local_w * local;
+                        if total > best_val {
+                            best_val = total;
+                            best_mv = mv;
+                        }
+                    }
+                    best_mv
+                }
+            }
+            mod x04_macro_route {
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    x01_beam_pessimistic, x02_monte_carlo, x06_expert_switch_hybrid, x174_chokudai,
+                    x206_sa_rolling_horizon, x228_strategic_mc, x305_full_horizon,
+                    x328_ratio_greedy, x86_aggressive_denial, x89_level_fortress, AiModel, Game,
+                    State,
+                };
+                use std::time::{Duration, Instant};
+
+                fn fallback_move(game: &Game, state: &State, models: &[AiModel]) -> (usize, usize) {
+                    match std::env::var("AHC_X04_FALLBACK").ok().as_deref() {
+                        Some("beam") => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                            game, state, models,
+                        ),
+                        Some("mc") => x02_monte_carlo::choose_move_monte_carlo(game, state, models),
+                        Some("deep_rollout") => {
+                            x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                game, state, models,
+                            )
+                        }
+                        Some("x228") => {
+                            x228_strategic_mc::choose_move_x228_strategic_mc(game, state, models)
+                        }
+                        Some("x86") => x86_aggressive_denial::choose_move_x86_aggressive_denial(
+                            game, state, models,
+                        ),
+                        Some("x174") => {
+                            x174_chokudai::choose_move_x174_chokudai(game, state, models)
+                        }
+                        Some("x206") => {
+                            x206_sa_rolling_horizon::choose_move_x206_sa_rolling_horizon(
+                                game, state, models,
+                            )
+                        }
+                        Some("x89") => {
+                            x89_level_fortress::choose_move_x89_level_fortress(game, state, models)
+                        }
+                        Some("smart") => match game.m {
+                            2 => x86_aggressive_denial::choose_move_x86_aggressive_denial(
+                                game, state, models,
+                            ),
+                            5 => x228_strategic_mc::choose_move_x228_strategic_mc(
+                                game, state, models,
+                            ),
+                            6..=8 => x174_chokudai::choose_move_x174_chokudai(game, state, models),
+                            _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                game, state, models,
+                            ),
+                        },
+                        Some("m6_x174") => {
+                            if game.m == 6 {
+                                x174_chokudai::choose_move_x174_chokudai(game, state, models)
+                            } else {
+                                x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                    game, state, models,
+                                )
+                            }
+                        }
+                        Some("m56_x174") => {
+                            if game.m == 5 || game.m == 6 {
+                                x174_chokudai::choose_move_x174_chokudai(game, state, models)
+                            } else {
+                                x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                    game, state, models,
+                                )
+                            }
+                        }
+                        Some("best_dispatch") => match game.m {
+                            2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                game, state, models,
+                            ),
+                            5 => x228_strategic_mc::choose_move_x228_strategic_mc(
+                                game, state, models,
+                            ),
+                            6 => x174_chokudai::choose_move_x174_chokudai(game, state, models),
+                            7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                game, state, models,
+                            ),
+                            _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                game, state, models,
+                            ),
+                        },
+                        Some("optimal_dispatch") => match game.m {
+                            2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                game, state, models,
+                            ),
+                            6 => x174_chokudai::choose_move_x174_chokudai(game, state, models),
+                            7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                game, state, models,
+                            ),
+                            _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                game, state, models,
+                            ),
+                        },
+                        Some("optimal_v2") => match game.m {
+                            2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                game, state, models,
+                            ),
+                            6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                game, state, models,
+                            ),
+                            7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                game, state, models,
+                            ),
+                            _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                game, state, models,
+                            ),
+                        },
+                        Some("optimal_v3") => match game.m {
+                            2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                game, state, models,
+                            ),
+                            5 | 6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                game, state, models,
+                            ),
+                            7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                game, state, models,
+                            ),
+                            _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                game, state, models,
+                            ),
+                        },
+                        Some("u_aware_v2") => match game.m {
+                            2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                game, state, models,
+                            ),
+                            3 | 4 | 5 | 6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                game, state, models,
+                            ),
+                            7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                game, state, models,
+                            ),
+                            _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                game, state, models,
+                            ),
+                        },
+                        Some("u_aware_v3") => {
+                            if game.u >= 3 && (game.m == 3 || game.m == 4) {
+                                x305_full_horizon::choose_move_x305_full_horizon(
+                                    game, state, models,
+                                )
+                            } else {
+                                match game.m {
+                                    2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                        game, state, models,
+                                    ),
+                                    6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                        game, state, models,
+                                    ),
+                                    7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                        game, state, models,
+                                    ),
+                                    _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                        game, state, models,
+                                    ),
+                                }
+                            }
+                        }
+                        Some("u_aware_v4") => {
+                            if game.u >= 3 && game.m == 4 {
+                                x305_full_horizon::choose_move_x305_full_horizon(
+                                    game, state, models,
+                                )
+                            } else {
+                                match game.m {
+                                    2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                        game, state, models,
+                                    ),
+                                    6 if game.u <= 3 => x174_chokudai::choose_move_x174_chokudai(
+                                        game, state, models,
+                                    ),
+                                    6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                        game, state, models,
+                                    ),
+                                    7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                        game, state, models,
+                                    ),
+                                    _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                        game, state, models,
+                                    ),
+                                }
+                            }
+                        }
+                        Some("u_aware_v5") => {
+                            if game.u >= 3 && game.m == 4 {
+                                x305_full_horizon::choose_move_x305_full_horizon(
+                                    game, state, models,
+                                )
+                            } else {
+                                match game.m {
+                                    2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                        game, state, models,
+                                    ),
+                                    5 => x174_chokudai::choose_move_x174_chokudai(
+                                        game, state, models,
+                                    ),
+                                    6 if game.u <= 3 => x174_chokudai::choose_move_x174_chokudai(
+                                        game, state, models,
+                                    ),
+                                    6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                        game, state, models,
+                                    ),
+                                    7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                        game, state, models,
+                                    ),
+                                    _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                        game, state, models,
+                                    ),
+                                }
+                            }
+                        }
+                        Some("u_aware_v6") => {
+                            if game.u >= 3 && game.m == 4 {
+                                x305_full_horizon::choose_move_x305_full_horizon(
+                                    game, state, models,
+                                )
+                            } else {
+                                match game.m {
+                                    2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                        game, state, models,
+                                    ),
+                                    5 => x305_full_horizon::choose_move_x305_full_horizon(
+                                        game, state, models,
+                                    ),
+                                    6 if game.u <= 3 => x174_chokudai::choose_move_x174_chokudai(
+                                        game, state, models,
+                                    ),
+                                    6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                        game, state, models,
+                                    ),
+                                    7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                        game, state, models,
+                                    ),
+                                    _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                        game, state, models,
+                                    ),
+                                }
+                            }
+                        }
+                        Some("smart_v2") => match game.m {
+                            2 | 6 => x174_chokudai::choose_move_x174_chokudai(game, state, models),
+                            5 | 7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                game, state, models,
+                            ),
+                            _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                game, state, models,
+                            ),
+                        },
+                        Some("u_aware") => match game.u {
+                            1 => x174_chokudai::choose_move_x174_chokudai(game, state, models),
+                            2 => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                game, state, models,
+                            ),
+                            _ => x89_level_fortress::choose_move_x89_level_fortress(
+                                game, state, models,
+                            ),
+                        },
+                        Some("phase") => {
+                            let phase = state.turn as f64 / game.t as f64;
+                            let switch_point: f64 = std::env::var("AHC_PHASE_SWITCH")
+                                .ok()
+                                .and_then(|v| v.parse().ok())
+                                .unwrap_or(0.55);
+                            if phase < switch_point {
+                                x228_strategic_mc::choose_move_x228_strategic_mc(
+                                    game, state, models,
+                                )
+                            } else {
+                                x89_level_fortress::choose_move_x89_level_fortress(
+                                    game, state, models,
+                                )
+                            }
+                        }
+                        Some("u_aware_v5") => {
+                            let candidates =
+                                crate::__cargo_equip::crates::ahc061_solver::get_candidates(
+                                    game, state, 0,
+                                );
+                            if game.u > 1 {
+                                let mut best_upgrade: Option<((usize, usize), f64)> = None;
+                                for &(x, y) in &candidates {
+                                    if state.owner[x][y] == 0
+                                        && (state.level[x][y] as usize) < game.u
+                                    {
+                                        let v = game.v[x][y] as f64;
+                                        let remaining_levels =
+                                            (game.u as f64 - state.level[x][y] as f64);
+                                        let value = v * remaining_levels;
+                                        if best_upgrade.is_none() || value > best_upgrade.unwrap().1
+                                        {
+                                            best_upgrade = Some(((x, y), value));
+                                        }
+                                    }
+                                }
+                                if let Some((target, _)) = best_upgrade {
+                                    return target;
+                                }
+                            }
+
+                            if game.u >= 3 && game.m == 4 {
+                                x305_full_horizon::choose_move_x305_full_horizon(
+                                    game, state, models,
+                                )
+                            } else {
+                                match game.m {
+                                    2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                        game, state, models,
+                                    ),
+                                    6 if game.u <= 3 => x174_chokudai::choose_move_x174_chokudai(
+                                        game, state, models,
+                                    ),
+                                    6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                        game, state, models,
+                                    ),
+                                    7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                        game, state, models,
+                                    ),
+                                    _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                        game, state, models,
+                                    ),
+                                }
+                            }
+                        }
+                        Some("u_aware_v7") => {
+                            if game.m == 3 {
+                                x328_ratio_greedy::choose_move_x328_ratio_greedy(
+                                    game, state, models,
+                                )
+                            } else {
+                                match game.m {
+                                    2 => x01_beam_pessimistic::choose_move_x01_beam_pessimistic(
+                                        game, state, models,
+                                    ),
+                                    6 if game.u <= 3 => x174_chokudai::choose_move_x174_chokudai(
+                                        game, state, models,
+                                    ),
+                                    6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                        game, state, models,
+                                    ),
+                                    7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                        game, state, models,
+                                    ),
+                                    _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                        game, state, models,
+                                    ),
+                                }
+                            }
+                        }
+                        Some("u_aware_v6") => {
+                            if game.m <= 4 {
+                                x328_ratio_greedy::choose_move_x328_ratio_greedy(
+                                    game, state, models,
+                                )
+                            } else {
+                                match game.m {
+                                    6 if game.u <= 3 => x174_chokudai::choose_move_x174_chokudai(
+                                        game, state, models,
+                                    ),
+                                    6 => x305_full_horizon::choose_move_x305_full_horizon(
+                                        game, state, models,
+                                    ),
+                                    7 | 8 => x89_level_fortress::choose_move_x89_level_fortress(
+                                        game, state, models,
+                                    ),
+                                    _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                                        game, state, models,
+                                    ),
+                                }
+                            }
+                        }
+                        _ => x06_expert_switch_hybrid::choose_move_x06_expert_switch(
+                            game, state, models,
+                        ),
+                    }
+                }
+                #[derive(Clone)]
+                struct RouteNode {
+                    state: State,
+                    score: f64,
+                }
+
+                fn env_u64(name: &str, default: u64, min: u64, max: u64) -> u64 {
+                    if let Ok(v) = std::env::var(name) {
+                        if let Ok(x) = v.parse::<u64>() {
+                            return x.max(min).min(max);
+                        }
+                    }
+                    default.max(min).min(max)
+                }
+
+                fn env_f64(name: &str, default: f64, min: f64, max: f64) -> f64 {
+                    if let Ok(v) = std::env::var(name) {
+                        if let Ok(x) = v.parse::<f64>() {
+                            return x.max(min).min(max);
+                        }
+                    }
+                    default.max(min).min(max)
+                }
+
+                fn manhattan(a: (usize, usize), b: (usize, usize)) -> usize {
+                    a.0.abs_diff(b.0) + a.1.abs_diff(b.1)
+                }
+
+                fn clamp01(x: f64) -> f64 {
+                    x.clamp(0.0, 1.0)
+                }
+
+                fn pressure_weight_by_phase(phase: f64, split: f64, early: f64, late: f64) -> f64 {
+                    if phase <= split {
+                        early
+                    } else {
+                        late
+                    }
+                }
+
+                fn estimate_move_pressure(
+                    game: &Game,
+                    state: &State,
+                    conflict: &[Vec<f64>],
+                    mv: (usize, usize),
+                    phase: f64,
+                ) -> f64 {
+                    const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+                    let mut neigh = 0.0;
+                    let mut neigh_n = 0_u32;
+                    for (dx, dy) in DIRS {
+                        let nx = mv.0 as isize + dx;
+                        let ny = mv.1 as isize + dy;
+                        if crate::__cargo_equip::crates::ahc061_solver::in_bounds(game.n, nx, ny) {
+                            neigh += conflict[nx as usize][ny as usize];
+                            neigh_n += 1;
+                        }
+                    }
+                    let neigh = if neigh_n > 0 {
+                        neigh / neigh_n as f64
+                    } else {
+                        0.0
+                    };
+                    let owner = state.owner[mv.0][mv.1];
+                    let owner_factor = if owner == -1 {
+                        0.22
+                    } else if owner == 0 {
+                        0.48
+                    } else {
+                        1.0 + (state.level[mv.0][mv.1] as f64) / (game.u as f64 + 1.0)
+                    };
+                    let base = 0.75 * clamp01(conflict[mv.0][mv.1]) + 0.25 * clamp01(neigh);
+                    base * owner_factor * (1.0 + 0.5 * phase).clamp(0.5, 1.5)
+                }
+
+                fn choose_target_cells(
+                    game: &Game,
+                    state: &State,
+                    conflict: &[Vec<f64>],
+                    max_targets: usize,
+                    pressure_weight: f64,
+                    phase: f64,
+                    upgrade_weight: f64,
+                ) -> Vec<(usize, usize)> {
+                    choose_target_cells_with_bfs(
+                        game,
+                        state,
+                        conflict,
+                        max_targets,
+                        pressure_weight,
+                        phase,
+                        upgrade_weight,
+                        0.0,
+                    )
+                }
+
+                fn choose_target_cells_with_bfs(
+                    game: &Game,
+                    state: &State,
+                    conflict: &[Vec<f64>],
+                    max_targets: usize,
+                    pressure_weight: f64,
+                    phase: f64,
+                    upgrade_weight: f64,
+                    bfs_decay: f64,
+                ) -> Vec<(usize, usize)> {
+                    let dist_map = if bfs_decay > 0.0 {
+                        Some(
+                            crate::__cargo_equip::crates::ahc061_solver::bfs_distance_map(
+                                game, state, 0,
+                            ),
+                        )
+                    } else {
+                        None
+                    };
+
+                    let scores =
+                        crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state);
+                    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                    let leader_target_bonus = env_f64("AHC_X04_LEADER_TARGET_BONUS", 0.0, 0.0, 3.0);
+
+                    let zone_bonus = env_f64("AHC_X04_ZONE_BONUS", 0.0, 0.0, 5.0);
+                    let use_adaptive_zone = std::env::var("AHC_ZONE_ADAPTIVE")
+                        .map(|v| v == "1")
+                        .unwrap_or(false);
+                    let use_dual_zone = std::env::var("AHC_ZONE_DUAL")
+                        .map(|v| v == "1")
+                        .unwrap_or(false);
+                    let use_proximity_zone = std::env::var("AHC_ZONE_PROXIMITY")
+                        .map(|v| v == "1")
+                        .unwrap_or(false);
+                    let zone = if zone_bonus > 0.0 {
+                        Some(if use_dual_zone {
+                            crate::__cargo_equip::crates::ahc061_solver::compute_dual_zone(game)
+                        } else if use_proximity_zone {
+                            crate::__cargo_equip::crates::ahc061_solver::compute_proximity_zone(
+                                game, state,
+                            )
+                        } else if use_adaptive_zone {
+                            crate::__cargo_equip::crates::ahc061_solver::compute_adaptive_zone(
+                                game, state,
+                            )
+                        } else {
+                            crate::__cargo_equip::crates::ahc061_solver::compute_value_zone(game)
+                        })
+                    } else {
+                        None
+                    };
+
+                    let frontier_denial_bonus =
+                        env_f64("AHC_X04_FRONTIER_DENIAL_BONUS", 0.0, 0.0, 5.0);
+                    let mut scored = Vec::<((usize, usize), f64)>::new();
+                    for x in 0..game.n {
+                        for y in 0..game.n {
+                            let owner = state.owner[x][y];
+                            let level = state.level[x][y];
+                            let v = game.v[x][y] as f64;
+                            let mut w = 0.0;
+                            let target_attack_w =
+                                env_f64("AHC_X04_TARGET_ATTACK_W", 1.18, 0.5, 3.0);
+                            if owner == -1 {
+                                w = 1.00 * v;
+
+                                if frontier_denial_bonus > 0.0 {
+                                    let dirs: [(isize, isize); 4] =
+                                        [(0, 1), (0, -1), (1, 0), (-1, 0)];
+                                    for (dx, dy) in dirs {
+                                        let nx = x as isize + dx;
+                                        let ny = y as isize + dy;
+                                        if nx >= 0
+                                            && nx < game.n as isize
+                                            && ny >= 0
+                                            && ny < game.n as isize
+                                        {
+                                            let no = state.owner[nx as usize][ny as usize];
+                                            if no > 0 && scores[no as usize] == max_ai_i64 {
+                                                w += frontier_denial_bonus * v * phase;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            } else if owner > 0 && level == 1 {
+                                w = target_attack_w * v;
+
+                                if leader_target_bonus > 0.0 && scores[owner as usize] == max_ai_i64
+                                {
+                                    w += leader_target_bonus * phase * v;
+                                }
+                            } else if owner == 0 && level < game.u {
+                                let upgrade_flat = std::env::var("AHC_X04_UPGRADE_TARGET_FLAT")
+                                    .map(|val| val == "1")
+                                    .unwrap_or(false);
+                                if upgrade_flat {
+                                    let remaining_bonus =
+                                        1.0 + 0.08 * (game.u as f64 - level as f64 - 1.0).max(0.0);
+                                    w = upgrade_weight * v * remaining_bonus;
+                                } else {
+                                    w = upgrade_weight * v * (game.u - level) as f64
+                                        / game.u as f64;
+                                }
+                            }
+                            if w > 0.0 {
+                                if let Some(ref z) = zone {
+                                    if z[x][y] {
+                                        w *= 1.0 + zone_bonus;
+                                    }
+                                }
+                                if pressure_weight.abs() > f64::EPSILON {
+                                    let p = estimate_move_pressure(
+                                        game,
+                                        state,
+                                        conflict,
+                                        (x, y),
+                                        phase,
+                                    );
+                                    w += -pressure_weight * p * v;
+                                }
+
+                                if let Some(ref dm) = dist_map {
+                                    let d = dm[x][y];
+                                    if d == usize::MAX {
+                                        let md = manhattan(state.pos[0], (x, y));
+                                        w *= 1.0 / (1.0 + bfs_decay * (md as f64) * 3.0);
+                                    } else {
+                                        w *= 1.0 / (1.0 + bfs_decay * d as f64);
+                                    }
+                                }
+                                scored.push(((x, y), w));
+                            }
+                        }
+                    }
+                    if scored.is_empty() {
+                        return Vec::new();
+                    }
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+                    scored.into_iter().take(max_targets).map(|x| x.0).collect()
+                }
+
+                fn predicted_ai_moves(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    step: usize,
+                ) -> Vec<(usize, usize)> {
+                    let scores =
+                        crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state);
+                    let top2 =
+                        crate::__cargo_equip::crates::ahc061_solver::choose_predicted_ai_top2_moves(
+                            game, state, models,
+                        );
+                    let primary: Vec<(usize, usize)> = top2.iter().map(|x| x.0).collect();
+                    let uncertainty =
+                        crate::__cargo_equip::crates::ahc061_solver::uncertainty_risk(&top2);
+                    let secondary_cap = if game.m >= 7 && uncertainty >= 0.40 {
+                        3
+                    } else if game.m >= 6 && uncertainty >= 0.28 {
+                        2
+                    } else {
+                        1
+                    };
+                    let secondary =
+                        crate::__cargo_equip::crates::ahc061_solver::build_secondary_ai_moves(
+                            &scores,
+                            &top2,
+                            secondary_cap,
+                        );
+                    if uncertainty >= 0.24 && (step % 2 == 1) {
+                        secondary
+                    } else {
+                        primary
+                    }
+                }
+
+                type RouteScoFn = fn(&Game, &State) -> f64;
+
+                fn resolve_route_score_fn() -> RouteScoFn {
+                    match std::env::var("AHC_X04_ROUTE_SCORE").ok().as_deref() {
+                        Some("denial") => crate::__cargo_equip::crates::ahc061_solver::denial_score,
+                        Some("denial_v2") => {
+                            crate::__cargo_equip::crates::ahc061_solver::denial_score_v2
+                        }
+                        Some("absolute") => {
+                            crate::__cargo_equip::crates::ahc061_solver::absolute_score
+                        }
+                        _ => {
+                            if std::env::var("AHC_X04_USE_DENIAL_ROUTE")
+                                .map(|v| v == "1")
+                                .unwrap_or(false)
+                            {
+                                crate::__cargo_equip::crates::ahc061_solver::denial_score
+                            } else {
+                                crate::__cargo_equip::crates::ahc061_solver::strategic_score
+                            }
+                        }
+                    }
+                }
+
+                fn route_increment(
+                    game: &Game,
+                    prev: &State,
+                    next: &State,
+                    mv: (usize, usize),
+                    target: (usize, usize),
+                    local: f64,
+                    pressure: f64,
+                    pressure_weight: f64,
+                    local_coeff: f64,
+                    route_coeff: f64,
+                ) -> f64 {
+                    let score_fn = resolve_route_score_fn();
+                    let prev_score = score_fn(game, prev);
+                    let next_score = score_fn(game, next);
+                    let gain = next_score - prev_score;
+                    let d0 = manhattan(prev.pos[0], target) as f64;
+                    let d1 = manhattan(mv, target) as f64;
+                    let route_bonus = (d0 - d1).clamp(-6.0, 6.0);
+                    gain + route_coeff * route_bonus - pressure_weight * pressure
+                        + local_coeff * local
+                }
+
+                fn beam_route_score(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    first_mv: (usize, usize),
+                    target: (usize, usize),
+                    plan_len: usize,
+                    beam_width: usize,
+                    branch_width: usize,
+                    pressure_phase_split: f64,
+                    pressure_weight_early: f64,
+                    pressure_weight_late: f64,
+                    local_coeff: f64,
+                    route_coeff: f64,
+                    deadline: Option<Instant>,
+                ) -> f64 {
+                    let mut moves = Vec::with_capacity(game.m);
+                    moves.push(first_mv);
+                    moves.extend_from_slice(&predicted_ai_moves(game, state, models, 0));
+                    let first_state = crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                        game, state, &moves,
+                    );
+                    let first_conflict =
+                        crate::__cargo_equip::crates::ahc061_solver::estimate_conflict_map(
+                            game, state, models,
+                        );
+
+                    let first_phase = state.turn as f64 / game.t as f64;
+                    let first_pressure =
+                        estimate_move_pressure(game, state, &first_conflict, first_mv, first_phase);
+                    let first_local =
+                        crate::__cargo_equip::crates::ahc061_solver::evaluate_local_move(
+                            game,
+                            state,
+                            first_mv,
+                            &crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state),
+                            crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state)[0]
+                                as f64,
+                            crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state)
+                                .iter()
+                                .skip(1)
+                                .copied()
+                                .max()
+                                .unwrap_or(1)
+                                .max(1),
+                            state.turn as f64 / game.t as f64,
+                            &first_conflict,
+                            state.pos[0],
+                            &{
+                                let mut is_leader = vec![false; game.m];
+                                let scores =
+                                    crate::__cargo_equip::crates::ahc061_solver::calc_scores(
+                                        game, state,
+                                    );
+                                let max_ai =
+                                    scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                                for p in 1..game.m {
+                                    if scores[p] == max_ai {
+                                        is_leader[p] = true;
+                                    }
+                                }
+                                is_leader
+                            },
+                        );
+                    let first_pressure_weight = pressure_weight_by_phase(
+                        first_phase,
+                        pressure_phase_split,
+                        pressure_weight_early,
+                        pressure_weight_late,
+                    );
+
+                    let base_gain = route_increment(
+                        game,
+                        state,
+                        &first_state,
+                        first_mv,
+                        target,
+                        first_local,
+                        first_pressure,
+                        first_pressure_weight,
+                        local_coeff,
+                        route_coeff,
+                    );
+                    let mut beam = vec![RouteNode {
+                        state: first_state,
+                        score: base_gain,
+                    }];
+
+                    for step in 1..plan_len {
+                        if let Some(dl) = deadline {
+                            if Instant::now() >= dl {
+                                break;
+                            }
+                        }
+                        let mut next_beam = Vec::<RouteNode>::new();
+                        for node in &beam {
+                            let scores = crate::__cargo_equip::crates::ahc061_solver::calc_scores(
+                                game,
+                                &node.state,
+                            );
+                            let s0 = scores[0] as f64;
+                            let max_ai_i64 =
+                                scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                            let phase = node.state.turn as f64 / game.t as f64;
+                            let conflict =
+                                crate::__cargo_equip::crates::ahc061_solver::estimate_conflict_map(
+                                    game,
+                                    &node.state,
+                                    models,
+                                );
+                            let cur = node.state.pos[0];
+                            let mut is_leader = vec![false; game.m];
+                            for p in 1..game.m {
+                                if scores[p] == max_ai_i64 {
+                                    is_leader[p] = true;
+                                }
+                            }
+
+                            let mut my_cands =
+                                crate::__cargo_equip::crates::ahc061_solver::get_candidates(
+                                    game,
+                                    &node.state,
+                                    0,
+                                );
+                            if my_cands.is_empty() {
+                                continue;
+                            }
+                            my_cands.sort_by(|&a, &b| {
+                                let la = crate::__cargo_equip::crates::ahc061_solver::evaluate_local_move(
+                                    game, &node.state, a, &scores, s0, max_ai_i64, phase, &conflict, cur, &is_leader,
+                                ) + 18.0
+                                    * (manhattan(cur, target) as f64 - manhattan(a, target) as f64);
+                                let lb = crate::__cargo_equip::crates::ahc061_solver::evaluate_local_move(
+                                    game, &node.state, b, &scores, s0, max_ai_i64, phase, &conflict, cur, &is_leader,
+                                ) + 18.0
+                                    * (manhattan(cur, target) as f64 - manhattan(b, target) as f64);
+                                lb.partial_cmp(&la).unwrap_or(std::cmp::Ordering::Equal)
+                            });
+
+                            for &mv in my_cands.iter().take(branch_width) {
+                                let local = crate::__cargo_equip::crates::ahc061_solver::evaluate_local_move(
+                                game, &node.state, mv, &scores, s0, max_ai_i64, phase, &conflict, cur, &is_leader,
+                            );
+                                let pressure =
+                                    estimate_move_pressure(game, &node.state, &conflict, mv, phase);
+                                let pressure_weight = pressure_weight_by_phase(
+                                    phase,
+                                    pressure_phase_split,
+                                    pressure_weight_early,
+                                    pressure_weight_late,
+                                );
+                                let mut full_moves = Vec::with_capacity(game.m);
+                                full_moves.push(mv);
+                                full_moves.extend_from_slice(&predicted_ai_moves(
+                                    game,
+                                    &node.state,
+                                    models,
+                                    step,
+                                ));
+                                let ns = crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                                    game,
+                                    &node.state,
+                                    &full_moves,
+                                );
+                                let discount_base = env_f64("AHC_X04_DISCOUNT", 0.93, 0.80, 0.99);
+                                let discount = discount_base.powi(step as i32);
+                                let inc = route_increment(
+                                    game,
+                                    &node.state,
+                                    &ns,
+                                    mv,
+                                    target,
+                                    local,
+                                    pressure,
+                                    pressure_weight,
+                                    local_coeff,
+                                    route_coeff,
+                                );
+                                next_beam.push(RouteNode {
+                                    state: ns,
+                                    score: node.score + discount * inc,
+                                });
+                            }
+                        }
+                        if next_beam.is_empty() {
+                            break;
+                        }
+                        next_beam.sort_by(|a, b| {
+                            b.score
+                                .partial_cmp(&a.score)
+                                .unwrap_or(std::cmp::Ordering::Equal)
+                        });
+                        next_beam.truncate(beam_width);
+                        beam = next_beam;
+                    }
+
+                    let final_eval_w = env_f64("AHC_X04_FINAL_EVAL_W", 0.03, 0.0, 0.50);
+                    let score_fn = resolve_route_score_fn();
+                    beam.iter()
+                        .map(|n| n.score + final_eval_w * score_fn(game, &n.state))
+                        .fold(f64::NEG_INFINITY, f64::max)
+                }
+
+                pub(super) fn choose_move_x04_macro_route(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let allowed_m_str =
+                        std::env::var("AHC_X04_ALLOWED_M").unwrap_or_else(|_| "4".to_string());
+                    let allowed_m: Vec<usize> = allowed_m_str
+                        .split(',')
+                        .filter_map(|s| s.trim().parse().ok())
+                        .collect();
+                    if !allowed_m.contains(&game.m) {
+                        return fallback_move(game, state, models);
+                    }
+                    let default_cutoff = env_f64("AHC_X04_PHASE_CUTOFF", 0.65, 0.20, 0.95);
+
+                    let per_m_cutoff_key = format!("AHC_X04_PHASE_CUTOFF_M{}", game.m);
+                    let m_cutoff = env_f64(&per_m_cutoff_key, default_cutoff, 0.20, 0.95);
+
+                    let mu_cutoff_key = format!("AHC_X04_PHASE_CUTOFF_M{}_U{}", game.m, game.u);
+
+                    let per_u_cutoff_key = format!("AHC_X04_PHASE_CUTOFF_U{}", game.u);
+                    let phase_cutoff = if std::env::var(&mu_cutoff_key).is_ok() {
+                        env_f64(&mu_cutoff_key, m_cutoff, 0.0, 0.98)
+                    } else {
+                        env_f64(&per_u_cutoff_key, m_cutoff, 0.0, 0.98)
+                    };
+                    let phase_split = env_f64("AHC_X04_PHASE_SPLIT", 0.50, 0.20, 0.90);
+
+                    let m_suffix = format!("_M{}", game.m);
+                    let target_count = env_u64(
+                        &format!("AHC_X04_TARGET_COUNT{}", m_suffix),
+                        env_u64("AHC_X04_TARGET_COUNT", 5, 2, 12),
+                        2,
+                        12,
+                    ) as usize;
+                    let target_eval = env_u64(
+                        &format!("AHC_X04_TARGET_EVAL{}", m_suffix),
+                        env_u64("AHC_X04_TARGET_EVAL", 4, 1, 8),
+                        1,
+                        8,
+                    ) as usize;
+                    let candidate_cap = env_u64(
+                        &format!("AHC_X04_CANDIDATE_CAP{}", m_suffix),
+                        env_u64("AHC_X04_CANDIDATE_CAP", 7, 4, 20),
+                        4,
+                        20,
+                    ) as usize;
+                    let plan_len_fast = env_u64(
+                        &format!("AHC_X04_PLAN_LEN_FAST{}", m_suffix),
+                        env_u64("AHC_X04_PLAN_LEN_FAST", 7, 3, 10),
+                        3,
+                        10,
+                    ) as usize;
+                    let plan_len_slow = env_u64(
+                        &format!("AHC_X04_PLAN_LEN_SLOW{}", m_suffix),
+                        env_u64("AHC_X04_PLAN_LEN_SLOW", 8, 3, 10),
+                        3,
+                        10,
+                    ) as usize;
+                    let beam_width_fast = env_u64(
+                        &format!("AHC_X04_BEAM_WIDTH_FAST{}", m_suffix),
+                        env_u64("AHC_X04_BEAM_WIDTH_FAST", 5, 2, 8),
+                        2,
+                        8,
+                    ) as usize;
+                    let beam_width_slow = env_u64(
+                        &format!("AHC_X04_BEAM_WIDTH_SLOW{}", m_suffix),
+                        env_u64("AHC_X04_BEAM_WIDTH_SLOW", 6, 2, 8),
+                        2,
+                        8,
+                    ) as usize;
+                    let beam_width_min = env_u64(
+                        &format!("AHC_X04_BEAM_WIDTH_MIN{}", m_suffix),
+                        env_u64("AHC_X04_BEAM_WIDTH_MIN", 0, 0, 8),
+                        0,
+                        8,
+                    ) as usize;
+                    let branch_width = env_u64(
+                        &format!("AHC_X04_BRANCH_WIDTH{}", m_suffix),
+                        env_u64("AHC_X04_BRANCH_WIDTH", 3, 1, 4),
+                        1,
+                        4,
+                    ) as usize;
+                    let local_weight = env_f64("AHC_X04_LOCAL_WEIGHT", 0.10, 0.0, 0.40);
+                    let local_coeff = env_f64("AHC_X04_LOCAL_COEFF", 0.07, 0.0, 0.40);
+                    let route_coeff = env_f64("AHC_X04_ROUTE_COEFF", 42.0, 10.0, 90.0);
+                    let target_pressure_weight =
+                        env_f64("AHC_X04_TARGET_PRESSURE_WEIGHT", 0.0, -1.0, 2.0);
+                    let pressure_weight = env_f64("AHC_X04_PRESSURE_WEIGHT", 0.00, -1.5, 2.0);
+                    let pressure_weight_early =
+                        env_f64("AHC_X04_PRESSURE_WEIGHT_EARLY", pressure_weight, -1.5, 2.0);
+                    let pressure_weight_late =
+                        env_f64("AHC_X04_PRESSURE_WEIGHT_LATE", pressure_weight, -1.5, 2.0);
+                    let pressure_route_weight =
+                        env_f64("AHC_X04_ROUTE_PRESSURE_WEIGHT", 0.00, -1.5, 2.0);
+                    let pressure_route_weight_early = env_f64(
+                        "AHC_X04_ROUTE_PRESSURE_WEIGHT_EARLY",
+                        pressure_route_weight,
+                        -1.5,
+                        2.0,
+                    );
+                    let pressure_route_weight_late = env_f64(
+                        "AHC_X04_ROUTE_PRESSURE_WEIGHT_LATE",
+                        pressure_route_weight,
+                        -1.5,
+                        2.0,
+                    );
+                    let pressure_phase_split =
+                        env_f64("AHC_X04_PRESSURE_PHASE_SPLIT", 0.60, 0.20, 0.90);
+                    let upgrade_weight_base = env_f64("AHC_X04_UPGRADE_WEIGHT", 0.72, 0.0, 5.0);
+                    let upgrade_weight_high_u =
+                        env_f64("AHC_X04_UPGRADE_WEIGHT_HIGH_U", -1.0, -1.0, 5.0);
+                    let default_for_u = if game.u >= 3 && upgrade_weight_high_u >= 0.0 {
+                        upgrade_weight_high_u
+                    } else {
+                        upgrade_weight_base
+                    };
+
+                    let per_u_key = format!("AHC_X04_UPGRADE_WEIGHT_U{}", game.u);
+                    let upgrade_weight = env_f64(&per_u_key, default_for_u, 0.0, 5.0);
+                    let target_bfs_decay = env_f64("AHC_X04_TARGET_BFS_DECAY", 0.0, 0.0, 2.0);
+                    let phase_now = state.turn as f64 / game.t as f64;
+
+                    let ratio_switch = env_f64("AHC_X04_RATIO_SWITCH", 0.0, 0.0, 20.0);
+                    if ratio_switch > 0.0 && phase_now > 0.15 {
+                        let sc =
+                            crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state);
+                        let s0 = sc[0].max(1) as f64;
+                        let sa = sc.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                        if s0 / sa > ratio_switch {
+                            return fallback_move(game, state, models);
+                        }
+                    }
+                    if phase_now > phase_cutoff {
+                        return fallback_move(game, state, models);
+                    }
+
+                    let preemptive_threshold =
+                        env_f64("AHC_X04_PREEMPTIVE_UPGRADE", -1.0, -1.0, 50000.0);
+                    if preemptive_threshold >= 0.0 && game.u > 1 {
+                        let cur_pos = state.pos[0];
+                        let pre_scores =
+                            crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state);
+                        let pre_s0 = pre_scores[0].max(1) as f64;
+                        let pre_sa =
+                            pre_scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                        let pre_abs = (1.0 + pre_s0 / pre_sa).log2() * 1e5;
+
+                        let mut best_upgrade: Option<((usize, usize), f64)> = None;
+
+                        let dirs: [(isize, isize); 5] = [(0, 0), (0, 1), (1, 0), (0, -1), (-1, 0)];
+                        for (dx, dy) in dirs {
+                            let nx = cur_pos.0 as isize + dx;
+                            let ny = cur_pos.1 as isize + dy;
+                            if nx < 0 || nx >= game.n as isize || ny < 0 || ny >= game.n as isize {
+                                continue;
+                            }
+                            let ux = nx as usize;
+                            let uy = ny as usize;
+                            if state.owner[ux][uy] == 0 && state.level[ux][uy] < game.u {
+                                let v = game.v[ux][uy] as i64;
+                                let new_s0 = pre_s0 + v as f64;
+                                let new_abs = (1.0 + new_s0 / pre_sa).log2() * 1e5;
+                                let delta = new_abs - pre_abs;
+                                if delta >= preemptive_threshold {
+                                    if best_upgrade.is_none() || delta > best_upgrade.unwrap().1 {
+                                        best_upgrade = Some(((ux, uy), delta));
+                                    }
+                                }
+                            }
+                        }
+                        if let Some((target, _)) = best_upgrade {
+                            let cands = crate::__cargo_equip::crates::ahc061_solver::get_candidates(
+                                game, state, 0,
+                            );
+                            if cands.contains(&target) {
+                                return target;
+                            }
+                        }
+                    }
+
+                    let candidates =
+                        crate::__cargo_equip::crates::ahc061_solver::get_candidates(game, state, 0);
+                    if candidates.len() <= 1 {
+                        return candidates.first().copied().unwrap_or(state.pos[0]);
+                    }
+
+                    let scores =
+                        crate::__cargo_equip::crates::ahc061_solver::calc_scores(game, state);
+                    let s0 = scores[0] as f64;
+                    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                    let phase = state.turn as f64 / game.t as f64;
+                    let conflict_map =
+                        crate::__cargo_equip::crates::ahc061_solver::estimate_conflict_map(
+                            game, state, models,
+                        );
+                    let targets = choose_target_cells_with_bfs(
+                        game,
+                        state,
+                        &conflict_map,
+                        target_count,
+                        target_pressure_weight,
+                        phase,
+                        upgrade_weight,
+                        target_bfs_decay,
+                    );
+                    if targets.is_empty() {
+                        return fallback_move(game, state, models);
+                    }
+                    let cur = state.pos[0];
+                    let mut is_leader = vec![false; game.m];
+                    for p in 1..game.m {
+                        if scores[p] == max_ai_i64 {
+                            is_leader[p] = true;
+                        }
+                    }
+
+                    let mut ranked = Vec::<((usize, usize), f64)>::new();
+                    for &mv in &candidates {
+                        let pressure =
+                            estimate_move_pressure(game, state, &conflict_map, mv, phase);
+                        let local =
+                            crate::__cargo_equip::crates::ahc061_solver::evaluate_local_move(
+                                game,
+                                state,
+                                mv,
+                                &scores,
+                                s0,
+                                max_ai_i64,
+                                phase,
+                                &conflict_map,
+                                cur,
+                                &is_leader,
+                            );
+                        let pressure_weight_now = pressure_weight_by_phase(
+                            phase,
+                            pressure_phase_split,
+                            pressure_weight_early,
+                            pressure_weight_late,
+                        );
+                        ranked.push((mv, local - pressure_weight_now * pressure));
+                    }
+                    ranked
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+                    let candidate_cap = candidate_cap.min(ranked.len());
+                    let fast_phase = phase_now > phase_split;
+                    let plan_len = if fast_phase {
+                        plan_len_fast
+                    } else {
+                        plan_len_slow
+                    };
+                    let beam_width = if fast_phase {
+                        beam_width_fast
+                    } else {
+                        beam_width_slow
+                    };
+
+                    let turn_budget = crate::__cargo_equip::crates::ahc061_solver::turn_budget_ms(
+                        state.turn, game.t,
+                    );
+                    let turn_start = Instant::now();
+                    let deadline = if turn_budget > 0 {
+                        Some(turn_start + Duration::from_millis(turn_budget * 96 / 100))
+                    } else {
+                        None
+                    };
+
+                    let mut best_mv = ranked[0].0;
+                    let mut best_score = f64::NEG_INFINITY;
+
+                    let effective_beam = if beam_width_min > 0
+                        && beam_width_min < beam_width
+                        && turn_budget > 0
+                        && !ranked.is_empty()
+                        && !targets.is_empty()
+                    {
+                        let probe_start = Instant::now();
+                        let _probe = beam_route_score(
+                            game,
+                            state,
+                            models,
+                            ranked[0].0,
+                            targets[0],
+                            plan_len,
+                            beam_width,
+                            branch_width,
+                            pressure_phase_split,
+                            pressure_route_weight_early,
+                            pressure_route_weight_late,
+                            local_coeff,
+                            route_coeff,
+                            deadline,
+                        );
+                        let probe_us = probe_start.elapsed().as_micros() as u64;
+
+                        let projected_us = probe_us * candidate_cap as u64 * target_eval as u64;
+
+                        let budget_us = turn_budget * 960 * 55 / 100;
+                        if projected_us > budget_us {
+                            beam_width_min
+                        } else {
+                            beam_width
+                        }
+                    } else {
+                        beam_width
+                    };
+
+                    for &(mv, local) in ranked.iter().take(candidate_cap) {
+                        if let Some(dl) = deadline {
+                            if Instant::now() >= dl {
+                                break;
+                            }
+                        }
+                        let mut best_target_score = f64::NEG_INFINITY;
+                        for &target in targets.iter().take(target_eval) {
+                            if let Some(dl) = deadline {
+                                if Instant::now() >= dl {
+                                    break;
+                                }
+                            }
+                            let route_score = beam_route_score(
+                                game,
+                                state,
+                                models,
+                                mv,
+                                target,
+                                plan_len,
+                                effective_beam,
+                                branch_width,
+                                pressure_phase_split,
+                                pressure_route_weight_early,
+                                pressure_route_weight_late,
+                                local_coeff,
+                                route_coeff,
+                                deadline,
+                            );
+                            if route_score > best_target_score {
+                                best_target_score = route_score;
+                            }
+                        }
+                        let total = best_target_score + local_weight * local;
+                        if total > best_score {
+                            best_score = total;
+                            best_mv = mv;
+                        }
+                    }
+
+                    if let Some(dl) = deadline {
+                        let iter_deepen = env_u64("AHC_X04_ITER_DEEPEN", 1, 0, 1);
+                        if iter_deepen == 1 {
+                            let mut deep_beam = beam_width + 2;
+                            let deep_plan = (plan_len * 2).min(16);
+                            let re_eval_count = (env_u64("AHC_X04_RE_EVAL_COUNT", 3, 1, 10)
+                                as usize)
+                                .min(candidate_cap);
+                            while Instant::now() < dl && deep_beam <= 20 {
+                                for &(mv, local) in ranked.iter().take(re_eval_count) {
+                                    if Instant::now() >= dl {
+                                        break;
+                                    }
+                                    let mut best_target_score = f64::NEG_INFINITY;
+                                    for &target in targets.iter().take(target_eval) {
+                                        if Instant::now() >= dl {
+                                            break;
+                                        }
+                                        let route_score = beam_route_score(
+                                            game,
+                                            state,
+                                            models,
+                                            mv,
+                                            target,
+                                            deep_plan,
+                                            deep_beam,
+                                            branch_width,
+                                            pressure_phase_split,
+                                            pressure_route_weight_early,
+                                            pressure_route_weight_late,
+                                            local_coeff,
+                                            route_coeff,
+                                            deadline,
+                                        );
+                                        if route_score > best_target_score {
+                                            best_target_score = route_score;
+                                        }
+                                    }
+                                    let total = best_target_score + local_weight * local;
+                                    if total > best_score {
+                                        best_score = total;
+                                        best_mv = mv;
+                                    }
+                                }
+                                deep_beam += 2;
+                            }
+                        }
+                    }
+
+                    best_mv
+                }
+            }
+            mod x06_expert_switch_hybrid {
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    x01_beam_pessimistic, x02_monte_carlo, AiModel, Game, State,
+                };
+
+                pub(super) fn choose_move_x06_expert_switch(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    if (3..=5).contains(&game.m) {
+                        x02_monte_carlo::choose_move_monte_carlo(game, state, models)
+                    } else {
+                        x01_beam_pessimistic::choose_move_x01_beam_pessimistic(game, state, models)
+                    }
+                }
+            }
+            mod x86_aggressive_denial {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    ai_features, calc_scores, dot, get_candidates, simulate_turn, AiModel, Game,
+                    State,
+                };
+
+                fn predict_ai_moves(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> Vec<(usize, usize)> {
+                    let mut moves = Vec::with_capacity(game.m.saturating_sub(1));
+                    for ai_idx in 0..game.m.saturating_sub(1) {
+                        let player = ai_idx + 1;
+                        let cands = get_candidates(game, state, player);
+                        if cands.is_empty() {
+                            moves.push(state.pos[player]);
+                            continue;
+                        }
+                        let mut best_score = f64::NEG_INFINITY;
+                        let mut best = cands[0];
+                        for &c in &cands {
+                            let feat = ai_features(game, state, player, c);
+                            let s = dot(&models[ai_idx].w, &feat);
+                            if s > best_score {
+                                best_score = s;
+                                best = c;
+                            }
+                        }
+                        moves.push(best);
+                    }
+                    moves
+                }
+
+                fn evaluate_ratio(game: &Game, state: &State) -> f64 {
+                    let scores = calc_scores(game, state);
+                    let s0 = scores[0] as f64;
+                    let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                    1e5 * (1.0 + s0 / sa).log2()
+                }
+
+                fn evaluate_board(game: &Game, state: &State) -> f64 {
+                    let base = evaluate_ratio(game, state);
+                    let scores = calc_scores(game, state);
+                    let s0 = scores[0] as f64;
+                    let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                    let remaining = (game.t as f64 - state.turn as f64).max(0.0);
+                    let phase = state.turn as f64 / game.t as f64;
+
+                    let leader_idx = scores
+                        .iter()
+                        .skip(1)
+                        .enumerate()
+                        .max_by_key(|&(_, &s)| s)
+                        .map(|(i, _)| i + 1)
+                        .unwrap_or(1);
+
+                    let mut level_up_potential = 0.0_f64;
+                    let mut attack_opportunity = 0.0_f64;
+                    let mut defense_risk = 0.0_f64;
+
+                    for x in 0..game.n {
+                        for y in 0..game.n {
+                            let v = game.v[x][y] as f64;
+                            let owner = state.owner[x][y];
+                            let level = state.level[x][y];
+
+                            if owner == 0 {
+                                if level < game.u {
+                                    level_up_potential += v * (game.u - level) as f64;
+                                }
+
+                                if level == 1 {
+                                    defense_risk += v * 0.3;
+                                }
+                            } else if owner > 0 && level == 1 {
+                                let leader_bonus = if owner as usize == leader_idx {
+                                    2.0
+                                } else {
+                                    1.0
+                                };
+                                attack_opportunity += v * leader_bonus;
+                            }
+                        }
+                    }
+
+                    let attack_weight = if phase < 0.4 {
+                        0.020
+                    } else if phase < 0.7 {
+                        0.025
+                    } else {
+                        0.015
+                    };
+                    let levelup_weight = if phase < 0.3 {
+                        0.005
+                    } else if phase < 0.7 {
+                        0.012
+                    } else {
+                        0.018
+                    };
+                    let defense_weight = -0.008;
+
+                    base + attack_weight * attack_opportunity
+                        + levelup_weight * level_up_potential
+                        + defense_weight * defense_risk
+                }
+
+                fn evaluate_move(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    my_move: (usize, usize),
+                ) -> f64 {
+                    let ai_moves = predict_ai_moves(game, state, models);
+                    let mut moves = Vec::with_capacity(game.m);
+                    moves.push(my_move);
+                    moves.extend_from_slice(&ai_moves);
+                    let state1 = simulate_turn(game, state, &moves);
+
+                    let eval1 = evaluate_board(game, &state1);
+
+                    if state1.turn >= game.t {
+                        return eval1;
+                    }
+
+                    let cands1 = get_candidates(game, &state1, 0);
+                    if cands1.is_empty() || cands1.len() > 15 {
+                        return eval1;
+                    }
+
+                    let ai_moves1 = predict_ai_moves(game, &state1, models);
+                    let mut best_eval2 = f64::NEG_INFINITY;
+                    let limit = cands1.len().min(8);
+
+                    let mut scored1: Vec<_> = cands1
+                        .iter()
+                        .map(|&mv| {
+                            let v = game.v[mv.0][mv.1] as f64;
+                            let owner = state1.owner[mv.0][mv.1];
+                            let level = state1.level[mv.0][mv.1];
+                            let h = if owner == -1 {
+                                v
+                            } else if owner == 0 && level < game.u {
+                                0.8 * v
+                            } else if owner > 0 && level == 1 {
+                                1.5 * v
+                            } else {
+                                -0.1 * v
+                            };
+                            (mv, h)
+                        })
+                        .collect();
+                    scored1
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    for &(mv1, _) in scored1.iter().take(limit) {
+                        let mut moves1 = Vec::with_capacity(game.m);
+                        moves1.push(mv1);
+                        moves1.extend_from_slice(&ai_moves1);
+                        let state2 = simulate_turn(game, &state1, &moves1);
+                        let eval2 = evaluate_board(game, &state2);
+                        if eval2 > best_eval2 {
+                            best_eval2 = eval2;
+                        }
+                    }
+
+                    0.4 * eval1 + 0.6 * best_eval2
+                }
+
+                pub(super) fn choose_move_x86_aggressive_denial(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.is_empty() {
+                        return state.pos[0];
+                    }
+                    if candidates.len() == 1 {
+                        return candidates[0];
+                    }
+
+                    let scores = calc_scores(game, state);
+                    let phase = state.turn as f64 / game.t as f64;
+
+                    let leader_idx = scores
+                        .iter()
+                        .skip(1)
+                        .enumerate()
+                        .max_by_key(|&(_, &s)| s)
+                        .map(|(i, _)| i + 1)
+                        .unwrap_or(1);
+
+                    let mut scored: Vec<((usize, usize), f64)> = candidates
+                        .iter()
+                        .map(|&mv| {
+                            let (x, y) = mv;
+                            let v = game.v[x][y] as f64;
+                            let owner = state.owner[x][y];
+                            let level = state.level[x][y];
+
+                            let mut h = 0.0_f64;
+                            if owner == -1 {
+                                h += v;
+                            } else if owner == 0 {
+                                if level < game.u {
+                                    h += 0.8 * v;
+                                } else {
+                                    h -= 0.2 * v;
+                                }
+                            } else if level == 1 {
+                                let leader_bonus = if owner as usize == leader_idx {
+                                    2.5
+                                } else {
+                                    1.3
+                                };
+                                h += v * leader_bonus;
+                            } else {
+                                h -= v * 0.3;
+                            }
+                            (mv, h)
+                        })
+                        .collect();
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    let eval_cap = if candidates.len() <= 8 {
+                        candidates.len()
+                    } else if phase < 0.3 {
+                        12_usize.min(candidates.len())
+                    } else {
+                        10_usize.min(candidates.len())
+                    };
+
+                    let mut best_mv = scored[0].0;
+                    let mut best_score = f64::NEG_INFINITY;
+
+                    for &(mv, _) in scored.iter().take(eval_cap) {
+                        let score = evaluate_move(game, state, models, mv);
+                        if score > best_score {
+                            best_score = score;
+                            best_mv = mv;
+                        }
+                    }
+
+                    best_mv
+                }
+            }
+            mod x89_level_fortress {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    ai_features, calc_scores, dot, estimate_conflict_map, get_candidates,
+                    in_bounds, simulate_turn, AiModel, Game, State,
+                };
+
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+
+                fn predict_ai_moves(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> Vec<(usize, usize)> {
+                    let mut moves = Vec::with_capacity(game.m.saturating_sub(1));
+                    for ai_idx in 0..game.m.saturating_sub(1) {
+                        let player = ai_idx + 1;
+                        let cands = get_candidates(game, state, player);
+                        if cands.is_empty() {
+                            moves.push(state.pos[player]);
+                            continue;
+                        }
+                        if cands.len() == 1 {
+                            moves.push(cands[0]);
+                            continue;
+                        }
+                        let mut best_score = f64::NEG_INFINITY;
+                        let mut best = cands[0];
+                        for &c in &cands {
+                            let feat = ai_features(game, state, player, c);
+                            let s = dot(&models[ai_idx].w, &feat);
+                            if s > best_score {
+                                best_score = s;
+                                best = c;
+                            }
+                        }
+                        moves.push(best);
+                    }
+                    moves
+                }
+
+                fn defense_urgency(game: &Game, state: &State, x: usize, y: usize) -> f64 {
+                    if state.owner[x][y] != 0 {
+                        return 0.0;
+                    }
+                    let v = game.v[x][y] as f64;
+                    let level = state.level[x][y];
+
+                    if level >= 2 {
+                        if level < game.u {
+                            return v * 0.3;
+                        }
+                        return 0.0;
+                    }
+
+                    let mut enemy_adjacent = false;
+                    let mut enemy_threat = 0.0_f64;
+                    for (dx, dy) in DIRS {
+                        let nx = x as isize + dx;
+                        let ny = y as isize + dy;
+                        if in_bounds(game.n, nx, ny) {
+                            let ux = nx as usize;
+                            let uy = ny as usize;
+                            if state.owner[ux][uy] > 0 {
+                                enemy_adjacent = true;
+
+                                enemy_threat += 1.0;
+                            }
+
+                            for p in 1..game.m {
+                                if state.pos[p] == (ux, uy) {
+                                    enemy_threat += 2.0;
+                                }
+                            }
+                        }
+                    }
+
+                    if enemy_adjacent {
+                        v * 3.0 + enemy_threat * v * 0.5
+                    } else {
+                        v * 1.5
+                    }
+                }
+
+                fn score_move(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    mv: (usize, usize),
+                    scores: &[i64],
+                    conflict_map: &[Vec<f64>],
+                ) -> f64 {
+                    let (x, y) = mv;
+                    let owner = state.owner[x][y];
+                    let level = state.level[x][y];
+                    let v = game.v[x][y] as f64;
+                    let phase = state.turn as f64 / game.t as f64;
+                    let remaining = (game.t - state.turn) as f64;
+                    let s0 = scores[0].max(1) as f64;
+                    let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+
+                    let mut score = 0.0_f64;
+
+                    if owner == -1 {
+                        let expansion_value = v * (1.2 + 0.8 * (1.0 - phase));
+
+                        let mut adj_own = 0;
+                        for (dx, dy) in DIRS {
+                            let nx = x as isize + dx;
+                            let ny = y as isize + dy;
+                            if in_bounds(game.n, nx, ny) {
+                                if state.owner[nx as usize][ny as usize] == 0 {
+                                    adj_own += 1;
+                                }
+                            }
+                        }
+                        let connectivity_bonus = v * 0.15 * adj_own as f64;
+
+                        score += expansion_value + connectivity_bonus;
+
+                        if game.u > 1 {
+                            let future_level_value = v * (game.u - 1) as f64 * 0.10;
+                            score += future_level_value;
+                        }
+                    } else if owner == 0 {
+                        if level < game.u {
+                            let direct_value = v;
+
+                            let defense_bonus = if level == 1 {
+                                v * 2.5
+                            } else if level == 2 {
+                                v * 1.0
+                            } else {
+                                v * 0.5
+                            };
+
+                            let time_value = direct_value * (remaining / game.t as f64) * 0.3;
+
+                            let high_v_bonus = if v > 70.0 {
+                                v * 0.8
+                            } else if v > 40.0 {
+                                v * 0.3
+                            } else {
+                                0.0
+                            };
+
+                            let urgency = defense_urgency(game, state, x, y);
+
+                            score +=
+                                direct_value + defense_bonus + time_value + high_v_bonus + urgency;
+
+                            if phase < 0.25 {
+                                score *= 1.1;
+                            } else if phase < 0.6 {
+                                score *= 1.4;
+                            } else {
+                                score *= 1.3;
+                            }
+                        } else {
+                            if (x, y) == state.pos[0] {
+                                score -= v * 0.3;
+                            } else {
+                                score -= v * 0.05;
+                            }
+                        }
+                    } else {
+                        let opp = owner as usize;
+                        let opp_score = scores[opp] as f64;
+                        let threat = (opp_score / sa).clamp(0.0, 1.0);
+
+                        if level == 1 {
+                            let capture_value = v * (1.5 + 1.0 * threat);
+
+                            if opp_score >= sa * 0.9 {
+                                let sa_reduction_bonus = v * 1.0;
+                                score += sa_reduction_bonus;
+                            }
+
+                            score += capture_value;
+                        } else {
+                            if level == 2 && remaining > 20.0 {
+                                score += v * 0.15 * threat;
+                            } else {
+                                score -= v * 0.2;
+                            }
+                        }
+                    }
+
+                    let p_any = 1.0 - (-conflict_map[x][y]).exp();
+                    let risk = p_any * v;
+
+                    if owner == -1 {
+                        score -= 0.6 * risk;
+                    } else if owner == 0 && level < game.u {
+                        score -= 0.05 * risk;
+                    } else if owner > 0 && level == 1 {
+                        score -= 0.4 * risk;
+                    }
+
+                    score
+                }
+
+                fn one_step_evaluate(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    mv: (usize, usize),
+                ) -> f64 {
+                    let ai_moves = predict_ai_moves(game, state, models);
+                    let mut all_moves = Vec::with_capacity(game.m);
+                    all_moves.push(mv);
+                    all_moves.extend_from_slice(&ai_moves);
+                    let next = simulate_turn(game, state, &all_moves);
+
+                    let scores = calc_scores(game, &next);
+                    let s0 = scores[0].max(1) as f64;
+                    let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+
+                    let ratio_score = 1e5 * (1.0 + s0 / sa).log2();
+
+                    let mut total_own_v = 0.0_f64;
+                    let mut defended_v = 0.0_f64;
+                    let mut level_sum = 0.0_f64;
+                    for x in 0..game.n {
+                        for y in 0..game.n {
+                            if next.owner[x][y] == 0 {
+                                let v = game.v[x][y] as f64;
+                                total_own_v += v;
+                                level_sum += v * next.level[x][y] as f64;
+                                if next.level[x][y] >= 2 {
+                                    defended_v += v;
+                                }
+                            }
+                        }
+                    }
+
+                    let defense_ratio = if total_own_v > 0.0 {
+                        defended_v / total_own_v
+                    } else {
+                        0.0
+                    };
+
+                    let defense_bonus = defense_ratio * 500.0;
+
+                    let level_density = if total_own_v > 0.0 {
+                        level_sum / total_own_v
+                    } else {
+                        0.0
+                    };
+                    let level_bonus = level_density * 200.0;
+
+                    ratio_score + defense_bonus + level_bonus
+                }
+
+                pub(super) fn choose_move_x89_level_fortress(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.is_empty() {
+                        return state.pos[0];
+                    }
+                    if candidates.len() == 1 {
+                        return candidates[0];
+                    }
+
+                    let scores = calc_scores(game, state);
+                    let conflict_map = estimate_conflict_map(game, state, models);
+
+                    let mut scored: Vec<((usize, usize), f64)> = candidates
+                        .iter()
+                        .map(|&mv| {
+                            let s = score_move(game, state, models, mv, &scores, &conflict_map);
+                            (mv, s)
+                        })
+                        .collect();
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    let eval_cap = scored.len().min(8);
+                    let mut best_mv = scored[0].0;
+                    let mut best_total = f64::NEG_INFINITY;
+
+                    for &(mv, heuristic_score) in scored.iter().take(eval_cap) {
+                        let lookahead = one_step_evaluate(game, state, models, mv);
+                        let total = lookahead + 0.05 * heuristic_score;
+                        if total > best_total {
+                            best_total = total;
+                            best_mv = mv;
+                        }
+                    }
+
+                    best_mv
+                }
+            }
+            mod x174_chokudai {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    in_bounds, AiModel, Game, State,
+                };
+                use std::cmp::Ordering;
+                use std::collections::BinaryHeap;
+                use std::time::Instant;
+
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+
+                fn reachable(game: &Game, state: &State, player: usize) -> Vec<(usize, usize)> {
+                    let mut visited = vec![vec![false; game.n]; game.n];
+                    let mut queue = std::collections::VecDeque::new();
+                    let mut result = Vec::new();
+                    let start = state.pos[player];
+                    queue.push_back(start);
+                    visited[start.0][start.1] = true;
+
+                    while let Some((x, y)) = queue.pop_front() {
+                        let occupied = state
+                            .pos
+                            .iter()
+                            .enumerate()
+                            .any(|(i, &(px, py))| i != player && px == x && py == y);
+                        if !occupied {
+                            result.push((x, y));
+                        }
+                        if state.owner[x][y] == player as i32 {
+                            for (dx, dy) in DIRS {
+                                let nx = x as isize + dx;
+                                let ny = y as isize + dy;
+                                if in_bounds(game.n, nx, ny) {
+                                    let ux = nx as usize;
+                                    let uy = ny as usize;
+                                    if !visited[ux][uy] {
+                                        visited[ux][uy] = true;
+                                        queue.push_back((ux, uy));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    result
+                }
+
+                fn predict_ai_top1(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> Vec<(usize, usize)> {
+                    let mut moves = Vec::with_capacity(game.m.saturating_sub(1));
+                    for ai_idx in 0..game.m.saturating_sub(1) {
+                        let player = ai_idx + 1;
+                        let cands = reachable(game, state, player);
+                        if cands.is_empty() {
+                            moves.push(state.pos[player]);
+                            continue;
+                        }
+                        let w = &models[ai_idx].w;
+                        let mut best = cands[0];
+                        let mut best_s = f64::NEG_INFINITY;
+                        for &(x, y) in &cands {
+                            let v = game.v[x][y] as f64;
+                            let owner = state.owner[x][y];
+                            let level = state.level[x][y];
+                            let feat = if owner == -1 {
+                                [v, 0.0, 0.0, 0.0]
+                            } else if owner == player as i32 {
+                                if level < game.u {
+                                    [0.0, v, 0.0, 0.0]
+                                } else {
+                                    [0.0; 4]
+                                }
+                            } else if level == 1 {
+                                [0.0, 0.0, v, 0.0]
+                            } else {
+                                [0.0, 0.0, 0.0, v]
+                            };
+                            let s =
+                                w[0] * feat[0] + w[1] * feat[1] + w[2] * feat[2] + w[3] * feat[3];
+                            if s > best_s {
+                                best_s = s;
+                                best = (x, y);
+                            }
+                        }
+                        moves.push(best);
+                    }
+                    moves
+                }
+
+                fn sim_turn(game: &Game, state: &State, all_moves: &[(usize, usize)]) -> State {
+                    crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                        game, state, all_moves,
+                    )
+                }
+
+                fn score_ratio(game: &Game, state: &State) -> (i64, i64) {
+                    let mut scores = vec![0_i64; game.m];
+                    for x in 0..game.n {
+                        for y in 0..game.n {
+                            let o = state.owner[x][y];
+                            if o >= 0 {
+                                scores[o as usize] += game.v[x][y] * state.level[x][y] as i64;
+                            }
+                        }
+                    }
+                    let s0 = scores[0];
+                    let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                    (s0, sa)
+                }
+
+                fn evaluate(game: &Game, state: &State) -> f64 {
+                    let (s0, sa) = score_ratio(game, state);
+                    let s0 = s0.max(1) as f64;
+                    let sa = sa as f64;
+
+                    let base = 1e5 * (1.0 + s0 / sa).log2();
+
+                    let remaining = (game.t as f64 - state.turn as f64).max(0.0) / game.t as f64;
+
+                    let mut own_total_v = 0.0_f64;
+                    let mut upgrade_room = 0.0_f64;
+                    let mut frontier_v = 0.0_f64;
+                    let mut defended_v = 0.0_f64;
+
+                    for x in 0..game.n {
+                        for y in 0..game.n {
+                            let v = game.v[x][y] as f64;
+                            if state.owner[x][y] == 0 {
+                                own_total_v += v * state.level[x][y] as f64;
+                                if state.level[x][y] < game.u {
+                                    upgrade_room +=
+                                        v * (game.u - state.level[x][y]) as f64 / game.u as f64;
+                                }
+                                if state.level[x][y] >= 2 {
+                                    defended_v += v;
+                                }
+
+                                for (dx, dy) in DIRS {
+                                    let nx = x as isize + dx;
+                                    let ny = y as isize + dy;
+                                    if in_bounds(game.n, nx, ny) {
+                                        let ux = nx as usize;
+                                        let uy = ny as usize;
+                                        if state.owner[ux][uy] == -1 {
+                                            frontier_v += game.v[ux][uy] as f64;
+                                        } else if state.owner[ux][uy] > 0
+                                            && state.level[ux][uy] == 1
+                                        {
+                                            frontier_v += 0.6 * game.v[ux][uy] as f64;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    base + remaining * 0.020 * frontier_v
+                        + (0.003 + 0.005 * (1.0 - remaining)) * upgrade_room
+                        + 0.010 * defended_v
+                }
+
+                fn score_move(game: &Game, state: &State, mv: (usize, usize), phase: f64) -> f64 {
+                    let (x, y) = mv;
+                    let v = game.v[x][y] as f64;
+                    let owner = state.owner[x][y];
+                    let level = state.level[x][y];
+
+                    let base = if owner == -1 {
+                        v * (1.2 + 0.6 * (1.0 - phase))
+                    } else if owner == 0 {
+                        if level < game.u {
+                            let upgrade_value = v * (1.0 / level as f64);
+                            upgrade_value * (0.8 + 0.8 * phase)
+                        } else {
+                            -0.2 * v
+                        }
+                    } else {
+                        if level == 1 {
+                            v * (0.9 + 0.5 * phase)
+                        } else {
+                            v * 0.15 / level as f64
+                        }
+                    };
+
+                    let next_pos = if owner > 0 && level >= 2 {
+                        state.pos[0]
+                    } else {
+                        (x, y)
+                    };
+                    let mut adj_bonus = 0.0;
+                    for (dx, dy) in DIRS {
+                        let nx = next_pos.0 as isize + dx;
+                        let ny = next_pos.1 as isize + dy;
+                        if in_bounds(game.n, nx, ny) {
+                            let ux = nx as usize;
+                            let uy = ny as usize;
+                            let nv = game.v[ux][uy] as f64;
+                            if state.owner[ux][uy] != 0 {
+                                adj_bonus += 0.06 * nv;
+                            }
+                        }
+                    }
+
+                    base + adj_bonus + v * 1e-7
+                }
+
+                #[derive(Clone)]
+                struct SearchNode {
+                    first_move: (usize, usize),
+                    state: State,
+                    score: f64,
+                    depth: usize,
+                }
+
+                impl PartialEq for SearchNode {
+                    fn eq(&self, other: &Self) -> bool {
+                        self.score == other.score
+                    }
+                }
+                impl Eq for SearchNode {}
+                impl PartialOrd for SearchNode {
+                    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                        self.score.partial_cmp(&other.score)
+                    }
+                }
+                impl Ord for SearchNode {
+                    fn cmp(&self, other: &Self) -> Ordering {
+                        self.partial_cmp(other).unwrap_or(Ordering::Equal)
+                    }
+                }
+
+                pub(super) fn choose_move_x174_chokudai(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let start = Instant::now();
+
+                    let candidates = reachable(game, state, 0);
+                    if candidates.len() <= 1 {
+                        return candidates.first().copied().unwrap_or(state.pos[0]);
+                    }
+
+                    let phase = state.turn as f64 / game.t as f64;
+                    let remaining_turns = game.t - state.turn;
+
+                    let budget_ms: u64 = if state.turn < 20 {
+                        22
+                    } else if state.turn < 50 {
+                        18
+                    } else if state.turn < 80 {
+                        15
+                    } else {
+                        10
+                    };
+
+                    let max_depth = remaining_turns.min(12);
+
+                    let base_width = match game.m {
+                        2 => 20,
+                        3 => 16,
+                        4 => 14,
+                        5 => 12,
+                        6 => 10,
+                        _ => 8,
+                    };
+
+                    let branch = match game.m {
+                        2 => 5,
+                        3..=4 => 4,
+                        5..=6 => 3,
+                        _ => 3,
+                    };
+
+                    let base_eval = evaluate(game, state);
+
+                    let mut beams: Vec<BinaryHeap<SearchNode>> =
+                        vec![BinaryHeap::new(); max_depth + 1];
+
+                    for &mv in &candidates {
+                        let ai_moves = predict_ai_top1(game, state, models);
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = sim_turn(game, state, &all_moves);
+                        let eval = evaluate(game, &ns);
+
+                        beams[1].push(SearchNode {
+                            first_move: mv,
+                            state: ns,
+                            score: eval - base_eval,
+                            depth: 1,
+                        });
+                    }
+
+                    let mut best_move = candidates[0];
+                    let mut best_score = f64::NEG_INFINITY;
+                    if let Some(top) = beams[1].peek() {
+                        best_move = top.first_move;
+                        best_score = top.score;
+                    }
+
+                    let mut iteration = 0;
+                    'outer: loop {
+                        iteration += 1;
+                        let elapsed = start.elapsed().as_millis() as u64;
+                        if elapsed >= budget_ms {
+                            break;
+                        }
+
+                        for d in 1..max_depth {
+                            if start.elapsed().as_millis() as u64 >= budget_ms {
+                                break 'outer;
+                            }
+
+                            let node = match beams[d].pop() {
+                                Some(n) => n,
+                                None => continue,
+                            };
+
+                            let width_at_next =
+                                (base_width as f64 * 0.85_f64.powi(d as i32)) as usize;
+                            let width_at_next = width_at_next.max(4);
+
+                            if node.state.turn >= game.t {
+                                if node.score > best_score {
+                                    best_score = node.score;
+                                    best_move = node.first_move;
+                                }
+                                beams[d].push(node);
+                                continue;
+                            }
+
+                            let node_cands = reachable(game, &node.state, 0);
+                            if node_cands.is_empty() {
+                                beams[d].push(node);
+                                continue;
+                            }
+
+                            let node_phase = node.state.turn as f64 / game.t as f64;
+                            let discount = 0.93_f64.powi(d as i32);
+
+                            let mut scored: Vec<((usize, usize), f64)> = node_cands
+                                .iter()
+                                .map(|&mv| (mv, score_move(game, &node.state, mv, node_phase)))
+                                .collect();
+                            scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(Ordering::Equal));
+
+                            let ai_moves = predict_ai_top1(game, &node.state, models);
+
+                            let node_eval = evaluate(game, &node.state);
+
+                            for &(mv, _) in scored.iter().take(branch) {
+                                let mut all_moves = vec![mv];
+                                all_moves.extend_from_slice(&ai_moves);
+                                let ns = sim_turn(game, &node.state, &all_moves);
+                                let eval = evaluate(game, &ns);
+                                let inc = eval - node_eval;
+
+                                let child = SearchNode {
+                                    first_move: node.first_move,
+                                    state: ns,
+                                    score: node.score + discount * inc,
+                                    depth: d + 1,
+                                };
+
+                                if child.score > best_score {
+                                    best_score = child.score;
+                                    best_move = child.first_move;
+                                }
+
+                                if beams[d + 1].len() < width_at_next * 2 {
+                                    beams[d + 1].push(child);
+                                } else if let Some(worst) = beams[d + 1].peek() {
+                                    beams[d + 1].push(child);
+                                }
+                            }
+
+                            if beams[d + 1].len() > width_at_next * 3 {
+                                let mut keep: Vec<SearchNode> = Vec::with_capacity(width_at_next);
+                                while keep.len() < width_at_next {
+                                    if let Some(n) = beams[d + 1].pop() {
+                                        keep.push(n);
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                beams[d + 1].clear();
+                                for n in keep {
+                                    beams[d + 1].push(n);
+                                }
+                            }
+                        }
+
+                        let total_nodes: usize = beams.iter().map(|b| b.len()).sum();
+                        if total_nodes == 0 {
+                            break;
+                        }
+                    }
+
+                    best_move
+                }
+            }
+            mod x206_sa_rolling_horizon {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    ai_features, dot, get_candidates, simulate_turn, strategic_score, AiModel,
+                    FastRng, Game, State,
+                };
+
+                use std::time::Instant;
+
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+
+                fn predict_ai_moves(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> Vec<(usize, usize)> {
+                    let mut moves = Vec::with_capacity(game.m.saturating_sub(1));
+                    for ai_idx in 0..game.m.saturating_sub(1) {
+                        let player = ai_idx + 1;
+                        let cands = get_candidates(game, state, player);
+                        if cands.is_empty() {
+                            moves.push(state.pos[player]);
+                            continue;
+                        }
+                        let mut best_score = f64::NEG_INFINITY;
+                        let mut best = cands[0];
+                        for &c in &cands {
+                            let feat = ai_features(game, state, player, c);
+                            let s = dot(&models[ai_idx].w, &feat);
+                            if s > best_score {
+                                best_score = s;
+                                best = c;
+                            }
+                        }
+                        moves.push(best);
+                    }
+                    moves
+                }
+
+                fn build_state_cache(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    my_moves: &[(usize, usize)],
+                ) -> Vec<State> {
+                    let k = my_moves.len();
+                    let mut states = Vec::with_capacity(k + 1);
+                    states.push(state.clone());
+
+                    for step in 0..k {
+                        let cur = &states[step];
+                        if cur.turn + step >= game.t {
+                            break;
+                        }
+                        let cands = get_candidates(game, cur, 0);
+                        let actual_mv = if cands.contains(&my_moves[step]) {
+                            my_moves[step]
+                        } else if !cands.is_empty() {
+                            cands[0]
+                        } else {
+                            cur.pos[0]
+                        };
+
+                        let ai_moves = predict_ai_moves(game, cur, models);
+                        let mut all_moves = Vec::with_capacity(game.m);
+                        all_moves.push(actual_mv);
+                        all_moves.extend_from_slice(&ai_moves);
+                        let mut next = simulate_turn(game, cur, &all_moves);
+                        next.turn = state.turn + step + 1;
+                        states.push(next);
+                    }
+                    states
+                }
+
+                fn rebuild_cache_from(
+                    game: &Game,
+                    states: &mut Vec<State>,
+                    models: &[AiModel],
+                    my_moves: &[(usize, usize)],
+                    from_step: usize,
+                    base_turn: usize,
+                ) {
+                    states.truncate(from_step + 1);
+
+                    for step in from_step..my_moves.len() {
+                        let cur = &states[step];
+                        if base_turn + step >= game.t {
+                            break;
+                        }
+                        let cands = get_candidates(game, cur, 0);
+                        let actual_mv = if cands.contains(&my_moves[step]) {
+                            my_moves[step]
+                        } else if !cands.is_empty() {
+                            cands[0]
+                        } else {
+                            cur.pos[0]
+                        };
+
+                        let ai_moves = predict_ai_moves(game, cur, models);
+                        let mut all_moves = Vec::with_capacity(game.m);
+                        all_moves.push(actual_mv);
+                        all_moves.extend_from_slice(&ai_moves);
+                        let mut next = simulate_turn(game, cur, &all_moves);
+                        next.turn = base_turn + step + 1;
+                        states.push(next);
+                    }
+                }
+
+                fn evaluate_final(game: &Game, states: &[State]) -> f64 {
+                    if let Some(last) = states.last() {
+                        strategic_score(game, last)
+                    } else {
+                        0.0
+                    }
+                }
+
+                fn greedy_sequence(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    k: usize,
+                ) -> Vec<(usize, usize)> {
+                    let mut cur = state.clone();
+                    let mut seq = Vec::with_capacity(k);
+
+                    for step in 0..k {
+                        if cur.turn + step >= game.t {
+                            break;
+                        }
+                        let cands = get_candidates(game, &cur, 0);
+                        if cands.is_empty() {
+                            break;
+                        }
+
+                        let ai_moves = predict_ai_moves(game, &cur, models);
+                        let mut best_mv = cands[0];
+                        let mut best_score = f64::NEG_INFINITY;
+
+                        let limit = cands.len().min(12);
+                        for &mv in cands.iter().take(limit) {
+                            let mut all_moves = Vec::with_capacity(game.m);
+                            all_moves.push(mv);
+                            all_moves.extend_from_slice(&ai_moves);
+                            let mut next = simulate_turn(game, &cur, &all_moves);
+                            next.turn = state.turn + step + 1;
+                            let score = strategic_score(game, &next);
+                            if score > best_score {
+                                best_score = score;
+                                best_mv = mv;
+                            }
+                        }
+
+                        seq.push(best_mv);
+
+                        let mut all_moves = Vec::with_capacity(game.m);
+                        all_moves.push(best_mv);
+                        all_moves.extend_from_slice(&ai_moves);
+                        cur = simulate_turn(game, &cur, &all_moves);
+                        cur.turn = state.turn + step + 1;
+                    }
+
+                    seq
+                }
+
+                fn horizon_length(m: usize, remaining: usize) -> usize {
+                    let base = match m {
+                        2 => 10,
+                        3 | 4 => 6,
+                        5 | 6 => 5,
+                        _ => 4,
+                    };
+                    base.min(remaining)
+                }
+
+                pub(super) fn choose_move_x206_sa_rolling_horizon(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.is_empty() {
+                        return state.pos[0];
+                    }
+                    if candidates.len() == 1 {
+                        return candidates[0];
+                    }
+
+                    let remaining_turns = game.t.saturating_sub(state.turn);
+                    let k = horizon_length(game.m, remaining_turns);
+
+                    let turn_budget = crate::__cargo_equip::crates::ahc061_solver::turn_budget_ms(
+                        state.turn, game.t,
+                    );
+                    let budget_ms = if turn_budget > 0 {
+                        (turn_budget * 85 / 100).max(5)
+                    } else {
+                        17
+                    };
+
+                    let start = Instant::now();
+
+                    let mut best_seq = greedy_sequence(game, state, models, k);
+                    if best_seq.is_empty() {
+                        return candidates[0];
+                    }
+
+                    let mut states = build_state_cache(game, state, models, &best_seq);
+                    let mut best_eval = evaluate_final(game, &states);
+
+                    let mut rng =
+                        FastRng::new(state.turn as u64 * 12345 + game.m as u64 * 67890 + 11111);
+
+                    let mut deltas: Vec<f64> = Vec::with_capacity(20);
+                    for _ in 0..20 {
+                        if start.elapsed().as_millis() as u64 > budget_ms / 4 {
+                            break;
+                        }
+                        if best_seq.is_empty() {
+                            break;
+                        }
+                        let step_idx = (rng.next_u64() as usize) % best_seq.len();
+                        let cands_at = get_candidates(game, &states[step_idx], 0);
+                        if cands_at.is_empty() {
+                            continue;
+                        }
+                        let new_mv = cands_at[(rng.next_u64() as usize) % cands_at.len()];
+                        let old_mv = best_seq[step_idx];
+                        best_seq[step_idx] = new_mv;
+
+                        rebuild_cache_from(
+                            game,
+                            &mut states,
+                            models,
+                            &best_seq,
+                            step_idx,
+                            state.turn,
+                        );
+                        let new_eval = evaluate_final(game, &states);
+                        deltas.push((new_eval - best_eval).abs());
+
+                        best_seq[step_idx] = old_mv;
+                        rebuild_cache_from(
+                            game,
+                            &mut states,
+                            models,
+                            &best_seq,
+                            step_idx,
+                            state.turn,
+                        );
+                    }
+
+                    let t_start;
+                    let t_end;
+                    if !deltas.is_empty() {
+                        deltas
+                            .sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+                        let median = deltas[deltas.len() / 2];
+
+                        t_start = (median * 3.0).max(1.0);
+                        t_end = (median * 0.05).max(0.01);
+                    } else {
+                        t_start = 500.0;
+                        t_end = 1.0;
+                    }
+
+                    let mut iteration = 0_u64;
+                    let mut accepted = 0_u64;
+
+                    loop {
+                        let elapsed = start.elapsed().as_millis() as u64;
+                        if elapsed >= budget_ms {
+                            break;
+                        }
+
+                        let progress = elapsed as f64 / budget_ms as f64;
+                        let temperature = t_start * (t_end / t_start).powf(progress);
+
+                        let rand_val = rng.next_u64() % 100;
+
+                        if best_seq.is_empty() {
+                            break;
+                        }
+
+                        if rand_val < 60 {
+                            let step_idx = (rng.next_u64() as usize) % best_seq.len();
+                            if step_idx >= states.len() {
+                                continue;
+                            }
+                            let cands_at = get_candidates(game, &states[step_idx], 0);
+                            if cands_at.is_empty() || cands_at.len() == 1 {
+                                iteration += 1;
+                                continue;
+                            }
+                            let new_mv = loop {
+                                let c = cands_at[(rng.next_u64() as usize) % cands_at.len()];
+                                if c != best_seq[step_idx] {
+                                    break c;
+                                }
+
+                                if cands_at.len() <= 1 {
+                                    break c;
+                                }
+                            };
+
+                            let old_mv = best_seq[step_idx];
+                            best_seq[step_idx] = new_mv;
+                            rebuild_cache_from(
+                                game,
+                                &mut states,
+                                models,
+                                &best_seq,
+                                step_idx,
+                                state.turn,
+                            );
+                            let new_eval = evaluate_final(game, &states);
+                            let diff = new_eval - best_eval;
+
+                            if diff > 0.0 || rng.next_f64() < (diff / temperature).exp() {
+                                best_eval = new_eval;
+                                accepted += 1;
+                            } else {
+                                best_seq[step_idx] = old_mv;
+                                rebuild_cache_from(
+                                    game,
+                                    &mut states,
+                                    models,
+                                    &best_seq,
+                                    step_idx,
+                                    state.turn,
+                                );
+                            }
+                        } else if rand_val < 85 {
+                            let step_idx = (rng.next_u64() as usize) % best_seq.len();
+                            if step_idx >= states.len() {
+                                continue;
+                            }
+                            let old_suffix: Vec<(usize, usize)> = best_seq[step_idx..].to_vec();
+
+                            let suffix_state = &states[step_idx];
+                            let suffix_k = best_seq.len() - step_idx;
+                            let new_suffix = greedy_sequence(game, suffix_state, models, suffix_k);
+
+                            let new_len = step_idx + new_suffix.len();
+                            best_seq.truncate(step_idx);
+                            best_seq.extend_from_slice(&new_suffix);
+
+                            rebuild_cache_from(
+                                game,
+                                &mut states,
+                                models,
+                                &best_seq,
+                                step_idx,
+                                state.turn,
+                            );
+                            let new_eval = evaluate_final(game, &states);
+                            let diff = new_eval - best_eval;
+
+                            if diff > 0.0 || rng.next_f64() < (diff / temperature).exp() {
+                                best_eval = new_eval;
+                                accepted += 1;
+                            } else {
+                                best_seq.truncate(step_idx);
+                                best_seq.extend_from_slice(&old_suffix);
+                                rebuild_cache_from(
+                                    game,
+                                    &mut states,
+                                    models,
+                                    &best_seq,
+                                    step_idx,
+                                    state.turn,
+                                );
+                            }
+                        } else {
+                            if best_seq.len() < 2 {
+                                iteration += 1;
+                                continue;
+                            }
+                            let step_idx = (rng.next_u64() as usize) % (best_seq.len() - 1);
+                            if step_idx >= states.len() {
+                                continue;
+                            }
+
+                            best_seq.swap(step_idx, step_idx + 1);
+                            rebuild_cache_from(
+                                game,
+                                &mut states,
+                                models,
+                                &best_seq,
+                                step_idx,
+                                state.turn,
+                            );
+                            let new_eval = evaluate_final(game, &states);
+                            let diff = new_eval - best_eval;
+
+                            if diff > 0.0 || rng.next_f64() < (diff / temperature).exp() {
+                                best_eval = new_eval;
+                                accepted += 1;
+                            } else {
+                                best_seq.swap(step_idx, step_idx + 1);
+                                rebuild_cache_from(
+                                    game,
+                                    &mut states,
+                                    models,
+                                    &best_seq,
+                                    step_idx,
+                                    state.turn,
+                                );
+                            }
+                        }
+
+                        iteration += 1;
+                    }
+
+                    if !best_seq.is_empty() && candidates.contains(&best_seq[0]) {
+                        best_seq[0]
+                    } else {
+                        candidates[0]
+                    }
+                }
+            }
+            mod x228_strategic_mc {
+
+                use std::time::{Duration, Instant};
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    absolute_score, blended_ai_probs, calc_scores, estimate_conflict_map,
+                    get_candidates, in_bounds, sample_index, simulate_turn, turn_budget_ms,
+                    AiModel, FastRng, Game, State,
+                };
+
+                fn env_usize(key: &str, default: usize) -> usize {
+                    std::env::var(key)
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(default)
+                }
+
+                fn env_f64(key: &str, default: f64) -> f64 {
+                    std::env::var(key)
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(default)
+                }
+
+                fn evaluate_move_optimal(
+                    game: &Game,
+                    state: &State,
+                    cand: (usize, usize),
+                    scores: &[i64],
+                    s0: f64,
+                    sa: f64,
+                    phase: f64,
+                    conflict_map: &[Vec<f64>],
+                    cur: (usize, usize),
+                    is_leader: &[bool],
+                    leader_dist: &[Vec<usize>],
+                ) -> f64 {
+                    let (x, y) = cand;
+                    let owner = state.owner[x][y];
+                    let level = state.level[x][y];
+                    let value = game.v[x][y] as f64;
+                    let sa_safe = sa.max(1.0);
+                    let ratio = s0 / sa_safe;
+                    let mut score = 0.0_f64;
+
+                    if owner == -1 {
+                        score += value;
+
+                        score += (1.0 - phase) * 0.52 * value;
+                    } else if owner == 0 {
+                        if level < game.u {
+                            score += 0.85 * value;
+
+                            score += 0.15 * value * phase;
+                        } else if (x, y) == cur {
+                            score -= 0.15 * value;
+                        } else {
+                            score -= 0.05 * value;
+                        }
+                    } else {
+                        let opp = owner as usize;
+                        if level == 1 {
+                            let attack_multiplier = (1.0 + ratio).min(6.0);
+                            score += attack_multiplier * value;
+
+                            if is_leader[opp] {
+                                score += 0.25 * value * phase;
+                            }
+                        } else {
+                            let attack_val = ratio.min(4.0) * value / level as f64;
+
+                            let opp_cost = 0.3 * value;
+                            score += attack_val - opp_cost;
+
+                            if is_leader[opp] && level == 2 {
+                                score += 0.15 * ratio.min(3.0) * value * phase;
+                            }
+                        }
+                    }
+
+                    let next_pos = if owner > 0 && level >= 2 { cur } else { (x, y) };
+                    const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+                    for (dx, dy) in DIRS {
+                        let nx = next_pos.0 as isize + dx;
+                        let ny = next_pos.1 as isize + dy;
+                        if in_bounds(game.n, nx, ny) {
+                            let ux = nx as usize;
+                            let uy = ny as usize;
+                            let vv = game.v[ux][uy] as f64;
+                            if state.owner[ux][uy] != 0 {
+                                score += 0.07 * vv;
+                            } else if state.level[ux][uy] < game.u {
+                                score += 0.03 * vv;
+                            }
+                        }
+                    }
+
+                    if leader_dist[x][y] < usize::MAX {
+                        let dist = leader_dist[x][y] as f64;
+
+                        let route_strength = env_f64("AHC_X228_ROUTE_STRENGTH", 0.15);
+                        let route_bonus =
+                            route_strength * value * ratio.min(3.0) * phase / (1.0 + dist);
+                        score += route_bonus;
+                    }
+
+                    let p_any = 1.0 - (-conflict_map[x][y]).exp();
+                    let multi_factor = ((game.m as f64 - 2.0) / 6.0).clamp(0.0, 1.0);
+                    let risk_scale = 1.0 + 0.35 * multi_factor + 0.20 * phase;
+                    if owner == -1 {
+                        score -= 0.75 * risk_scale * p_any * value;
+                    } else if owner == 0 {
+                        score += 0.08 * p_any * value / risk_scale;
+                    } else if level == 1 {
+                        score -= 0.30 * risk_scale * p_any * value;
+                    } else {
+                        score -= 0.18 * risk_scale * p_any * value;
+                    }
+
+                    score + value * 1e-6 - (x as f64 * 31.0 + y as f64) * 1e-9
+                }
+
+                fn compute_leader_l1_distance(
+                    game: &Game,
+                    state: &State,
+                    leader_players: &[usize],
+                ) -> Vec<Vec<usize>> {
+                    use std::collections::VecDeque;
+                    let mut dist = vec![vec![usize::MAX; game.n]; game.n];
+                    if leader_players.is_empty() {
+                        return dist;
+                    }
+
+                    let mut queue = VecDeque::new();
+                    for i in 0..game.n {
+                        for j in 0..game.n {
+                            let owner = state.owner[i][j];
+                            if owner > 0
+                                && leader_players.contains(&(owner as usize))
+                                && state.level[i][j] == 1
+                            {
+                                dist[i][j] = 0;
+                                queue.push_back((i, j));
+                            }
+                        }
+                    }
+
+                    const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+                    while let Some((x, y)) = queue.pop_front() {
+                        let d = dist[x][y];
+                        for (dx, dy) in DIRS {
+                            let nx = x as isize + dx;
+                            let ny = y as isize + dy;
+                            if in_bounds(game.n, nx, ny) {
+                                let ux = nx as usize;
+                                let uy = ny as usize;
+                                if dist[ux][uy] > d + 1 {
+                                    dist[ux][uy] = d + 1;
+                                    queue.push_back((ux, uy));
+                                }
+                            }
+                        }
+                    }
+
+                    dist
+                }
+
+                fn greedy_move_optimal(
+                    game: &Game,
+                    state: &State,
+                    scores: &[i64],
+                    leader_dist: &[Vec<usize>],
+                ) -> (usize, usize) {
+                    let cands = get_candidates(game, state, 0);
+                    if cands.is_empty() {
+                        return state.pos[0];
+                    }
+                    if cands.len() == 1 {
+                        return cands[0];
+                    }
+
+                    let s0 = scores[0] as f64;
+                    let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                    let phase = state.turn as f64 / game.t as f64;
+                    let cur = state.pos[0];
+                    let empty_map = vec![vec![0.0_f64; game.n]; game.n];
+                    let mut is_leader = vec![false; game.m];
+                    let max_ai = scores.iter().skip(1).copied().max().unwrap_or(1);
+                    for p in 1..game.m {
+                        if scores[p] == max_ai {
+                            is_leader[p] = true;
+                        }
+                    }
+
+                    let mut best = cands[0];
+                    let mut best_score = f64::NEG_INFINITY;
+                    for &c in &cands {
+                        let s = evaluate_move_optimal(
+                            game,
+                            state,
+                            c,
+                            scores,
+                            s0,
+                            sa,
+                            phase,
+                            &empty_map,
+                            cur,
+                            &is_leader,
+                            leader_dist,
+                        );
+                        if s > best_score {
+                            best_score = s;
+                            best = c;
+                        }
+                    }
+                    best
+                }
+
+                fn rollout(
+                    game: &Game,
+                    state: &State,
+                    my_first_move: (usize, usize),
+                    models: &[AiModel],
+                    rng: &mut FastRng,
+                    depth: usize,
+                    leader_dist: &[Vec<usize>],
+                ) -> f64 {
+                    let mut moves = Vec::with_capacity(game.m);
+                    moves.push(my_first_move);
+                    for ai_idx in 0..game.m - 1 {
+                        let player = ai_idx + 1;
+                        let cands = get_candidates(game, state, player);
+                        if cands.is_empty() {
+                            moves.push(state.pos[player]);
+                        } else {
+                            let probs =
+                                blended_ai_probs(game, state, player, &models[ai_idx], &cands);
+                            let idx = sample_index(&probs, rng);
+                            moves.push(cands[idx]);
+                        }
+                    }
+                    let mut sim_state = simulate_turn(game, state, &moves);
+                    sim_state.turn = state.turn + 1;
+
+                    for _step in 1..depth {
+                        if sim_state.turn >= game.t {
+                            break;
+                        }
+
+                        let scores = calc_scores(game, &sim_state);
+                        let p0_move = greedy_move_optimal(game, &sim_state, &scores, leader_dist);
+
+                        let mut sim_moves = Vec::with_capacity(game.m);
+                        sim_moves.push(p0_move);
+                        for ai_idx in 0..game.m - 1 {
+                            let player = ai_idx + 1;
+                            let cands = get_candidates(game, &sim_state, player);
+                            if cands.is_empty() {
+                                sim_moves.push(sim_state.pos[player]);
+                            } else {
+                                let probs = blended_ai_probs(
+                                    game,
+                                    &sim_state,
+                                    player,
+                                    &models[ai_idx],
+                                    &cands,
+                                );
+                                let idx = sample_index(&probs, rng);
+                                sim_moves.push(cands[idx]);
+                            }
+                        }
+                        let next = simulate_turn(game, &sim_state, &sim_moves);
+                        sim_state = next;
+                        sim_state.turn += 1;
+                    }
+
+                    absolute_score(game, &sim_state)
+                }
+
+                pub(super) fn choose_move_x228_strategic_mc(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.len() <= 1 {
+                        return candidates.first().copied().unwrap_or(state.pos[0]);
+                    }
+
+                    let turn_budget = turn_budget_ms(state.turn, game.t);
+                    if turn_budget <= 2 {
+                        let scores = calc_scores(game, state);
+                        let s0 = scores[0] as f64;
+                        let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                        let phase = state.turn as f64 / game.t as f64;
+                        let cur = state.pos[0];
+                        let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                        let mut is_leader = vec![false; game.m];
+                        let mut leader_players = Vec::new();
+                        for p in 1..game.m {
+                            if scores[p] == max_ai_i64 {
+                                is_leader[p] = true;
+                                leader_players.push(p);
+                            }
+                        }
+                        let leader_dist = compute_leader_l1_distance(game, state, &leader_players);
+                        let empty_map = vec![vec![0.0_f64; game.n]; game.n];
+                        let mut best = candidates[0];
+                        let mut best_score = f64::NEG_INFINITY;
+                        for &c in &candidates {
+                            let s = evaluate_move_optimal(
+                                game,
+                                state,
+                                c,
+                                &scores,
+                                s0,
+                                sa,
+                                phase,
+                                &empty_map,
+                                cur,
+                                &is_leader,
+                                &leader_dist,
+                            );
+                            if s > best_score {
+                                best_score = s;
+                                best = c;
+                            }
+                        }
+                        return best;
+                    }
+
+                    let top_k = env_usize("AHC_X228_TOP_K", 6);
+                    let base_depth = env_usize("AHC_X228_DEPTH", 8);
+                    let local_weight = env_f64("AHC_X228_LOCAL_WEIGHT", 0.03);
+                    let budget_pct = env_usize("AHC_X228_BUDGET_PCT", 90);
+                    let ucb_c = env_f64("AHC_X228_UCB_C", 1.0);
+
+                    let turn_start = Instant::now();
+                    let deadline = Some(
+                        turn_start + Duration::from_millis(turn_budget * budget_pct as u64 / 100),
+                    );
+
+                    let scores = calc_scores(game, state);
+                    let s0 = scores[0] as f64;
+                    let max_ai_i64 = scores.iter().skip(1).copied().max().unwrap_or(1).max(1);
+                    let sa = max_ai_i64 as f64;
+                    let phase = state.turn as f64 / game.t as f64;
+                    let conflict_map = estimate_conflict_map(game, state, models);
+                    let cur = state.pos[0];
+                    let mut is_leader = vec![false; game.m];
+                    let mut leader_players = Vec::new();
+                    for p in 1..game.m {
+                        if scores[p] == max_ai_i64 {
+                            is_leader[p] = true;
+                            leader_players.push(p);
+                        }
+                    }
+
+                    let leader_dist = compute_leader_l1_distance(game, state, &leader_players);
+
+                    let mut ranked: Vec<((usize, usize), f64)> = candidates
+                        .iter()
+                        .map(|&mv| {
+                            let score = evaluate_move_optimal(
+                                game,
+                                state,
+                                mv,
+                                &scores,
+                                s0,
+                                sa,
+                                phase,
+                                &conflict_map,
+                                cur,
+                                &is_leader,
+                                &leader_dist,
+                            );
+                            (mv, score)
+                        })
+                        .collect();
+                    ranked
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    let k = top_k.min(ranked.len()).max(2);
+
+                    let remaining = game.t.saturating_sub(state.turn);
+
+                    let effective_depth = match game.m {
+                        2 => base_depth.min(remaining).max(1),
+                        3 => base_depth.min(remaining).max(1),
+                        4..=5 => (base_depth - 2).min(remaining).max(1),
+                        _ => (base_depth - 3).min(remaining).max(1),
+                    };
+
+                    let mut rng = FastRng::new(state.turn as u64 * 31337 + 42);
+
+                    let mut totals = vec![0.0_f64; k];
+                    let mut counts = vec![0_u32; k];
+                    let mut total_rollouts: u32 = 0;
+
+                    let dl = deadline.unwrap();
+
+                    for i in 0..k {
+                        totals[i] += rollout(
+                            game,
+                            state,
+                            ranked[i].0,
+                            models,
+                            &mut rng,
+                            effective_depth,
+                            &leader_dist,
+                        );
+                        counts[i] += 1;
+                        total_rollouts += 1;
+                        if Instant::now() >= dl {
+                            break;
+                        }
+                    }
+
+                    while Instant::now() < dl {
+                        let ln_n = (total_rollouts as f64 + 1.0).ln();
+                        let mut best_idx = 0;
+                        let mut best_ucb = f64::NEG_INFINITY;
+                        for i in 0..k {
+                            if counts[i] == 0 {
+                                best_idx = i;
+                                break;
+                            }
+                            let avg = totals[i] / counts[i] as f64;
+                            let exploration = ucb_c * (ln_n / counts[i] as f64).sqrt();
+                            let ucb = avg + exploration * 1000.0;
+                            if ucb > best_ucb {
+                                best_ucb = ucb;
+                                best_idx = i;
+                            }
+                        }
+
+                        totals[best_idx] += rollout(
+                            game,
+                            state,
+                            ranked[best_idx].0,
+                            models,
+                            &mut rng,
+                            effective_depth,
+                            &leader_dist,
+                        );
+                        counts[best_idx] += 1;
+                        total_rollouts += 1;
+                    }
+
+                    let mut best_mv = ranked[0].0;
+                    let mut best_score = f64::NEG_INFINITY;
+                    for i in 0..k {
+                        if counts[i] == 0 {
+                            continue;
+                        }
+                        let avg = totals[i] / counts[i] as f64;
+                        let combined = avg + local_weight * ranked[i].1;
+                        if combined > best_score {
+                            best_score = combined;
+                            best_mv = ranked[i].0;
+                        }
+                    }
+
+                    best_mv
+                }
+            }
+            mod x305_full_horizon {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{AiModel, Game, State};
+
+                fn ai_best_move(
+                    game: &Game,
+                    state: &State,
+                    player: usize,
+                    model: &AiModel,
+                ) -> (usize, usize) {
+                    let cands = crate::__cargo_equip::crates::ahc061_solver::get_candidates(
+                        game, state, player,
+                    );
+                    if cands.is_empty() {
+                        return state.pos[player];
+                    }
+                    let mut best = cands[0];
+                    let mut best_score = f64::NEG_INFINITY;
+                    for &c in &cands {
+                        let feat = crate::__cargo_equip::crates::ahc061_solver::ai_features(
+                            game, state, player, c,
+                        );
+                        let s = crate::__cargo_equip::crates::ahc061_solver::dot(&model.w, &feat);
+                        if s > best_score {
+                            best_score = s;
+                            best = c;
+                        }
+                    }
+                    best
+                }
+
+                fn greedy_p0_move(game: &Game, state: &State) -> (usize, usize) {
+                    let cands =
+                        crate::__cargo_equip::crates::ahc061_solver::get_candidates(game, state, 0);
+                    if cands.is_empty() {
+                        return state.pos[0];
+                    }
+                    if cands.len() == 1 {
+                        return cands[0];
+                    }
+
+                    let phase = state.turn as f64 / game.t as f64;
+                    let remaining = game.t - state.turn;
+                    let (px, py) = state.pos[0];
+
+                    let mut best = cands[0];
+                    let mut best_score = f64::NEG_INFINITY;
+
+                    for &(x, y) in &cands {
+                        let v = game.v[x][y] as f64;
+                        let owner = state.owner[x][y];
+                        let level = state.level[x][y];
+
+                        let dist = ((x as isize - px as isize).unsigned_abs()
+                            + (y as isize - py as isize).unsigned_abs())
+                            as f64;
+
+                        let base = if remaining <= game.u && owner == 0 && level < game.u {
+                            v * 3.0
+                        } else if owner == -1 {
+                            v * (1.4 - 0.4 * phase)
+                        } else if owner == 0 {
+                            if level < game.u {
+                                v * (0.3 + 1.0 * phase)
+                            } else {
+                                -v * 0.5
+                            }
+                        } else if level == 1 {
+                            v * (1.1 - 0.2 * phase)
+                        } else {
+                            v * 0.1 / level as f64
+                        };
+
+                        let dist_penalty = dist * 50.0;
+                        let s = base - dist_penalty;
+
+                        if s > best_score {
+                            best_score = s;
+                            best = (x, y);
+                        }
+                    }
+                    best
+                }
+
+                fn quick_score(game: &Game, state: &State, x: usize, y: usize) -> f64 {
+                    let v = game.v[x][y] as f64;
+                    let owner = state.owner[x][y];
+                    let level = state.level[x][y];
+                    let phase = state.turn as f64 / game.t as f64;
+                    let remaining = game.t - state.turn;
+                    let (px, py) = state.pos[0];
+                    let dist = ((x as isize - px as isize).unsigned_abs()
+                        + (y as isize - py as isize).unsigned_abs())
+                        as f64;
+
+                    let base = if remaining <= game.u && owner == 0 && level < game.u {
+                        v * 3.0
+                    } else if owner == -1 {
+                        v * (1.4 - 0.4 * phase)
+                    } else if owner == 0 {
+                        if level < game.u {
+                            v * (0.3 + 1.0 * phase)
+                        } else {
+                            -v * 0.5
+                        }
+                    } else if level == 1 {
+                        v * (1.1 - 0.2 * phase)
+                    } else {
+                        v * 0.1 / level as f64
+                    };
+
+                    base - dist * 50.0
+                }
+
+                fn simulate_remaining(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    max_depth: usize,
+                ) -> f64 {
+                    let mut st = state.clone();
+                    let depth = max_depth.min(game.t.saturating_sub(st.turn));
+
+                    for _ in 0..depth {
+                        let mut moves = Vec::with_capacity(game.m);
+
+                        moves.push(greedy_p0_move(game, &st));
+
+                        for ai_idx in 0..game.m.saturating_sub(1) {
+                            moves.push(ai_best_move(game, &st, ai_idx + 1, &models[ai_idx]));
+                        }
+                        st = crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                            game, &st, &moves,
+                        );
+                    }
+                    crate::__cargo_equip::crates::ahc061_solver::absolute_score(game, &st)
+                }
+
+                pub(in crate::__cargo_equip::crates::ahc061_solver) fn choose_move_x305_full_horizon(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates =
+                        crate::__cargo_equip::crates::ahc061_solver::get_candidates(game, state, 0);
+                    if candidates.len() <= 1 {
+                        return candidates.first().copied().unwrap_or(state.pos[0]);
+                    }
+
+                    let cfg_depth: usize = std::env::var("AHC_X305_DEPTH")
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(20);
+                    let remaining = game.t.saturating_sub(state.turn);
+                    let max_depth = remaining.min(cfg_depth);
+
+                    let budget = crate::__cargo_equip::crates::ahc061_solver::turn_budget_ms(
+                        state.turn, game.t,
+                    );
+                    let start = std::time::Instant::now();
+
+                    let cfg_k: usize = std::env::var("AHC_X305_TOP_K")
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(6);
+                    let k = cfg_k.min(candidates.len());
+                    let mut scored: Vec<_> = candidates
+                        .iter()
+                        .map(|&(x, y)| ((x, y), quick_score(game, state, x, y)))
+                        .collect();
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+                    scored.truncate(k);
+
+                    let ai_top2 =
+                        crate::__cargo_equip::crates::ahc061_solver::choose_predicted_ai_top2_moves(
+                            game, state, models,
+                        );
+                    let ai_primary: Vec<(usize, usize)> = ai_top2.iter().map(|x| x.0).collect();
+
+                    let mut best = scored[0].0;
+                    let mut best_fh_score = f64::NEG_INFINITY;
+
+                    for &(mv, _) in &scored {
+                        if budget > 0
+                            && start.elapsed().as_millis() as u64 > budget.saturating_sub(2)
+                        {
+                            break;
+                        }
+
+                        let mut first_moves = Vec::with_capacity(game.m);
+                        first_moves.push(mv);
+                        first_moves.extend_from_slice(&ai_primary);
+                        let next = crate::__cargo_equip::crates::ahc061_solver::simulate_turn(
+                            game,
+                            state,
+                            &first_moves,
+                        );
+
+                        let fh_score =
+                            simulate_remaining(game, &next, models, max_depth.saturating_sub(1));
+
+                        if fh_score > best_fh_score {
+                            best_fh_score = fh_score;
+                            best = mv;
+                        }
+                    }
+
+                    best
+                }
+            }
+            mod x328_ratio_greedy {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    absolute_score, calc_scores, estimate_conflict_map, evaluate_local_move,
+                    get_candidates, simulate_turn, AiModel, Game, State,
+                };
+                use std::time::Instant;
+
+                fn predict_ai_top1(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> Vec<(usize, usize)> {
+                    let mut moves = Vec::with_capacity(game.m.saturating_sub(1));
+                    for ai_idx in 0..game.m.saturating_sub(1) {
+                        let player = ai_idx + 1;
+                        let cands = get_candidates(game, state, player);
+                        if cands.is_empty() {
+                            moves.push(state.pos[player]);
+                            continue;
+                        }
+                        let w = &models[ai_idx].w;
+                        let mut best = cands[0];
+                        let mut best_s = f64::NEG_INFINITY;
+                        for &(x, y) in &cands {
+                            let feat = crate::__cargo_equip::crates::ahc061_solver::ai_features(
+                                game,
+                                state,
+                                player,
+                                (x, y),
+                            );
+                            let s = crate::__cargo_equip::crates::ahc061_solver::dot(w, &feat);
+                            if s > best_s {
+                                best_s = s;
+                                best = (x, y);
+                            }
+                        }
+                        moves.push(best);
+                    }
+                    moves
+                }
+
+                fn env_u64(name: &str, default: u64, min: u64, max: u64) -> u64 {
+                    if let Ok(v) = std::env::var(name) {
+                        if let Ok(x) = v.parse::<u64>() {
+                            return x.max(min).min(max);
+                        }
+                    }
+                    default.max(min).min(max)
+                }
+
+                pub(super) fn choose_move_x328_ratio_greedy(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.len() <= 1 {
+                        return candidates.first().copied().unwrap_or(state.pos[0]);
+                    }
+
+                    let ai_moves = predict_ai_top1(game, state, models);
+                    let lookahead = env_u64("AHC_X328_LOOKAHEAD", 2, 1, 4) as usize;
+                    let branch_top = env_u64("AHC_X328_BRANCH_TOP", 6, 2, 12) as usize;
+                    let branch_deep = env_u64("AHC_X328_BRANCH_DEEP", 3, 1, 6) as usize;
+
+                    let turn_budget = crate::__cargo_equip::crates::ahc061_solver::turn_budget_ms(
+                        state.turn, game.t,
+                    );
+                    let start = Instant::now();
+                    let deadline_ms = if turn_budget > 0 {
+                        turn_budget * 90 / 100
+                    } else {
+                        18
+                    };
+
+                    let mut scored: Vec<((usize, usize), f64)> =
+                        Vec::with_capacity(candidates.len());
+                    for &mv in &candidates {
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = simulate_turn(game, state, &all_moves);
+                        let score = absolute_score(game, &ns);
+                        scored.push((mv, score));
+                    }
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    if lookahead <= 1 || state.turn + 1 >= game.t {
+                        return scored[0].0;
+                    }
+
+                    let mut best_mv = scored[0].0;
+                    let mut best_score = f64::NEG_INFINITY;
+                    let eval_count = branch_top.min(scored.len());
+
+                    for &(mv, _) in scored.iter().take(eval_count) {
+                        if start.elapsed().as_millis() as u64 >= deadline_ms {
+                            break;
+                        }
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = simulate_turn(game, state, &all_moves);
+
+                        let deep_score = deep_eval(
+                            game,
+                            &ns,
+                            models,
+                            lookahead - 1,
+                            branch_deep,
+                            &start,
+                            deadline_ms,
+                        );
+                        if deep_score > best_score {
+                            best_score = deep_score;
+                            best_mv = mv;
+                        }
+                    }
+
+                    best_mv
+                }
+
+                fn deep_eval(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    remaining_depth: usize,
+                    branch: usize,
+                    start: &Instant,
+                    deadline_ms: u64,
+                ) -> f64 {
+                    if remaining_depth == 0 || state.turn >= game.t {
+                        return absolute_score(game, state);
+                    }
+                    if start.elapsed().as_millis() as u64 >= deadline_ms {
+                        return absolute_score(game, state);
+                    }
+
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.is_empty() {
+                        return absolute_score(game, state);
+                    }
+
+                    let ai_moves = predict_ai_top1(game, state, models);
+
+                    let mut scored: Vec<((usize, usize), f64)> =
+                        Vec::with_capacity(candidates.len());
+                    for &mv in &candidates {
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = simulate_turn(game, state, &all_moves);
+                        scored.push((mv, absolute_score(game, &ns)));
+                    }
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    let mut best = f64::NEG_INFINITY;
+                    for &(mv, _) in scored.iter().take(branch) {
+                        if start.elapsed().as_millis() as u64 >= deadline_ms {
+                            break;
+                        }
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = simulate_turn(game, state, &all_moves);
+                        let score = deep_eval(
+                            game,
+                            &ns,
+                            models,
+                            remaining_depth - 1,
+                            branch.min(2),
+                            start,
+                            deadline_ms,
+                        );
+                        if score > best {
+                            best = score;
+                        }
+                    }
+
+                    if best == f64::NEG_INFINITY {
+                        absolute_score(game, state)
+                    } else {
+                        best
+                    }
+                }
+            }
+            mod x332_expectimax {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    denial_score_v2, get_candidates, simulate_turn, strategic_score, AiModel, Game,
+                    State,
+                };
+                use std::time::Instant;
+
+                fn eval_fn(game: &Game, state: &State) -> f64 {
+                    match std::env::var("AHC_X332_EVAL").ok().as_deref() {
+                        Some("denial_v2") => denial_score_v2(game, state),
+                        Some("ratio") => {
+                            crate::__cargo_equip::crates::ahc061_solver::ratio_eval_score(
+                                game, state, 0.05, 0.5, 0.1,
+                            )
+                        }
+                        _ => strategic_score(game, state),
+                    }
+                }
+
+                fn predict_ai_top1(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> Vec<(usize, usize)> {
+                    let mut moves = Vec::with_capacity(game.m.saturating_sub(1));
+                    for ai_idx in 0..game.m.saturating_sub(1) {
+                        let player = ai_idx + 1;
+                        let cands = get_candidates(game, state, player);
+                        if cands.is_empty() {
+                            moves.push(state.pos[player]);
+                            continue;
+                        }
+                        let w = &models[ai_idx].w;
+                        let mut best = cands[0];
+                        let mut best_s = f64::NEG_INFINITY;
+                        for &(x, y) in &cands {
+                            let feat = crate::__cargo_equip::crates::ahc061_solver::ai_features(
+                                game,
+                                state,
+                                player,
+                                (x, y),
+                            );
+                            let s = crate::__cargo_equip::crates::ahc061_solver::dot(w, &feat);
+                            if s > best_s {
+                                best_s = s;
+                                best = (x, y);
+                            }
+                        }
+                        moves.push(best);
+                    }
+                    moves
+                }
+
+                fn env_u64(name: &str, default: u64, min: u64, max: u64) -> u64 {
+                    if let Ok(v) = std::env::var(name) {
+                        if let Ok(x) = v.parse::<u64>() {
+                            return x.max(min).min(max);
+                        }
+                    }
+                    default.max(min).min(max)
+                }
+
+                pub(super) fn choose_move_x332_expectimax(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.len() <= 1 {
+                        return candidates.first().copied().unwrap_or(state.pos[0]);
+                    }
+
+                    let default_depth = env_u64("AHC_X332_DEPTH", 3, 1, 6);
+                    let m_depth =
+                        env_u64(&format!("AHC_X332_DEPTH_M{}", game.m), default_depth, 1, 6);
+                    let depth = env_u64(
+                        &format!("AHC_X332_DEPTH_M{}_U{}", game.m, game.u),
+                        m_depth,
+                        1,
+                        6,
+                    ) as usize;
+                    let branch_top = env_u64("AHC_X332_BRANCH_TOP", 8, 2, 16) as usize;
+                    let branch_deep = env_u64("AHC_X332_BRANCH_DEEP", 4, 1, 8) as usize;
+
+                    let turn_budget = crate::__cargo_equip::crates::ahc061_solver::turn_budget_ms(
+                        state.turn, game.t,
+                    );
+                    let start = Instant::now();
+                    let deadline_ms = if turn_budget > 0 {
+                        turn_budget * 90 / 100
+                    } else {
+                        18
+                    };
+
+                    let ai_moves = predict_ai_top1(game, state, models);
+                    let mut scored: Vec<((usize, usize), f64)> =
+                        Vec::with_capacity(candidates.len());
+                    for &mv in &candidates {
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = simulate_turn(game, state, &all_moves);
+                        let score = eval_fn(game, &ns);
+                        scored.push((mv, score));
+                    }
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    if depth <= 1 || state.turn + 1 >= game.t {
+                        return scored[0].0;
+                    }
+
+                    let mut best_mv = scored[0].0;
+                    let mut best_score = f64::NEG_INFINITY;
+                    let eval_count = branch_top.min(scored.len());
+
+                    for &(mv, _) in scored.iter().take(eval_count) {
+                        if start.elapsed().as_millis() as u64 >= deadline_ms {
+                            break;
+                        }
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = simulate_turn(game, state, &all_moves);
+
+                        let deep_score = expectimax_eval(
+                            game,
+                            &ns,
+                            models,
+                            depth - 1,
+                            branch_deep,
+                            &start,
+                            deadline_ms,
+                        );
+                        if deep_score > best_score {
+                            best_score = deep_score;
+                            best_mv = mv;
+                        }
+                    }
+
+                    best_mv
+                }
+
+                fn expectimax_eval(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                    remaining_depth: usize,
+                    branch: usize,
+                    start: &Instant,
+                    deadline_ms: u64,
+                ) -> f64 {
+                    if remaining_depth == 0 || state.turn >= game.t {
+                        return eval_fn(game, state);
+                    }
+                    if start.elapsed().as_millis() as u64 >= deadline_ms {
+                        return eval_fn(game, state);
+                    }
+
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.is_empty() {
+                        return eval_fn(game, state);
+                    }
+
+                    let ai_moves = predict_ai_top1(game, state, models);
+
+                    let mut scored: Vec<((usize, usize), f64)> =
+                        Vec::with_capacity(candidates.len());
+                    for &mv in &candidates {
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = simulate_turn(game, state, &all_moves);
+                        scored.push((mv, eval_fn(game, &ns)));
+                    }
+                    scored
+                        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                    let effective_branch = if remaining_depth <= 1 {
+                        branch.min(3)
+                    } else {
+                        branch
+                    };
+
+                    let mut best = f64::NEG_INFINITY;
+                    for &(mv, _) in scored.iter().take(effective_branch) {
+                        if start.elapsed().as_millis() as u64 >= deadline_ms {
+                            break;
+                        }
+                        let mut all_moves = vec![mv];
+                        all_moves.extend_from_slice(&ai_moves);
+                        let ns = simulate_turn(game, state, &all_moves);
+                        let score = expectimax_eval(
+                            game,
+                            &ns,
+                            models,
+                            remaining_depth - 1,
+                            branch.min(3),
+                            start,
+                            deadline_ms,
+                        );
+                        if score > best {
+                            best = score;
+                        }
+                    }
+
+                    if best == f64::NEG_INFINITY {
+                        eval_fn(game, state)
+                    } else {
+                        best
+                    }
+                }
+            }
+            mod x343_mcts {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    build_ai_candidates_and_probs, calc_scores, get_candidates, sample_index,
+                    simulate_turn, AiModel, FastRng, Game, State,
+                };
+                use std::time::Instant;
+
+                const UCB_C: f64 = 1.414;
+
+                struct MctsNode {
+                    mv: (usize, usize),
+                    visits: u32,
+                    total_score: f64,
+                }
+
+                impl MctsNode {
+                    fn new(mv: (usize, usize)) -> Self {
+                        MctsNode {
+                            mv,
+                            visits: 0,
+                            total_score: 0.0,
+                        }
+                    }
+
+                    fn mean(&self) -> f64 {
+                        if self.visits == 0 {
+                            0.0
+                        } else {
+                            self.total_score / self.visits as f64
+                        }
+                    }
+
+                    fn ucb1(&self, parent_visits: u32) -> f64 {
+                        if self.visits == 0 {
+                            return f64::INFINITY;
+                        }
+                        self.mean()
+                            + UCB_C * ((parent_visits as f64).ln() / self.visits as f64).sqrt()
+                    }
+                }
+
+                fn rollout(
+                    game: &Game,
+                    state: &State,
+                    ai_options_cache: &[(Vec<(usize, usize)>, Vec<f64>)],
+                    rng: &mut FastRng,
+                    depth: usize,
+                ) -> f64 {
+                    let mut current = state.clone();
+                    for _ in 0..depth {
+                        if current.turn >= game.t {
+                            break;
+                        }
+
+                        let our_cands = get_candidates(game, &current, 0);
+                        let our_move = if our_cands.is_empty() {
+                            current.pos[0]
+                        } else {
+                            greedy_move(game, &current, &our_cands)
+                        };
+
+                        let mut moves = vec![our_move];
+                        for ai_idx in 0..game.m.saturating_sub(1) {
+                            let player = ai_idx + 1;
+                            let opp_cands = get_candidates(game, &current, player);
+                            if opp_cands.is_empty() {
+                                moves.push(current.pos[player]);
+                            } else if ai_idx < ai_options_cache.len()
+                                && !ai_options_cache[ai_idx].0.is_empty()
+                            {
+                                let (cands, probs) = &ai_options_cache[ai_idx];
+                                let idx = sample_index(probs, rng);
+
+                                if cands.len() > idx {
+                                    moves.push(cands[idx]);
+                                } else {
+                                    moves
+                                        .push(opp_cands[rng.next_u64() as usize % opp_cands.len()]);
+                                }
+                            } else {
+                                moves.push(opp_cands[rng.next_u64() as usize % opp_cands.len()]);
+                            }
+                        }
+                        current = simulate_turn(game, &current, &moves);
+                    }
+
+                    let scores = calc_scores(game, &current);
+                    let s0 = scores[0] as f64;
+                    let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                    1e5 * (1.0 + s0 / sa).log2()
+                }
+
+                fn greedy_move(
+                    game: &Game,
+                    state: &State,
+                    candidates: &[(usize, usize)],
+                ) -> (usize, usize) {
+                    let mut best = candidates[0];
+                    let mut best_score = f64::NEG_INFINITY;
+                    for &(x, y) in candidates {
+                        let v = game.v[x][y] as f64;
+                        let owner = state.owner[x][y];
+                        let level = state.level[x][y];
+                        let score = if owner == 0 {
+                            if level < game.u {
+                                v * if level == 1 { 3.0 } else { 1.5 }
+                            } else {
+                                0.01
+                            }
+                        } else if owner == -1 {
+                            v * 1.2
+                        } else if level <= 1 {
+                            v * 0.8
+                        } else {
+                            0.0
+                        };
+                        if score > best_score {
+                            best_score = score;
+                            best = (x, y);
+                        }
+                    }
+                    best
+                }
+
+                pub(super) fn choose_move_x343_mcts(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    let candidates = get_candidates(game, state, 0);
+                    if candidates.len() <= 1 {
+                        return candidates.first().copied().unwrap_or(state.pos[0]);
+                    }
+
+                    let rollout_depth: usize = std::env::var("AHC_X343_ROLLOUT_DEPTH")
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(5)
+                        .max(1)
+                        .min(20);
+
+                    let turn_budget = crate::__cargo_equip::crates::ahc061_solver::turn_budget_ms(
+                        state.turn, game.t,
+                    );
+                    let start = Instant::now();
+                    let deadline_ms = if turn_budget > 0 {
+                        turn_budget * 90 / 100
+                    } else {
+                        15
+                    };
+
+                    let ai_options = build_ai_candidates_and_probs(game, state, models);
+
+                    let mut nodes: Vec<MctsNode> =
+                        candidates.iter().map(|&mv| MctsNode::new(mv)).collect();
+
+                    let seed = ((state.turn as u64 + 1) * 0x9e37_79b9_7f4a_7c15)
+                        ^ (game.m as u64 * 0x5851_f42d_4c95_7f2d)
+                        ^ (game.u as u64 * 0x14057_b7ef_767814f);
+                    let mut rng = FastRng::new(seed);
+
+                    let mut total_visits: u32 = 0;
+
+                    loop {
+                        if start.elapsed().as_millis() as u64 >= deadline_ms {
+                            break;
+                        }
+
+                        let selected = if total_visits == 0 {
+                            0
+                        } else {
+                            let mut best_idx = 0;
+                            let mut best_ucb = f64::NEG_INFINITY;
+                            for (i, node) in nodes.iter().enumerate() {
+                                let ucb = node.ucb1(total_visits);
+                                if ucb > best_ucb {
+                                    best_ucb = ucb;
+                                    best_idx = i;
+                                }
+                            }
+                            best_idx
+                        };
+
+                        let our_move = nodes[selected].mv;
+                        let mut first_turn_moves = vec![our_move];
+                        for (cands, probs) in &ai_options {
+                            if cands.is_empty() {
+                                first_turn_moves.push((0, 0));
+                            } else {
+                                let idx = sample_index(probs, &mut rng);
+                                first_turn_moves.push(cands[idx]);
+                            }
+                        }
+                        let next_state = simulate_turn(game, state, &first_turn_moves);
+
+                        let score = if rollout_depth <= 1 || next_state.turn >= game.t {
+                            let scores = calc_scores(game, &next_state);
+                            let s0 = scores[0] as f64;
+                            let sa =
+                                scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                            1e5 * (1.0 + s0 / sa).log2()
+                        } else {
+                            rollout(game, &next_state, &ai_options, &mut rng, rollout_depth - 1)
+                        };
+
+                        nodes[selected].visits += 1;
+                        nodes[selected].total_score += score;
+                        total_visits += 1;
+                    }
+
+                    let best = nodes.iter().filter(|n| n.visits > 0).max_by(|a, b| {
+                        a.mean()
+                            .partial_cmp(&b.mean())
+                            .unwrap_or(std::cmp::Ordering::Equal)
+                    });
+
+                    match best {
+                        Some(node) => node.mv,
+                        None => candidates[0],
+                    }
+                }
+            }
+            mod x378_extended_mcts {
+
+                use crate::__cargo_equip::crates::ahc061_solver::{
+                    x04_macro_route, x332_expectimax, x343_mcts, AiModel, Game, State,
+                };
+
+                pub(super) fn choose_move_x378_extended_mcts(
+                    game: &Game,
+                    state: &State,
+                    models: &[AiModel],
+                ) -> (usize, usize) {
+                    if game.u == 1 && game.m >= 3 && game.m != 6 {
+                        return x343_mcts::choose_move_x343_mcts(game, state, models);
+                    }
+
+                    if game.m == 5 && (game.u == 2 || game.u == 3) {
+                        return x343_mcts::choose_move_x343_mcts(game, state, models);
+                    }
+
+                    if game.m == 4 && game.u == 5 {
+                        return x343_mcts::choose_move_x343_mcts(game, state, models);
+                    }
+
+                    if game.m == 3 && game.u == 2 {
+                        return x343_mcts::choose_move_x343_mcts(game, state, models);
+                    }
+
+                    let use_expectimax = (game.m <= 4 && game.u == 3)
+                        || (game.m == 4 && game.u == 2)
+                        || (game.m == 2 && game.u == 4);
+
+                    if use_expectimax {
+                        return x332_expectimax::choose_move_x332_expectimax(game, state, models);
+                    }
+
+                    x04_macro_route::choose_move_x04_macro_route(game, state, models)
+                }
+            }
+
+            use strategy_mode::choose_move;
+            pub use strategy_mode::{strategy_from_env, StrategyMode};
+
+            #[derive(Clone)]
+            pub(in crate::__cargo_equip::crates::ahc061_solver) struct Game {
+                n: usize,
+                m: usize,
+                t: usize,
+                u: usize,
+                v: Vec<Vec<i64>>,
+            }
+
+            #[derive(Clone)]
+            pub(in crate::__cargo_equip::crates::ahc061_solver) struct State {
+                pos: Vec<(usize, usize)>,
+                owner: Vec<Vec<i32>>,
+                level: Vec<Vec<usize>>,
+                turn: usize,
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) const FEAT_DIM: usize = 4;
+
+            const FEAT_ANCHOR: [f64; FEAT_DIM] = [0.64, 0.64, 0.64, 0.64];
+            const FEAT_CLAMP_LO: [f64; FEAT_DIM] = [0.10, 0.10, 0.10, 0.10];
+            const FEAT_CLAMP_HI: [f64; FEAT_DIM] = [2.00, 2.00, 2.00, 2.00];
+
+            #[derive(Clone)]
+            pub(in crate::__cargo_equip::crates::ahc061_solver) struct AiModel {
+                pub(in crate::__cargo_equip::crates::ahc061_solver) w: [f64; FEAT_DIM],
+                pub(in crate::__cargo_equip::crates::ahc061_solver) eps_est: f64,
+                seen: u32,
+                mismatch: u32,
+            }
+
+            impl AiModel {
+                fn new() -> Self {
+                    Self {
+                        w: FEAT_ANCHOR,
+                        eps_est: 0.30,
+                        seen: 0,
+                        mismatch: 0,
+                    }
+                }
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) struct FastRng {
+                state: u64,
+            }
+
+            impl FastRng {
+                pub(in crate::__cargo_equip::crates::ahc061_solver) fn new(seed: u64) -> Self {
+                    Self { state: seed | 1 }
+                }
+
+                pub(in crate::__cargo_equip::crates::ahc061_solver) fn next_u64(&mut self) -> u64 {
+                    self.state ^= self.state << 7;
+                    self.state ^= self.state >> 9;
+                    self.state ^= self.state << 8;
+                    self.state
+                }
+
+                pub(in crate::__cargo_equip::crates::ahc061_solver) fn next_f64(&mut self) -> f64 {
+                    let x = self.next_u64() >> 11;
+                    (x as f64) * (1.0 / ((1_u64 << 53) as f64))
+                }
+            }
+
+            static GAME_TIMER: OnceLock<Instant> = OnceLock::new();
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn init_game_timer() {
+                GAME_TIMER.get_or_init(Instant::now);
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn turn_budget_ms(
+                turn: usize,
+                total_turns: usize,
+            ) -> u64 {
+                let total_limit: u64 = match std::env::var("AHC_TIME_LIMIT_MS") {
+                    Ok(v) => match v.parse() {
+                        Ok(ms) => ms,
+                        Err(_) => return 0,
+                    },
+                    Err(_) => return 0,
+                };
+                let start = match GAME_TIMER.get() {
+                    Some(t) => t,
+                    None => return 0,
+                };
+                let elapsed = start.elapsed().as_millis() as u64;
+                let remaining_turns = (total_turns - turn).max(1) as u64;
+                let remaining_time = total_limit.saturating_sub(elapsed);
+
+                let usable = remaining_time.saturating_sub(remaining_turns);
+                usable / remaining_turns
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn game_time_elapsed_ms() -> u64 {
+                match GAME_TIMER.get() {
+                    Some(t) => t.elapsed().as_millis() as u64,
+                    None => 0,
+                }
+            }
+
+            struct Scanner<R: BufRead> {
+                reader: R,
+                line: String,
+                tokens: VecDeque<String>,
+            }
+
+            impl<R: BufRead> Scanner<R> {
+                fn new(reader: R) -> Self {
+                    Self {
+                        reader,
+                        line: String::new(),
+                        tokens: VecDeque::new(),
+                    }
+                }
+
+                fn next<T: std::str::FromStr>(&mut self) -> Option<T> {
+                    loop {
+                        if let Some(tok) = self.tokens.pop_front() {
+                            if let Ok(v) = tok.parse::<T>() {
+                                return Some(v);
+                            }
+                            return None;
+                        }
+                        self.line.clear();
+                        let n = self.reader.read_line(&mut self.line).ok()?;
+                        if n == 0 {
+                            return None;
+                        }
+                        let s = self.line.trim();
+                        if s.is_empty() || s.starts_with('#') {
+                            continue;
+                        }
+                        self.tokens = s
+                            .split_whitespace()
+                            .map(|x| x.to_owned())
+                            .collect::<VecDeque<_>>();
+                    }
+                }
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn in_bounds(
+                n: usize,
+                x: isize,
+                y: isize,
+            ) -> bool {
+                x >= 0 && y >= 0 && (x as usize) < n && (y as usize) < n
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn occupied_by_other(
+                state: &State,
+                player: usize,
+                x: usize,
+                y: usize,
+            ) -> bool {
+                for (i, &(px, py)) in state.pos.iter().enumerate() {
+                    if i != player && px == x && py == y {
+                        return true;
+                    }
+                }
+                false
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn bfs_distance_map(
+                game: &Game,
+                state: &State,
+                player: usize,
+            ) -> Vec<Vec<usize>> {
+                let mut dist = vec![vec![usize::MAX; game.n]; game.n];
+                let mut queue = VecDeque::new();
+                let start = state.pos[player];
+                dist[start.0][start.1] = 0;
+                queue.push_back(start);
+
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+                while let Some((x, y)) = queue.pop_front() {
+                    let d = dist[x][y];
+                    if state.owner[x][y] == player as i32 {
+                        for (dx, dy) in DIRS {
+                            let nx = x as isize + dx;
+                            let ny = y as isize + dy;
+                            if in_bounds(game.n, nx, ny) {
+                                let ux = nx as usize;
+                                let uy = ny as usize;
+                                if dist[ux][uy] > d + 1 {
+                                    dist[ux][uy] = d + 1;
+                                    queue.push_back((ux, uy));
+                                }
+                            }
+                        }
+                    }
+                }
+                dist
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn get_candidates(
+                game: &Game,
+                state: &State,
+                player: usize,
+            ) -> Vec<(usize, usize)> {
+                let mut reachable = Vec::new();
+                let mut visited = vec![vec![false; game.n]; game.n];
+                let mut q = VecDeque::new();
+
+                let start = state.pos[player];
+                q.push_back(start);
+                visited[start.0][start.1] = true;
+
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+
+                while let Some((x, y)) = q.pop_front() {
+                    if !occupied_by_other(state, player, x, y) {
+                        reachable.push((x, y));
+                    }
+
+                    if state.owner[x][y] == player as i32 {
+                        for (dx, dy) in DIRS {
+                            let nx = x as isize + dx;
+                            let ny = y as isize + dy;
+                            if in_bounds(game.n, nx, ny) {
+                                let ux = nx as usize;
+                                let uy = ny as usize;
+                                if !visited[ux][uy] {
+                                    visited[ux][uy] = true;
+                                    q.push_back((ux, uy));
+                                }
+                            }
+                        }
+                    }
+                }
+                reachable
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn calc_scores(
+                game: &Game,
+                state: &State,
+            ) -> Vec<i64> {
+                let mut scores = vec![0_i64; game.m];
+                for i in 0..game.n {
+                    for j in 0..game.n {
+                        let owner = state.owner[i][j];
+                        if owner >= 0 {
+                            scores[owner as usize] += game.v[i][j] * state.level[i][j] as i64;
+                        }
+                    }
+                }
+                scores
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn ai_features(
+                game: &Game,
+                state: &State,
+                player: usize,
+                target: (usize, usize),
+            ) -> [f64; FEAT_DIM] {
+                let (x, y) = target;
+                let owner = state.owner[x][y];
+                let level = state.level[x][y];
+                let value = game.v[x][y] as f64;
+
+                if owner == -1 {
+                    [value, 0.0, 0.0, 0.0]
+                } else if owner == player as i32 {
+                    if level < game.u {
+                        [0.0, value, 0.0, 0.0]
+                    } else {
+                        [0.0, 0.0, 0.0, 0.0]
+                    }
+                } else if level == 1 {
+                    [0.0, 0.0, value, 0.0]
+                } else {
+                    [0.0, 0.0, 0.0, value]
+                }
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn dot(
+                w: &[f64; FEAT_DIM],
+                x: &[f64; FEAT_DIM],
+            ) -> f64 {
+                let mut s = 0.0;
+                for i in 0..FEAT_DIM {
+                    s += w[i] * x[i];
+                }
+                s
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn predict_ai_distribution(
+                game: &Game,
+                state: &State,
+                player: usize,
+                model: &AiModel,
+                candidates: &[(usize, usize)],
+            ) -> Vec<f64> {
+                if candidates.is_empty() {
+                    return Vec::new();
+                }
+
+                let mut est_scores = vec![0.0_f64; candidates.len()];
+                for (i, &cand) in candidates.iter().enumerate() {
+                    let feat = ai_features(game, state, player, cand);
+                    est_scores[i] = dot(&model.w, &feat);
+                }
+
+                let temp: f64 = std::env::var("AHC_AI_SOFTMAX_TEMP")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0.0);
+
+                if temp > 0.0 {
+                    let max_s = est_scores.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+                    let exp_scores: Vec<f64> = est_scores
+                        .iter()
+                        .map(|&s| ((s - max_s) / temp).exp())
+                        .collect();
+                    let sum: f64 = exp_scores.iter().sum();
+                    let eps = model.eps_est.clamp(0.05, 0.60);
+                    let floor = eps / candidates.len() as f64;
+                    let mut probs: Vec<f64> = exp_scores
+                        .iter()
+                        .map(|&e| floor + (1.0 - eps) * e / sum)
+                        .collect();
+                    let total: f64 = probs.iter().sum();
+                    if total > 0.0 {
+                        for p in &mut probs {
+                            *p /= total;
+                        }
+                    }
+                    probs
+                } else {
+                    let max_score = est_scores.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+                    let tol = 1e-9 * max_score.abs().max(1.0);
+                    let best_idx: Vec<usize> = (0..candidates.len())
+                        .filter(|&i| est_scores[i] >= max_score - tol)
+                        .collect();
+
+                    let eps = model.eps_est.clamp(0.05, 0.60);
+                    let base = eps / candidates.len() as f64;
+                    let mut probs = vec![base; candidates.len()];
+                    let rem = 1.0 - eps;
+                    let share = if best_idx.is_empty() {
+                        rem / candidates.len() as f64
+                    } else {
+                        rem / best_idx.len() as f64
+                    };
+
+                    if best_idx.is_empty() {
+                        for p in &mut probs {
+                            *p += share;
+                        }
+                    } else {
+                        for &i in &best_idx {
+                            probs[i] += share;
+                        }
+                    }
+                    probs
+                }
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn blended_ai_probs(
+                game: &Game,
+                state: &State,
+                player: usize,
+                model: &AiModel,
+                candidates: &[(usize, usize)],
+            ) -> Vec<f64> {
+                if candidates.is_empty() {
+                    return Vec::new();
+                }
+                let model_probs = predict_ai_distribution(game, state, player, model, candidates);
+                let uniform_prob = 1.0 / candidates.len() as f64;
+                let turns_ratio = (state.turn as f64 / game.t as f64).clamp(0.0, 1.0);
+                let seen = model.seen as f64;
+                let confidence = (seen / (seen + 10.0)) * (1.0 - model.eps_est).clamp(0.15, 0.95);
+                let alpha = (0.05 + 0.90 * turns_ratio * confidence).clamp(0.05, 0.95);
+                model_probs
+                    .iter()
+                    .map(|&p| alpha * p + (1.0 - alpha) * uniform_prob)
+                    .collect()
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn estimate_conflict_map(
+                game: &Game,
+                state: &State,
+                models: &[AiModel],
+            ) -> Vec<Vec<f64>> {
+                let mut map = vec![vec![0.0_f64; game.n]; game.n];
+                for ai_idx in 0..(game.m.saturating_sub(1)) {
+                    let player = ai_idx + 1;
+                    let cands = get_candidates(game, state, player);
+                    if cands.is_empty() {
+                        continue;
+                    }
+                    let probs = blended_ai_probs(game, state, player, &models[ai_idx], &cands);
+                    for (i, &(x, y)) in cands.iter().enumerate() {
+                        map[x][y] += probs[i];
+                    }
+                }
+                map
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn simulate_turn(
+                game: &Game,
+                state: &State,
+                moves: &[(usize, usize)],
+            ) -> State {
+                let mut next = state.clone();
+                let temp_pos = moves.to_vec();
+                let mut next_pos = state.pos.clone();
+                let mut move_counts = HashMap::<(usize, usize), usize>::new();
+                for &mv in moves {
+                    *move_counts.entry(mv).or_insert(0) += 1;
+                }
+
+                let mut collected = vec![false; game.m];
+                for i in 0..game.m {
+                    let target = if i < temp_pos.len() {
+                        temp_pos[i]
+                    } else {
+                        state.pos[i]
+                    };
+                    let collision_count = move_counts.get(&target).copied().unwrap_or(0);
+                    if collision_count >= 2 {
+                        let owner = next.owner[target.0][target.1];
+                        if i as i32 != owner {
+                            collected[i] = true;
+                        }
+                    }
+                }
+
+                for i in 0..game.m {
+                    if collected[i] {
+                        continue;
+                    }
+                    let (x, y) = if i < temp_pos.len() {
+                        temp_pos[i]
+                    } else {
+                        state.pos[i]
+                    };
+                    let owner = next.owner[x][y];
+                    if owner == -1 {
+                        next.owner[x][y] = i as i32;
+                        next.level[x][y] = 1;
+                    } else if owner == i as i32 {
+                        if next.level[x][y] < game.u {
+                            next.level[x][y] += 1;
+                        }
+                    } else {
+                        next.level[x][y] -= 1;
+                        if next.level[x][y] == 0 {
+                            next.owner[x][y] = i as i32;
+                            next.level[x][y] = 1;
+                        } else {
+                            collected[i] = true;
+                        }
+                    }
+                    next_pos[i] = (x, y);
+                }
+
+                for i in 0..game.m {
+                    if collected[i] {
+                        next_pos[i] = state.pos[i];
+                    }
+                }
+                next.pos = next_pos;
+                next
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn absolute_score(
+                game: &Game,
+                state: &State,
+            ) -> f64 {
+                let scores = calc_scores(game, state);
+                let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                let ratio = scores[0] as f64 / sa;
+                1e5 * (1.0 + ratio).log2()
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn zone_absolute_score(
+                game: &Game,
+                state: &State,
+            ) -> f64 {
+                let base = absolute_score(game, state);
+                let zone_w: f64 = std::env::var("AHC_ZONE_SCORE_W")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0.0);
+                if zone_w <= 0.0 {
+                    return base;
+                }
+                let zone = compute_value_zone(game);
+                let mut zone_val = 0.0_f64;
+                for x in 0..game.n {
+                    for y in 0..game.n {
+                        if zone[x][y] && state.owner[x][y] == 0 {
+                            zone_val += game.v[x][y] as f64 * state.level[x][y] as f64;
+                        }
+                    }
+                }
+                base + zone_w * zone_val
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn compute_value_zone(
+                game: &Game,
+            ) -> Vec<Vec<bool>> {
+                let zone_size: usize = std::env::var("AHC_ZONE_SIZE")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(4);
+                let n = game.n;
+                let k = zone_size.min(n);
+
+                let mut best_sum = 0_i64;
+                let mut best_x = 0;
+                let mut best_y = 0;
+                for x in 0..=(n - k) {
+                    for y in 0..=(n - k) {
+                        let mut s = 0_i64;
+                        for dx in 0..k {
+                            for dy in 0..k {
+                                s += game.v[x + dx][y + dy];
+                            }
+                        }
+                        if s > best_sum {
+                            best_sum = s;
+                            best_x = x;
+                            best_y = y;
+                        }
+                    }
+                }
+
+                let mut zone = vec![vec![false; n]; n];
+                for dx in 0..k {
+                    for dy in 0..k {
+                        zone[best_x + dx][best_y + dy] = true;
+                    }
+                }
+                zone
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn compute_adaptive_zone(
+                game: &Game,
+                state: &State,
+            ) -> Vec<Vec<bool>> {
+                let zone_size: usize = std::env::var("AHC_ZONE_SIZE")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(4);
+                let opp_penalty: f64 = std::env::var("AHC_ZONE_OPP_PENALTY")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0.0);
+                let n = game.n;
+                let k = zone_size.min(n);
+
+                let mut best_score = f64::NEG_INFINITY;
+                let mut best_x = 0;
+                let mut best_y = 0;
+                for x in 0..=(n - k) {
+                    for y in 0..=(n - k) {
+                        let mut val_sum = 0.0_f64;
+                        let mut opp_count = 0_usize;
+                        for dx in 0..k {
+                            for dy in 0..k {
+                                let cx = x + dx;
+                                let cy = y + dy;
+                                val_sum += game.v[cx][cy] as f64;
+                                if state.owner[cx][cy] > 0 {
+                                    opp_count += 1;
+
+                                    if state.level[cx][cy] >= 2 {
+                                        opp_count += 1;
+                                    }
+                                }
+                            }
+                        }
+                        let score = val_sum - opp_penalty * opp_count as f64;
+                        if score > best_score {
+                            best_score = score;
+                            best_x = x;
+                            best_y = y;
+                        }
+                    }
+                }
+
+                let mut zone = vec![vec![false; n]; n];
+                for dx in 0..k {
+                    for dy in 0..k {
+                        zone[best_x + dx][best_y + dy] = true;
+                    }
+                }
+                zone
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn compute_dual_zone(
+                game: &Game,
+            ) -> Vec<Vec<bool>> {
+                let zone_size: usize = std::env::var("AHC_ZONE_SIZE")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(4);
+                let n = game.n;
+                let k = zone_size.min(n);
+                let max_overlap = k * k / 2;
+
+                let mut windows: Vec<(usize, usize, i64)> = Vec::new();
+                for x in 0..=(n - k) {
+                    for y in 0..=(n - k) {
+                        let mut s = 0_i64;
+                        for dx in 0..k {
+                            for dy in 0..k {
+                                s += game.v[x + dx][y + dy];
+                            }
+                        }
+                        windows.push((x, y, s));
+                    }
+                }
+                windows.sort_by(|a, b| b.2.cmp(&a.2));
+
+                let (bx1, by1, _) = windows[0];
+
+                let mut bx2 = bx1;
+                let mut by2 = by1;
+                let mut found_second = false;
+                for &(x, y, _) in windows.iter().skip(1) {
+                    let ox_start = x.max(bx1);
+                    let ox_end = (x + k).min(bx1 + k);
+                    let oy_start = y.max(by1);
+                    let oy_end = (y + k).min(by1 + k);
+                    let overlap = if ox_start < ox_end && oy_start < oy_end {
+                        (ox_end - ox_start) * (oy_end - oy_start)
+                    } else {
+                        0
+                    };
+                    if overlap <= max_overlap {
+                        bx2 = x;
+                        by2 = y;
+                        found_second = true;
+                        break;
+                    }
+                }
+
+                let mut zone = vec![vec![false; n]; n];
+                for dx in 0..k {
+                    for dy in 0..k {
+                        zone[bx1 + dx][by1 + dy] = true;
+                        if found_second {
+                            zone[bx2 + dx][by2 + dy] = true;
+                        }
+                    }
+                }
+                zone
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn compute_proximity_zone(
+                game: &Game,
+                state: &State,
+            ) -> Vec<Vec<bool>> {
+                let zone_size: usize = std::env::var("AHC_ZONE_SIZE")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(4);
+                let prox_decay: f64 = std::env::var("AHC_ZONE_PROX_DECAY")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0.15);
+                let n = game.n;
+                let k = zone_size.min(n);
+
+                let dist_map = bfs_distance_map(game, state, 0);
+
+                let mut best_score = f64::NEG_INFINITY;
+                let mut best_x = 0;
+                let mut best_y = 0;
+                for x in 0..=(n - k) {
+                    for y in 0..=(n - k) {
+                        let mut score = 0.0_f64;
+                        for dx in 0..k {
+                            for dy in 0..k {
+                                let cx = x + dx;
+                                let cy = y + dy;
+                                let v = game.v[cx][cy] as f64;
+                                let d = dist_map[cx][cy] as f64;
+
+                                let weight = (-prox_decay * d).exp();
+                                score += v * weight;
+                            }
+                        }
+                        if score > best_score {
+                            best_score = score;
+                            best_x = x;
+                            best_y = y;
+                        }
+                    }
+                }
+
+                let mut zone = vec![vec![false; n]; n];
+                for dx in 0..k {
+                    for dy in 0..k {
+                        zone[best_x + dx][best_y + dy] = true;
+                    }
+                }
+                zone
+            }
+
+            static VALUE_ZONE: OnceLock<Vec<Vec<bool>>> = OnceLock::new();
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn get_value_zone(
+                game: &Game,
+            ) -> &'static Vec<Vec<bool>> {
+                VALUE_ZONE.get_or_init(|| compute_value_zone(game))
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn choose_predicted_ai_top2_moves(
+                game: &Game,
+                state: &State,
+                models: &[AiModel],
+            ) -> Vec<((usize, usize), (usize, usize), f64)> {
+                let mut moves = Vec::with_capacity(game.m.saturating_sub(1));
+                for ai_idx in 0..game.m.saturating_sub(1) {
+                    let player = ai_idx + 1;
+                    let cands = get_candidates(game, state, player);
+                    if cands.is_empty() {
+                        let cur = state.pos[player];
+                        moves.push((cur, cur, 1.0));
+                        continue;
+                    }
+                    let probs = blended_ai_probs(game, state, player, &models[ai_idx], &cands);
+                    let mut order: Vec<usize> = (0..cands.len()).collect();
+                    order.sort_by(|&a, &b| {
+                        probs[b]
+                            .partial_cmp(&probs[a])
+                            .unwrap_or(std::cmp::Ordering::Equal)
+                    });
+                    let i1 = order[0];
+                    let i2 = if order.len() >= 2 { order[1] } else { order[0] };
+                    let p1 = probs[i1];
+                    let p2 = probs[i2];
+                    let conf = if i1 == i2 {
+                        1.0
+                    } else {
+                        p1 / (p1 + p2 + 1e-12)
+                    };
+                    moves.push((cands[i1], cands[i2], conf.clamp(0.5, 1.0)));
+                }
+                moves
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn uncertainty_risk(
+                top2: &[((usize, usize), (usize, usize), f64)],
+            ) -> f64 {
+                if top2.is_empty() {
+                    return 0.0;
+                }
+                let mut sum = 0.0;
+                for (_, _, conf) in top2 {
+                    sum += 1.0 - *conf;
+                }
+                (sum / top2.len() as f64).clamp(0.0, 0.5)
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn build_secondary_ai_moves(
+                scores: &[i64],
+                top2: &[((usize, usize), (usize, usize), f64)],
+                switch_cap: usize,
+            ) -> Vec<(usize, usize)> {
+                let mut moves: Vec<(usize, usize)> = top2.iter().map(|x| x.0).collect();
+                if top2.is_empty() {
+                    return moves;
+                }
+                let s0 = scores.first().copied().unwrap_or(1).max(1) as f64;
+                let mut ranked: Vec<(f64, usize)> = Vec::new();
+                for (ai_idx, (p1, p2, conf)) in top2.iter().enumerate() {
+                    if p1 == p2 {
+                        continue;
+                    }
+                    let player = ai_idx + 1;
+                    let threat_ratio = (scores[player] as f64 / s0).clamp(0.2, 3.0);
+                    let threat = (1.0 - *conf) * threat_ratio;
+                    ranked.push((threat, ai_idx));
+                }
+                ranked.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+                let cap = switch_cap.max(1).min(ranked.len());
+                for (_, i) in ranked.into_iter().take(cap) {
+                    moves[i] = top2[i].1;
+                }
+                moves
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn sample_index(
+                probs: &[f64],
+                rng: &mut FastRng,
+            ) -> usize {
+                if probs.is_empty() {
+                    return 0;
+                }
+                let r = rng.next_f64();
+                let mut acc = 0.0;
+                for (i, &p) in probs.iter().enumerate() {
+                    acc += p.max(0.0);
+                    if r <= acc {
+                        return i;
+                    }
+                }
+                probs.len() - 1
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn build_ai_candidates_and_probs(
+                game: &Game,
+                state: &State,
+                models: &[AiModel],
+            ) -> Vec<(Vec<(usize, usize)>, Vec<f64>)> {
+                let mut all = Vec::with_capacity(game.m.saturating_sub(1));
+                for ai_idx in 0..game.m.saturating_sub(1) {
+                    let player = ai_idx + 1;
+                    let cands = get_candidates(game, state, player);
+                    if cands.is_empty() {
+                        all.push((vec![state.pos[player]], vec![1.0]));
+                        continue;
+                    }
+                    let probs = blended_ai_probs(game, state, player, &models[ai_idx], &cands);
+                    all.push((cands, probs));
+                }
+                all
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn frontier_potential(
+                game: &Game,
+                state: &State,
+            ) -> f64 {
+                let mut frontier = 0.0_f64;
+                let mut growth = 0.0_f64;
+                let mut vulnerability = 0.0_f64;
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+
+                for x in 0..game.n {
+                    for y in 0..game.n {
+                        if state.owner[x][y] != 0 {
+                            continue;
+                        }
+                        let v = game.v[x][y] as f64;
+                        let lv = state.level[x][y] as f64;
+                        if state.level[x][y] < game.u {
+                            growth += v * (game.u - state.level[x][y]) as f64 / game.u as f64;
+                        }
+                        for (dx, dy) in DIRS {
+                            let nx = x as isize + dx;
+                            let ny = y as isize + dy;
+                            if !in_bounds(game.n, nx, ny) {
+                                continue;
+                            }
+                            let ux = nx as usize;
+                            let uy = ny as usize;
+                            let nv = game.v[ux][uy] as f64;
+                            let owner = state.owner[ux][uy];
+                            if owner == -1 {
+                                frontier += 1.00 * nv;
+                            } else if owner > 0 {
+                                if state.level[ux][uy] == 1 {
+                                    frontier += 0.85 * nv;
+                                } else {
+                                    frontier += 0.35 * nv / state.level[ux][uy] as f64;
+                                }
+                            } else if state.level[ux][uy] == 1 && lv == 1.0 {
+                                vulnerability += 0.45 * v;
+                            }
+                        }
+                    }
+                }
+                0.022 * frontier + 0.090 * growth - 0.060 * vulnerability
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn strategic_score(
+                game: &Game,
+                state: &State,
+            ) -> f64 {
+                let base = absolute_score(game, state) + frontier_potential(game, state);
+                let enriched_w: f64 = std::env::var("AHC_ENRICHED_SCORE_W")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0.0);
+                let opp_frontier_w: f64 = std::env::var("AHC_OPP_FRONTIER_W")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0.0);
+                let mut score = base;
+                if enriched_w > 0.0 {
+                    score += enriched_w * territory_enrichment(game, state);
+                }
+                if opp_frontier_w > 0.0 {
+                    score -= opp_frontier_w * leader_frontier_strength(game, state);
+                }
+                score
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn denial_score(
+                game: &Game,
+                state: &State,
+            ) -> f64 {
+                let scores = calc_scores(game, state);
+                let s0 = scores[0] as f64;
+                let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                let ratio = s0 / sa;
+                let base = 1e5 * (1.0 + ratio).log2();
+
+                let phase = state.turn as f64 / game.t as f64;
+                let remaining = (1.0 - phase).max(0.0);
+
+                let leader = (1..game.m).max_by_key(|&p| scores[p]).unwrap_or(1);
+
+                let mut own_upgrade_pot = 0.0_f64;
+                let mut leader_upgrade_pot = 0.0_f64;
+                let mut leader_weak_cells = 0.0_f64;
+
+                for x in 0..game.n {
+                    for y in 0..game.n {
+                        let v = game.v[x][y] as f64;
+                        let owner = state.owner[x][y];
+                        let level = state.level[x][y];
+
+                        if owner == 0 && level < game.u {
+                            own_upgrade_pot += v * (game.u - level) as f64;
+                        } else if owner == leader as i32 {
+                            if level < game.u {
+                                leader_upgrade_pot += v * (game.u - level) as f64;
+                            }
+                            if level == 1 {
+                                leader_weak_cells += v;
+                            }
+                        }
+                    }
+                }
+
+                let own_pot_w = 0.30 * remaining;
+
+                let deny_pot_w = 0.15 * remaining * ratio.clamp(0.5, 3.0);
+
+                let weak_bonus_w = 0.10 * remaining * ratio.clamp(0.5, 2.0);
+
+                base + own_pot_w * own_upgrade_pot - deny_pot_w * leader_upgrade_pot
+                    + weak_bonus_w * leader_weak_cells
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn denial_score_v2(
+                game: &Game,
+                state: &State,
+            ) -> f64 {
+                let scores = calc_scores(game, state);
+                let s0 = scores[0] as f64;
+                let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                let ratio = s0 / sa;
+                let base = 1e5 * (1.0 + ratio).log2();
+
+                let phase = state.turn as f64 / game.t as f64;
+                let remaining = (1.0 - phase).max(0.0);
+
+                let leader = (1..game.m).max_by_key(|&p| scores[p]).unwrap_or(1);
+
+                let mut own_upgrade_pot = 0.0_f64;
+                let mut leader_upgrade_pot = 0.0_f64;
+                let mut leader_weak_cells = 0.0_f64;
+
+                for x in 0..game.n {
+                    for y in 0..game.n {
+                        let v = game.v[x][y] as f64;
+                        let owner = state.owner[x][y];
+                        let level = state.level[x][y];
+
+                        if owner == 0 && level < game.u {
+                            own_upgrade_pot += v * (game.u - level) as f64;
+                        } else if owner == leader as i32 {
+                            if level < game.u {
+                                leader_upgrade_pot += v * (game.u - level) as f64;
+                            }
+                            if level == 1 {
+                                leader_weak_cells += v;
+                            }
+                        }
+                    }
+                }
+
+                let own_pot_w = 0.20 * remaining;
+                let deny_pot_w = 0.15 * remaining * ratio.clamp(0.5, 3.0);
+                let weak_bonus_w = 0.10 * remaining * ratio.clamp(0.5, 2.0);
+
+                let frontier = frontier_potential(game, state);
+
+                base + frontier - own_pot_w * own_upgrade_pot - deny_pot_w * leader_upgrade_pot
+                    + weak_bonus_w * leader_weak_cells
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn ratio_eval_score(
+                game: &Game,
+                state: &State,
+                equalization_w: f64,
+                frontier_w: f64,
+                denial_w: f64,
+            ) -> f64 {
+                let scores = calc_scores(game, state);
+                let s0 = scores[0] as f64;
+                let sa = scores.iter().skip(1).copied().max().unwrap_or(1).max(1) as f64;
+                let base = 1e5 * (1.0 + s0 / sa).log2();
+
+                let phase = state.turn as f64 / game.t as f64;
+                let remaining = (1.0 - phase).max(0.0);
+
+                let opp_scores: Vec<f64> =
+                    scores.iter().skip(1).copied().map(|s| s as f64).collect();
+                let n_opp = opp_scores.len().max(1) as f64;
+                let opp_mean = opp_scores.iter().sum::<f64>() / n_opp;
+                let opp_var = opp_scores
+                    .iter()
+                    .map(|&s| (s - opp_mean).powi(2))
+                    .sum::<f64>()
+                    / n_opp;
+                let equalization = -equalization_w * opp_var.sqrt() * remaining;
+
+                let n = game.n;
+                let mut frontier = 0.0_f64;
+                for x in 0..n {
+                    for y in 0..n {
+                        if state.owner[x][y] == 0 {
+                            let v = game.v[x][y] as f64;
+                            if state.level[x][y] < game.u {
+                                frontier +=
+                                    v * (game.u - state.level[x][y]) as f64 / game.u as f64 * 0.3;
+                            }
+                            for &(dx, dy) in &[(0isize, 1isize), (1, 0), (0, -1), (-1, 0)] {
+                                let nx = x as isize + dx;
+                                let ny = y as isize + dy;
+                                if nx >= 0 && nx < n as isize && ny >= 0 && ny < n as isize {
+                                    let ux = nx as usize;
+                                    let uy = ny as usize;
+                                    if state.owner[ux][uy] == -1 {
+                                        frontier += game.v[ux][uy] as f64 * 0.2;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                let leader = (1..game.m).max_by_key(|&p| scores[p]).unwrap_or(1);
+                let mut leader_weak = 0.0_f64;
+                for x in 0..n {
+                    for y in 0..n {
+                        if state.owner[x][y] == leader as i32 && state.level[x][y] == 1 {
+                            leader_weak += game.v[x][y] as f64;
+                        }
+                    }
+                }
+
+                base + frontier_w * frontier + equalization + denial_w * leader_weak * remaining
+            }
+
+            fn leader_frontier_strength(game: &Game, state: &State) -> f64 {
+                let scores = calc_scores(game, state);
+                let max_ai = scores.iter().skip(1).copied().max().unwrap_or(0);
+                if max_ai <= 0 {
+                    return 0.0;
+                }
+
+                let leader = (1..game.m).find(|&p| scores[p] == max_ai).unwrap_or(1);
+                let mut frontier_v = 0.0_f64;
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+                for x in 0..game.n {
+                    for y in 0..game.n {
+                        if state.owner[x][y] != leader as i32 {
+                            continue;
+                        }
+                        for (dx, dy) in DIRS {
+                            let nx = x as isize + dx;
+                            let ny = y as isize + dy;
+                            if !in_bounds(game.n, nx, ny) {
+                                continue;
+                            }
+                            let ux = nx as usize;
+                            let uy = ny as usize;
+                            let nv = game.v[ux][uy] as f64;
+                            let owner = state.owner[ux][uy];
+                            if owner == -1 {
+                                frontier_v += nv;
+                            } else if owner != leader as i32 && state.level[ux][uy] == 1 {
+                                frontier_v += 0.7 * nv;
+                            }
+                        }
+                    }
+                }
+                frontier_v
+            }
+
+            fn territory_enrichment(game: &Game, state: &State) -> f64 {
+                let mut visited = vec![vec![false; game.n]; game.n];
+                let mut queue = VecDeque::new();
+                let (sx, sy) = state.pos[0];
+                visited[sx][sy] = true;
+                queue.push_back((sx, sy));
+
+                let mut reachable_value = 0.0_f64;
+                let mut defended_value = 0.0_f64;
+                let mut frontier_access = 0.0_f64;
+                let mut total_owned = 0_u32;
+
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+                while let Some((x, y)) = queue.pop_front() {
+                    let v = game.v[x][y] as f64;
+                    let lv = state.level[x][y];
+                    reachable_value += v * lv as f64;
+                    total_owned += 1;
+                    if lv >= 2 {
+                        defended_value += v;
+                    }
+
+                    for (dx, dy) in DIRS {
+                        let nx = x as isize + dx;
+                        let ny = y as isize + dy;
+                        if !in_bounds(game.n, nx, ny) {
+                            continue;
+                        }
+                        let ux = nx as usize;
+                        let uy = ny as usize;
+                        if visited[ux][uy] {
+                            continue;
+                        }
+                        if state.owner[ux][uy] == 0 {
+                            visited[ux][uy] = true;
+                            queue.push_back((ux, uy));
+                        } else {
+                            visited[ux][uy] = true;
+
+                            let nv = game.v[ux][uy] as f64;
+                            if state.owner[ux][uy] == -1 {
+                                frontier_access += nv;
+                            } else if state.level[ux][uy] == 1 {
+                                frontier_access += 0.8 * nv;
+                            }
+                        }
+                    }
+                }
+
+                let mut total_owned_all = 0_u32;
+                for x in 0..game.n {
+                    for y in 0..game.n {
+                        if state.owner[x][y] == 0 {
+                            total_owned_all += 1;
+                        }
+                    }
+                }
+                let fragmentation = if total_owned_all > 0 {
+                    1.0 - (total_owned as f64 / total_owned_all as f64)
+                } else {
+                    0.0
+                };
+
+                0.003 * reachable_value + 0.010 * defended_value + 0.008 * frontier_access
+                    - 50.0 * fragmentation
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn pessimism_weight(
+                game: &Game,
+                uncertainty: f64,
+            ) -> f64 {
+                if uncertainty < 0.08 {
+                    return 0.0;
+                }
+                let m_factor = ((game.m as f64 - 2.0) / 6.0).clamp(0.0, 1.0);
+                (0.05 + 0.22 * uncertainty + 0.10 * m_factor).clamp(0.05, 0.32)
+            }
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) fn evaluate_local_move(
+                game: &Game,
+                state: &State,
+                cand: (usize, usize),
+                scores: &[i64],
+                s0: f64,
+                max_ai_i64: i64,
+                phase: f64,
+                conflict_map: &[Vec<f64>],
+                cur: (usize, usize),
+                is_leader: &[bool],
+            ) -> f64 {
+                let (x, y) = cand;
+                let owner = state.owner[x][y];
+                let level = state.level[x][y];
+                let value = game.v[x][y] as f64;
+                let max_ai = max_ai_i64 as f64;
+                let mut score = 0.0_f64;
+
+                if owner == -1 {
+                    score += value;
+                    score += (1.0 - phase) * 0.52 * value;
+                } else if owner == 0 {
+                    if level < game.u {
+                        let upgrade_early: f64 = std::env::var("AHC_UPGRADE_EARLY")
+                            .ok()
+                            .and_then(|v| v.parse().ok())
+                            .unwrap_or(-1.0);
+                        let upgrade_late: f64 = std::env::var("AHC_UPGRADE_LATE")
+                            .ok()
+                            .and_then(|v| v.parse().ok())
+                            .unwrap_or(-1.0);
+                        let upgrade_base: f64 = if upgrade_early >= 0.0 && upgrade_late >= 0.0 {
+                            let u_factor = if game.u <= 1 {
+                                0.0
+                            } else {
+                                ((game.u as f64 - 1.0) / 4.0).clamp(0.0, 1.0)
+                            };
+                            upgrade_early + (upgrade_late - upgrade_early) * phase * u_factor
+                        } else {
+                            std::env::var("AHC_UPGRADE_BASE")
+                                .ok()
+                                .and_then(|v| v.parse().ok())
+                                .unwrap_or(0.90)
+                        };
+                        let upgrade_defense: f64 = std::env::var("AHC_UPGRADE_DEFENSE")
+                            .ok()
+                            .and_then(|v| v.parse().ok())
+                            .unwrap_or(0.0);
+                        score += upgrade_base * value;
+                        score += 0.18 * value * (game.u - level) as f64 / game.u as f64;
+
+                        score += upgrade_defense * value * phase / level as f64;
+                    } else if (x, y) == cur {
+                        score -= 0.15 * value;
+                    } else {
+                        score -= 0.05 * value;
+                    }
+                } else {
+                    let opp = owner as usize;
+                    let threat = ((scores[opp] as f64 - s0).max(0.0)) / max_ai;
+                    let m5_focus = (1.0 - ((game.m as f64 - 5.0).abs() / 2.0)).clamp(0.0, 1.0);
+                    let leader_bonus: f64 = std::env::var("AHC_LEADER_ATTACK_BONUS")
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(0.45);
+                    if level == 1 {
+                        score += (1.25 + 0.85 * threat) * value;
+                        if is_leader[opp] {
+                            score += leader_bonus * phase * value;
+                            score += (0.10 + 0.20 * phase) * m5_focus * (0.5 + threat) * value;
+                        }
+                    } else {
+                        score += (0.32 + 0.45 * threat) * value / level as f64;
+                        score -= 0.11 * value;
+                        if is_leader[opp] {
+                            score += 0.20 * phase * value / level as f64;
+                        }
+                    }
+                }
+
+                let next_pos = if owner > 0 && level >= 2 { cur } else { (x, y) };
+                const DIRS: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+                for (dx, dy) in DIRS {
+                    let nx = next_pos.0 as isize + dx;
+                    let ny = next_pos.1 as isize + dy;
+                    if in_bounds(game.n, nx, ny) {
+                        let ux = nx as usize;
+                        let uy = ny as usize;
+                        let vv = game.v[ux][uy] as f64;
+                        if state.owner[ux][uy] != 0 {
+                            score += 0.07 * vv;
+                        } else if state.level[ux][uy] < game.u {
+                            score += 0.03 * vv;
+                        }
+                    }
+                }
+
+                let p_any = 1.0 - (-conflict_map[x][y]).exp();
+                let multi_factor = ((game.m as f64 - 2.0) / 6.0).clamp(0.0, 1.0);
+                let risk_scale = 1.0 + 0.35 * multi_factor + 0.20 * phase;
+                if owner == -1 {
+                    score -= 0.75 * risk_scale * p_any * value;
+                } else if owner == 0 {
+                    score += 0.08 * p_any * value / risk_scale;
+                } else if level == 1 {
+                    score -= 0.30 * risk_scale * p_any * value;
+                } else {
+                    score -= 0.18 * risk_scale * p_any * value;
+                }
+
+                let eval_zone_bonus: f64 = std::env::var("AHC_EVAL_ZONE_BONUS")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0.0);
+                if eval_zone_bonus > 0.0 {
+                    let zone = get_value_zone(game);
+                    if zone[x][y] {
+                        score += eval_zone_bonus * value;
+                    }
+                }
+
+                score + value * 1e-6 - (x as f64 * 31.0 + y as f64) * 1e-9
+            }
+
+            fn update_model_for_player(
+                game: &Game,
+                state_before: &State,
+                player: usize,
+                observed: (usize, usize),
+                model: &mut AiModel,
+            ) {
+                let cands = get_candidates(game, state_before, player);
+                if cands.is_empty() {
+                    return;
+                }
+
+                let obs_idx = match cands.iter().position(|&x| x == observed) {
+                    Some(v) => v,
+                    None => return,
+                };
+
+                let mut est_scores = vec![0.0_f64; cands.len()];
+                let mut feats = vec![[0.0_f64; FEAT_DIM]; cands.len()];
+                for (i, &cand) in cands.iter().enumerate() {
+                    let f = ai_features(game, state_before, player, cand);
+                    feats[i] = f;
+                    est_scores[i] = dot(&model.w, &f);
+                }
+
+                let max_score = est_scores.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+                let tol = 1e-9 * max_score.abs().max(1.0);
+                let best_set: Vec<usize> = (0..cands.len())
+                    .filter(|&i| est_scores[i] >= max_score - tol)
+                    .collect();
+                let pred_idx = best_set.first().copied().unwrap_or(0);
+
+                let informative = best_set.len() < cands.len();
+                if informative {
+                    model.seen += 1;
+                    let matched = best_set.contains(&obs_idx);
+                    if !matched {
+                        model.mismatch += 1;
+                    }
+
+                    let raw_eps = model.mismatch as f64 / model.seen.max(1) as f64;
+                    model.eps_est = (0.70 * model.eps_est + 0.30 * raw_eps).clamp(0.05, 0.60);
+
+                    if !matched {
+                        let lr: f64 = std::env::var("AHC_MODEL_LR")
+                            .ok()
+                            .and_then(|v| v.parse().ok())
+                            .unwrap_or(0.12);
+                        for k in 0..FEAT_DIM {
+                            let diff = (feats[obs_idx][k] - feats[pred_idx][k]) / 1000.0;
+                            model.w[k] =
+                                (model.w[k] + lr * diff).clamp(FEAT_CLAMP_LO[k], FEAT_CLAMP_HI[k]);
+                        }
+                    }
+                }
+
+                let reg: f64 = std::env::var("AHC_MODEL_REG")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0.995);
+                for k in 0..FEAT_DIM {
+                    model.w[k] = reg * model.w[k] + (1.0 - reg) * FEAT_ANCHOR[k];
+                }
+            }
+
+            fn update_models(
+                game: &Game,
+                state_before: &State,
+                selected: &[(usize, usize)],
+                models: &mut [AiModel],
+            ) {
+                for ai_idx in 0..models.len() {
+                    let player = ai_idx + 1;
+                    update_model_for_player(
+                        game,
+                        state_before,
+                        player,
+                        selected[player],
+                        &mut models[ai_idx],
+                    );
+                }
+            }
+
+            fn read_initial<R: BufRead>(sc: &mut Scanner<R>) -> Option<(Game, State)> {
+                let n = sc.next::<usize>()?;
+                let m = sc.next::<usize>()?;
+                let t = sc.next::<usize>()?;
+                let u = sc.next::<usize>()?;
+
+                let mut v = vec![vec![0_i64; n]; n];
+                for row in &mut v {
+                    for val in row.iter_mut() {
+                        *val = sc.next::<i64>()?;
+                    }
+                }
+
+                let mut pos = vec![(0_usize, 0_usize); m];
+                for p in &mut pos {
+                    let x = sc.next::<usize>()?;
+                    let y = sc.next::<usize>()?;
+                    *p = (x, y);
+                }
+
+                let mut owner = vec![vec![-1_i32; n]; n];
+                let mut level = vec![vec![0_usize; n]; n];
+                for (i, &(x, y)) in pos.iter().enumerate() {
+                    owner[x][y] = i as i32;
+                    level[x][y] = 1;
+                }
+
+                let game = Game { n, m, t, u, v };
+                let state = State {
+                    pos,
+                    owner,
+                    level,
+                    turn: 0,
+                };
+                Some((game, state))
+            }
+
+            fn read_feedback<R: BufRead>(
+                sc: &mut Scanner<R>,
+                game: &Game,
+                state: &mut State,
+            ) -> Option<Vec<(usize, usize)>> {
+                let mut selected = vec![(0_usize, 0_usize); game.m];
+                for s in &mut selected {
+                    let x = sc.next::<usize>()?;
+                    let y = sc.next::<usize>()?;
+                    *s = (x, y);
+                }
+
+                for p in 0..game.m {
+                    let x = sc.next::<usize>()?;
+                    let y = sc.next::<usize>()?;
+                    state.pos[p] = (x, y);
+                }
+                for i in 0..game.n {
+                    for j in 0..game.n {
+                        state.owner[i][j] = sc.next::<i32>()?;
+                    }
+                }
+                for i in 0..game.n {
+                    for j in 0..game.n {
+                        state.level[i][j] = sc.next::<usize>()?;
+                    }
+                }
+                state.turn += 1;
+                Some(selected)
+            }
+
+            const BAYES_GRID_SIZE: usize = 200;
+            const BAYES_DIM: usize = FEAT_DIM + 1;
+            const BAYES_PRUNE_LOG_THRESHOLD: f64 = -30.0;
+            const BAYES_PRIOR_SIGMA: f64 = 0.50;
+
+            pub(in crate::__cargo_equip::crates::ahc061_solver) struct BayesGrid {
+                points: Vec<[f64; BAYES_DIM]>,
+                log_weights: Vec<f64>,
+                active: Vec<bool>,
+                n_active: usize,
+            }
+
+            fn generate_lhs_grid(rng: &mut FastRng, n: usize) -> Vec<[f64; BAYES_DIM]> {
+                let ranges: [(f64, f64); BAYES_DIM] = [
+                    (0.10, 2.00),
+                    (0.10, 2.00),
+                    (0.10, 2.00),
+                    (0.10, 2.00),
+                    (0.05, 0.60),
+                ];
+
+                let mut perms = vec![vec![0usize; n]; BAYES_DIM];
+                for d in 0..BAYES_DIM {
+                    for i in 0..n {
+                        perms[d][i] = i;
+                    }
+                    for i in (1..n).rev() {
+                        let j = (rng.next_u64() % (i as u64 + 1)) as usize;
+                        perms[d].swap(i, j);
+                    }
+                }
+
+                let mut grid = Vec::with_capacity(n);
+                for i in 0..n {
+                    let mut point = [0.0_f64; BAYES_DIM];
+                    for d in 0..BAYES_DIM {
+                        let u = (perms[d][i] as f64 + rng.next_f64()) / n as f64;
+                        point[d] = ranges[d].0 + u * (ranges[d].1 - ranges[d].0);
+                    }
+                    grid.push(point);
+                }
+                grid
+            }
+
+            impl BayesGrid {
+                fn new(rng: &mut FastRng) -> Self {
+                    let n = BAYES_GRID_SIZE;
+                    let points = generate_lhs_grid(rng, n);
+
+                    let anchor = [
+                        FEAT_ANCHOR[0],
+                        FEAT_ANCHOR[1],
+                        FEAT_ANCHOR[2],
+                        FEAT_ANCHOR[3],
+                        0.30,
+                    ];
+                    let inv_2sigma2 = 1.0 / (2.0 * BAYES_PRIOR_SIGMA * BAYES_PRIOR_SIGMA);
+                    let mut log_weights = Vec::with_capacity(n);
+                    for p in &points {
+                        let mut dist2 = 0.0_f64;
+                        for d in 0..BAYES_DIM {
+                            let diff = p[d] - anchor[d];
+                            dist2 += diff * diff;
+                        }
+                        log_weights.push(-dist2 * inv_2sigma2);
+                    }
+
+                    Self {
+                        points,
+                        log_weights,
+                        active: vec![true; n],
+                        n_active: n,
+                    }
+                }
+
+                fn update(
+                    &mut self,
+                    game: &Game,
+                    state: &State,
+                    player: usize,
+                    observed: (usize, usize),
+                ) {
+                    let cands = get_candidates(game, state, player);
+                    if cands.len() <= 1 {
+                        return;
+                    }
+
+                    let obs_idx = match cands.iter().position(|&c| c == observed) {
+                        Some(v) => v,
+                        None => return,
+                    };
+
+                    let feats: Vec<[f64; FEAT_DIM]> = cands
+                        .iter()
+                        .map(|&c| ai_features(game, state, player, c))
+                        .collect();
+                    let k = cands.len() as f64;
+
+                    for g in 0..self.points.len() {
+                        if !self.active[g] {
+                            continue;
+                        }
+
+                        let w = [
+                            self.points[g][0],
+                            self.points[g][1],
+                            self.points[g][2],
+                            self.points[g][3],
+                        ];
+                        let eps = self.points[g][4];
+
+                        let mut max_score = f64::NEG_INFINITY;
+                        let mut obs_score = 0.0_f64;
+                        let mut n_ties = 0usize;
+                        for (i, feat) in feats.iter().enumerate() {
+                            let s = dot(&w, feat);
+                            if s > max_score + 1e-12 {
+                                max_score = s;
+                                n_ties = 1;
+                            } else if s >= max_score - 1e-12 {
+                                n_ties += 1;
+                            }
+                            if i == obs_idx {
+                                obs_score = s;
+                            }
+                        }
+
+                        let likelihood = if obs_score >= max_score - 1e-12 {
+                            (1.0 - eps) / n_ties as f64 + eps / k
+                        } else {
+                            eps / k
+                        };
+
+                        self.log_weights[g] += likelihood.max(1e-300).ln();
+                    }
+
+                    self.prune();
+                }
+
+                fn prune(&mut self) {
+                    let max_lw = self
+                        .log_weights
+                        .iter()
+                        .zip(self.active.iter())
+                        .filter(|&(_, a)| *a)
+                        .map(|(&w, _)| w)
+                        .fold(f64::NEG_INFINITY, f64::max);
+
+                    for g in 0..self.points.len() {
+                        if self.active[g]
+                            && self.log_weights[g] < max_lw + BAYES_PRUNE_LOG_THRESHOLD
+                        {
+                            self.active[g] = false;
+                            self.n_active -= 1;
+                        }
+                    }
+                }
+
+                fn map_estimate(&self) -> ([f64; FEAT_DIM], f64) {
+                    let mut best_g = 0;
+                    let mut best_lw = f64::NEG_INFINITY;
+                    for g in 0..self.points.len() {
+                        if self.active[g] && self.log_weights[g] > best_lw {
+                            best_lw = self.log_weights[g];
+                            best_g = g;
+                        }
+                    }
+                    let p = &self.points[best_g];
+                    ([p[0], p[1], p[2], p[3]], p[4])
+                }
+
+                fn posterior_mean(&self) -> ([f64; FEAT_DIM], f64) {
+                    let max_lw = self
+                        .log_weights
+                        .iter()
+                        .zip(self.active.iter())
+                        .filter(|&(_, a)| *a)
+                        .map(|(&w, _)| w)
+                        .fold(f64::NEG_INFINITY, f64::max);
+
+                    let mut sum_w = 0.0_f64;
+                    let mut mean = [0.0_f64; BAYES_DIM];
+
+                    for g in 0..self.points.len() {
+                        if !self.active[g] {
+                            continue;
+                        }
+                        let w = (self.log_weights[g] - max_lw).exp();
+                        sum_w += w;
+                        for d in 0..BAYES_DIM {
+                            mean[d] += w * self.points[g][d];
+                        }
+                    }
+
+                    if sum_w > 0.0 {
+                        for d in 0..BAYES_DIM {
+                            mean[d] /= sum_w;
+                        }
+                    } else {
+                        return (FEAT_ANCHOR, 0.30);
+                    }
+
+                    ([mean[0], mean[1], mean[2], mean[3]], mean[4])
+                }
+
+                fn thompson_sample(&self, rng: &mut FastRng) -> ([f64; FEAT_DIM], f64) {
+                    let max_lw = self
+                        .log_weights
+                        .iter()
+                        .zip(self.active.iter())
+                        .filter(|&(_, a)| *a)
+                        .map(|(&w, _)| w)
+                        .fold(f64::NEG_INFINITY, f64::max);
+
+                    let mut cum_weights = Vec::with_capacity(self.n_active);
+                    let mut indices = Vec::with_capacity(self.n_active);
+                    let mut cumsum = 0.0_f64;
+
+                    for g in 0..self.points.len() {
+                        if !self.active[g] {
+                            continue;
+                        }
+                        let w = (self.log_weights[g] - max_lw).exp();
+                        cumsum += w;
+                        cum_weights.push(cumsum);
+                        indices.push(g);
+                    }
+
+                    if cumsum <= 0.0 || indices.is_empty() {
+                        return (FEAT_ANCHOR, 0.30);
+                    }
+
+                    let u = rng.next_f64() * cumsum;
+                    let idx = match cum_weights.binary_search_by(|w| {
+                        w.partial_cmp(&u).unwrap_or(std::cmp::Ordering::Equal)
+                    }) {
+                        Ok(i) => i,
+                        Err(i) => i.min(indices.len() - 1),
+                    };
+                    let g = indices[idx];
+                    let p = &self.points[g];
+                    ([p[0], p[1], p[2], p[3]], p[4])
+                }
+
+                fn write_to_model(&self, model: &mut AiModel) {
+                    let (w, eps) = self.posterior_mean();
+                    model.w = w;
+                    model.eps_est = eps.clamp(0.05, 0.60);
+                }
+            }
+
+            fn bayes_switch_turn() -> usize {
+                std::env::var("AHC_BAYES_SWITCH_TURN")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(8)
+            }
+            fn bayes_max_m() -> usize {
+                std::env::var("AHC_BAYES_MAX_M")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(5)
+            }
+
+            fn update_bayes_models(
+                game: &Game,
+                state_before: &State,
+                selected: &[(usize, usize)],
+                models: &mut [AiModel],
+                grids: &mut [BayesGrid],
+            ) {
+                for ai_idx in 0..models.len() {
+                    let player = ai_idx + 1;
+
+                    update_model_for_player(
+                        game,
+                        state_before,
+                        player,
+                        selected[player],
+                        &mut models[ai_idx],
+                    );
+
+                    if game.m <= bayes_max_m() {
+                        grids[ai_idx].update(game, state_before, player, selected[player]);
+                        if state_before.turn >= bayes_switch_turn() {
+                            grids[ai_idx].write_to_model(&mut models[ai_idx]);
+                        }
+                    }
+                }
+            }
+
+            pub fn run_with_strategy_bayes(strategy: StrategyMode) {
+                init_game_timer();
+
+                let stdin = io::stdin();
+                let mut sc = Scanner::new(BufReader::new(stdin.lock()));
+                let stdout = io::stdout();
+                let mut out = BufWriter::new(stdout.lock());
+
+                let (game, mut state) = match read_initial(&mut sc) {
+                    Some(v) => v,
+                    None => return,
+                };
+
+                let mut models = vec![AiModel::new(); game.m.saturating_sub(1)];
+                let mut rng = FastRng::new(42);
+                let mut grids: Vec<BayesGrid> = (0..game.m.saturating_sub(1))
+                    .map(|_| BayesGrid::new(&mut rng))
+                    .collect();
+
+                for _ in 0..game.t {
+                    let prev_state = state.clone();
+                    let (x, y) = choose_move(&game, &prev_state, &models, strategy);
+
+                    if writeln!(out, "{} {}", x, y).is_err() {
+                        return;
+                    }
+                    if out.flush().is_err() {
+                        return;
+                    }
+
+                    let selected = match read_feedback(&mut sc, &game, &mut state) {
+                        Some(v) => v,
+                        None => return,
+                    };
+                    update_bayes_models(&game, &prev_state, &selected, &mut models, &mut grids);
+                }
+            }
+
+            pub fn run_with_strategy(strategy: StrategyMode) {
+                init_game_timer();
+
+                let stdin = io::stdin();
+                let mut sc = Scanner::new(BufReader::new(stdin.lock()));
+                let stdout = io::stdout();
+                let mut out = BufWriter::new(stdout.lock());
+
+                let (game, mut state) = match read_initial(&mut sc) {
+                    Some(v) => v,
+                    None => return,
+                };
+
+                let mut models = vec![AiModel::new(); game.m.saturating_sub(1)];
+
+                for _ in 0..game.t {
+                    let prev_state = state.clone();
+                    let (x, y) = choose_move(&game, &prev_state, &models, strategy);
+
+                    if writeln!(out, "{} {}", x, y).is_err() {
+                        return;
+                    }
+                    if out.flush().is_err() {
+                        return;
+                    }
+
+                    let selected = match read_feedback(&mut sc, &game, &mut state) {
+                        Some(v) => v,
+                        None => return,
+                    };
+                    update_models(&game, &prev_state, &selected, &mut models);
+                }
+            }
+
+            pub fn run_prediction_verify() {
+                init_game_timer();
+
+                let stdin = io::stdin();
+                let mut sc = Scanner::new(BufReader::new(stdin.lock()));
+                let stdout = io::stdout();
+                let mut out = BufWriter::new(stdout.lock());
+
+                let (game, mut state) = match read_initial(&mut sc) {
+                    Some(v) => v,
+                    None => return,
+                };
+
+                let n_opponents = game.m.saturating_sub(1);
+                let mut models = vec![AiModel::new(); n_opponents];
+                let mut rng = FastRng::new(42);
+                let mut grids: Vec<BayesGrid> =
+                    (0..n_opponents).map(|_| BayesGrid::new(&mut rng)).collect();
+
+                let mut top1_hits = vec![0u32; n_opponents];
+                let mut top2_hits = vec![0u32; n_opponents];
+                let mut total = vec![0u32; n_opponents];
+                let mut phase_hits = vec![[0u32; 3]; n_opponents];
+                let mut phase_total = vec![[0u32; 3]; n_opponents];
+                let mut cand_sum = vec![0u64; n_opponents];
+                let mut unique_best_count = vec![0u32; n_opponents];
+
+                for turn in 0..game.t {
+                    let prev_state = state.clone();
+
+                    let phase = if turn < 30 {
+                        0
+                    } else if turn < 70 {
+                        1
+                    } else {
+                        2
+                    };
+
+                    struct PredRecord {
+                        best_set: Vec<(usize, usize)>,
+                        top2_set: Vec<(usize, usize)>,
+                        n_cands: usize,
+                        unique_best: bool,
+                    }
+
+                    let mut preds = Vec::with_capacity(n_opponents);
+                    for ai_idx in 0..n_opponents {
+                        let player = ai_idx + 1;
+                        let candidates = get_candidates(&game, &prev_state, player);
+                        let n_cands = candidates.len();
+
+                        if candidates.is_empty() {
+                            preds.push(PredRecord {
+                                best_set: Vec::new(),
+                                top2_set: Vec::new(),
+                                n_cands: 0,
+                                unique_best: false,
+                            });
+                            continue;
+                        }
+
+                        let mut scored: Vec<(f64, (usize, usize))> = candidates
+                            .iter()
+                            .map(|&c| {
+                                let feat = ai_features(&game, &prev_state, player, c);
+                                (dot(&models[ai_idx].w, &feat), c)
+                            })
+                            .collect();
+
+                        scored.sort_by(|a, b| {
+                            b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal)
+                        });
+
+                        let best_score = scored[0].0;
+                        let tol = 1e-9;
+
+                        let best_set: Vec<(usize, usize)> = scored
+                            .iter()
+                            .filter(|(s, _)| best_score - s < tol)
+                            .map(|&(_, c)| c)
+                            .collect();
+
+                        let unique_best = best_set.len() == 1;
+
+                        let mut top2_set = best_set.clone();
+                        if scored.len() > best_set.len() {
+                            let second_score = scored[best_set.len()].0;
+                            for &(s, c) in &scored[best_set.len()..] {
+                                if second_score - s < tol {
+                                    top2_set.push(c);
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+
+                        preds.push(PredRecord {
+                            best_set,
+                            top2_set,
+                            n_cands,
+                            unique_best,
+                        });
+                    }
+
+                    let my_cands = get_candidates(&game, &prev_state, 0);
+                    let (mx, my) = if my_cands.is_empty() {
+                        prev_state.pos[0]
+                    } else {
+                        *my_cands
+                            .iter()
+                            .max_by_key(|&&(x, y)| {
+                                let v = game.v[x][y];
+                                let owner = prev_state.owner[x][y];
+                                if owner == -1 {
+                                    v * 10
+                                } else if owner == 0 {
+                                    if prev_state.level[x][y] < game.u {
+                                        v * 5
+                                    } else {
+                                        0
+                                    }
+                                } else {
+                                    v * 3
+                                }
+                            })
+                            .unwrap()
+                    };
+
+                    if writeln!(out, "{} {}", mx, my).is_err() {
+                        return;
+                    }
+                    if out.flush().is_err() {
+                        return;
+                    }
+
+                    let selected = match read_feedback(&mut sc, &game, &mut state) {
+                        Some(v) => v,
+                        None => return,
+                    };
+
+                    for ai_idx in 0..n_opponents {
+                        let player = ai_idx + 1;
+                        let actual = selected[player];
+                        let pred = &preds[ai_idx];
+
+                        total[ai_idx] += 1;
+                        phase_total[ai_idx][phase] += 1;
+                        cand_sum[ai_idx] += pred.n_cands as u64;
+                        if pred.unique_best {
+                            unique_best_count[ai_idx] += 1;
+                        }
+
+                        let hit1 = pred.best_set.contains(&actual);
+                        let hit2 = pred.top2_set.contains(&actual);
+
+                        if hit1 {
+                            top1_hits[ai_idx] += 1;
+                            phase_hits[ai_idx][phase] += 1;
+                        }
+                        if hit2 {
+                            top2_hits[ai_idx] += 1;
+                        }
+
+                        eprintln!(
+                            "T={:3}|P{}|cands={:3}|best_sz={:2}|hit1={}|hit2={}|eps={:.3}",
+                            turn,
+                            player,
+                            pred.n_cands,
+                            pred.best_set.len(),
+                            if hit1 { 1 } else { 0 },
+                            if hit2 { 1 } else { 0 },
+                            models[ai_idx].eps_est,
+                        );
+                    }
+
+                    update_bayes_models(&game, &prev_state, &selected, &mut models, &mut grids);
+                }
+
+                eprintln!("HEADER|M={}|U={}", game.m, game.u,);
+
+                let mut overall_top1 = 0u32;
+                let mut overall_top2 = 0u32;
+                let mut overall_total = 0u32;
+
+                for ai_idx in 0..n_opponents {
+                    let player = ai_idx + 1;
+                    let t = total[ai_idx].max(1) as f64;
+                    let top1_rate = top1_hits[ai_idx] as f64 / t;
+                    let top2_rate = top2_hits[ai_idx] as f64 / t;
+
+                    let early_rate = if phase_total[ai_idx][0] > 0 {
+                        phase_hits[ai_idx][0] as f64 / phase_total[ai_idx][0] as f64
+                    } else {
+                        0.0
+                    };
+                    let mid_rate = if phase_total[ai_idx][1] > 0 {
+                        phase_hits[ai_idx][1] as f64 / phase_total[ai_idx][1] as f64
+                    } else {
+                        0.0
+                    };
+                    let late_rate = if phase_total[ai_idx][2] > 0 {
+                        phase_hits[ai_idx][2] as f64 / phase_total[ai_idx][2] as f64
+                    } else {
+                        0.0
+                    };
+
+                    let mean_cands = cand_sum[ai_idx] as f64 / t;
+
+                    eprintln!(
+                        "PLAYER_{}|top1={:.3}|top2={:.3}|early={:.3}|mid={:.3}|late={:.3}|eps={:.3}|n={}|mean_cands={:.1}|unique_best={}",
+                        player,
+                        top1_rate,
+                        top2_rate,
+                        early_rate,
+                        mid_rate,
+                        late_rate,
+                        models[ai_idx].eps_est,
+                        total[ai_idx],
+                        mean_cands,
+                        unique_best_count[ai_idx],
+                    );
+
+                    overall_top1 += top1_hits[ai_idx];
+                    overall_top2 += top2_hits[ai_idx];
+                    overall_total += total[ai_idx];
+                }
+
+                let ot = overall_total.max(1) as f64;
+                eprintln!(
+                    "OVERALL|top1={:.3}|top2={:.3}",
+                    overall_top1 as f64 / ot,
+                    overall_top2 as f64 / ot,
+                );
+            }
+        }
+    }
+
+    pub(crate) mod macros {
+        pub mod ahc061_solver {}
+    }
+
+    pub(crate) mod prelude {
+        pub use crate::__cargo_equip::crates::*;
+    }
+
+    mod preludes {
+        pub mod ahc061_solver {}
+    }
+}
