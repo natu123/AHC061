@@ -66,3 +66,17 @@ tmp_run*.ps1
 *.code-workspace
 .DS_Store
 Thumbs.db
+
+# AtCoder official tools (download separately)
+N52XwIfp_windows/
+N52XwIfp_local/
+
+# Build artifacts in root
+nul.*
+submission_*.pdb
+
+# All tmp files
+tmp_*
+
+# Claude Code local config
+.claude/
