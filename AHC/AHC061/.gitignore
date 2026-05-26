@@ -75,6 +75,12 @@ N52XwIfp_local/
 nul.*
 submission_*.pdb
 
+# Compiled binaries in submissions/
+submissions/*.exe
+submissions/*.pdb
+submissions/submission_*_test
+submissions/submission_*_test_*
+
 # All tmp files
 tmp_*
 
